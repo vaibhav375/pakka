@@ -129,7 +129,7 @@
   "id": "ID_DOCUMENTS",
   "name": "Asks for your Aadhaar or PAN",
   "why": "A photo of your Aadhaar or PAN is enough to open accounts and take loans in your name. Nobody legitimate collects it over a chat message.",
-  "weight": 2
+  "weight": 3
  },
  {
   "id": "CALLBACK_NUMBER",
@@ -165,6 +165,12 @@
   "id": "SIM_BLOCK",
   "name": "Threatens to block your SIM or connection",
   "why": "Your operator does not disconnect you over a text with a link. The panic is the product.",
+  "weight": 3
+ },
+ {
+  "id": "NEW_NUMBER",
+  "name": "A new number that needs money",
+  "why": "Someone claiming a new number and then asking for money is how a family member's identity gets borrowed. Call them on the number you already have.",
   "weight": 3
  },
  {

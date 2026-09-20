@@ -228,7 +228,7 @@ function adviceFor(findings) {
     return {
       actions: [
         'Nothing matched, but that is not proof it is safe — it means this message ' +
-        'does not use any of the thirty-three patterns Pakka knows.',
+        'does not use any of the thirty-four patterns Pakka knows.',
         'If it still feels wrong, verify on a number you already had, not one from the message.',
       ],
       forward: '',
@@ -291,6 +291,8 @@ function render(d) {
   remember(d);
   /* the constellation lights from the same findings that draw the cards */
   window.PakkaScene?.light((d.findings || []).map((f) => f.id));
+  const glc = document.getElementById('glcount');
+  if (glc) glc.textContent = (d.findings || []).length;
 
   out.classList.add('show');
   card.className = `verdict band-${d.band}`;
@@ -319,7 +321,7 @@ function render(d) {
       </div>
     </div>`).join('') || `
     <div class="flag in"><div class="w" style="color:var(--acid)">\u2713</div>
-      <div><h4>None of the thirty-three checks fired</h4>
+      <div><h4>None of the thirty-four checks fired</h4>
       <p>That is not a guarantee \u2014 it means this message does not use any of the
          patterns Pakka knows about. If something still feels wrong, trust that.</p></div></div>`;
 
@@ -396,10 +398,16 @@ fetch('rules.json')
   })
   .catch(() => {});
 
-/* the header count comes from the generated rules, so it cannot go stale again */
+/* every count on the page comes from the generated rules, so none of them can
+   go stale when a rule is added */
 (() => {
-  const el = document.getElementById('rulecount');
-  if (el && window.PAKKA_RULES) el.textContent = window.PAKKA_RULES.length;
+  const n = (window.PAKKA_RULES || []).length;
+  if (!n) return;
+  ['rulecount', 'gltotal'].forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = n;
+  });
+  document.querySelectorAll('b[data-to="34"]').forEach((el) => { el.dataset.to = n; });
 })();
 
 /* ---------- rules gallery: a column that walks itself ---------- */
@@ -428,7 +436,7 @@ fetch('rules.json')
     /* keep the active row near the middle of the window */
     const top = Math.max(0, Math.min(i - Math.floor(VIEW / 2), R.length - VIEW));
     ul.style.transform = `translateY(${-top * ROW}px)`;
-    $('gnum').textContent = String(i + 1).padStart(2, '0') + ' / 20';
+    $('gnum').textContent = String(i + 1).padStart(2, '0') + ' / ' + (window.PAKKA_RULES || []).length;
     $('gname').textContent = R[i].name;
     $('ghunt').textContent = '“' + hunts(R[i].re) + '”';
   };

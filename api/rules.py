@@ -38,7 +38,8 @@ RULES: tuple[Rule, ...] = (
         3,
         _p(r"registration fee", r"security (?:fee|deposit|amount)", r"processing fee",
            r"training fee", r"refundable (?:fee|deposit|amount)", r"joining fee",
-           r"pay(?:ment)? of (?:rs\.?|₹)\s?\d"),
+           r"(?:have to|need to|must|kindly|please) pay (?:rs\.?|₹)?\s?[\d,]+",
+           r"\bpay (?:rs\.?|₹)\s?[\d,]+ (?:to|for) (?:confirm|secure|book|get|join|start|activat)"),
     ),
     Rule(
         "ASKS_FOR_SECRET", "Asks for an OTP, PIN or password",
@@ -78,7 +79,7 @@ RULES: tuple[Rule, ...] = (
         _p(r"within \d+ ?(?:hours?|hrs?|minutes?|mins?)", r"today only", r"last chance",
            r"(?:block|suspend|deactivat|expir|clos|disconnect|cancel|terminat)\w*\s+"
            r"(?:with)?in\s+\d+\s*(?:hours?|hrs?|days?|minutes?)",
-           r"expires? (?:today|tonight|soon)", r"immediately", r"hurry",
+           r"expires? (?:today|tonight|soon)", r"immediately", r"hurry", r"\burgently\b",
            r"limited (?:slots?|seats?|offer)", r"only \d+ (?:slots?|seats?) left",
            r"before (?:you )?(?:lose|miss)", r"\b(?:click|claim|act|apply) (?:it |this |here |the link )?now\b"),
     ),
@@ -175,7 +176,8 @@ RULES: tuple[Rule, ...] = (
            r"\bkbc\b", r"lucky (?:winner|draw)",
            r"congratulations.{0,30}\b(?:won|winning|winner)\b",
            r"\b(?:won|winning|win a)\b.{0,40}(?:iphone|mac ?book|laptop|smartphone|"
-           r"scooter|\bcar\b|\bbike\b|gift (?:card|voucher|hamper)|voucher|cash prize|\bgift\b)"),
+           r"scooter|\bcar\b|\bbike\b|gift (?:card|voucher|hamper)|voucher|cash prize|\bgift\b)",
+           r"\bfree\b.{0,20}(?:iphone|mac ?book|laptop|smartphone|\bcar\b|scooter|\bbike\b)"),
     ),
     Rule(
         "QR_SCAN", "A QR code to receive money",
@@ -231,10 +233,12 @@ RULES: tuple[Rule, ...] = (
         "ID_DOCUMENTS", "Asks for your Aadhaar or PAN",
         "A photo of your Aadhaar or PAN is enough to open accounts and take loans "
         "in your name. Nobody legitimate collects it over a chat message.",
-        2,
+        3,
         _p(r"(?:photo|copy|scan|pic|image|soft copy) .{0,25}(?:of )?(?:your )?"
            r"(?:aadhaar|aadhar|pan card|passport|voter id|driving licen[cs]e)",
-           r"(?:send|share|whatsapp|forward) .{0,25}\b(?:aadhaar|aadhar|pan card)\b"),
+           r"(?:send|share|whatsapp|forward) .{0,25}\b(?:aadhaar|aadhar|pan card)\b",
+           r"selfie .{0,30}(?:with|holding) .{0,20}(?:aadhaar|aadhar|pan|id)",
+           r"(?:aadhaar|aadhar|pan card).{0,30}(?:and|\+) .{0,15}selfie"),
     ),
     Rule(
         "CALLBACK_NUMBER", "A personal mobile posing as a helpline",
@@ -285,8 +289,8 @@ RULES: tuple[Rule, ...] = (
         _p(r"(?:refund|amount|salary|payment|prize|claim).{0,60}"
            r"(?:submit|share|send|provide|enter|fill) .{0,25}"
            r"(?:bank account|account number|account details|ifsc)",
-           r"(?:submit|share|send|provide) .{0,25}(?:bank account|account number|ifsc)"
-           r".{0,40}(?:receive|refund|credit|transfer)"),
+           r"(?:bank account|account number|ifsc).{0,40}(?:to )?(?:receive|claim) "
+           r"(?:your |the )?(?:refund|prize|amount|winnings|money)"),
     ),
     Rule(
         "SIM_BLOCK", "Threatens to block your SIM or connection",
@@ -296,6 +300,17 @@ RULES: tuple[Rule, ...] = (
         _p(r"(?:sim(?: card)?|mobile number|connection|outgoing)"
            r".{0,30}(?:will be |going to be |about to be )?"
            r"(?:block|deactivat|disconnect|barred|suspend)"),
+    ),
+    Rule(
+        "NEW_NUMBER", "A new number that needs money",
+        "Someone claiming a new number and then asking for money is how a family "
+        "member's identity gets borrowed. Call them on the number you already have.",
+        3,
+        _p(r"(?:this is|it'?s) (?:my |me,? )?(?:new|changed) number"
+           r".{0,120}(?:send|transfer|urgent|money|pay\b|rs\.?\s?\d|\u20b9)",
+           r"\b(?:mom|mum|mummy|dad|papa|mama)\b.{0,60}\bnew number\b"
+           r".{0,120}(?:send|transfer|urgent|money|pay\b|rs\.?\s?\d)",
+           r"(?:lost|broke|damaged|changed) my phone.{0,80}(?:send|transfer|money|rs\.?\s?\d)"),
     ),
     Rule(
         "STRANDED_PLEA", "Stranded somewhere and needs money now",

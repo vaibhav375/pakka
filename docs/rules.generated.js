@@ -7,7 +7,7 @@ window.PAKKA_RULES = [
     "name": "Asks for money before a job",
     "why": "A real employer never charges you to be hired. Registration, training and security fees are the oldest job scam there is.",
     "weight": 3,
-    "re": "registration fee|security (?:fee|deposit|amount)|processing fee|training fee|refundable (?:fee|deposit|amount)|joining fee|pay(?:ment)? of (?:rs\\.?|₹)\\s?\\d"
+    "re": "registration fee|security (?:fee|deposit|amount)|processing fee|training fee|refundable (?:fee|deposit|amount)|joining fee|(?:have to|need to|must|kindly|please) pay (?:rs\\.?|₹)?\\s?[\\d,]+|\\bpay (?:rs\\.?|₹)\\s?[\\d,]+ (?:to|for) (?:confirm|secure|book|get|join|start|activat)"
   },
   {
     "id": "ASKS_FOR_SECRET",
@@ -35,7 +35,7 @@ window.PAKKA_RULES = [
     "name": "Manufactured urgency",
     "why": "Pressure to act within hours exists to stop you checking. Anything genuine will still be there tomorrow.",
     "weight": 1,
-    "re": "within \\d+ ?(?:hours?|hrs?|minutes?|mins?)|today only|last chance|(?:block|suspend|deactivat|expir|clos|disconnect|cancel|terminat)\\w*\\s+(?:with)?in\\s+\\d+\\s*(?:hours?|hrs?|days?|minutes?)|expires? (?:today|tonight|soon)|immediately|hurry|limited (?:slots?|seats?|offer)|only \\d+ (?:slots?|seats?) left|before (?:you )?(?:lose|miss)|\\b(?:click|claim|act|apply) (?:it |this |here |the link )?now\\b"
+    "re": "within \\d+ ?(?:hours?|hrs?|minutes?|mins?)|today only|last chance|(?:block|suspend|deactivat|expir|clos|disconnect|cancel|terminat)\\w*\\s+(?:with)?in\\s+\\d+\\s*(?:hours?|hrs?|days?|minutes?)|expires? (?:today|tonight|soon)|immediately|hurry|\\burgently\\b|limited (?:slots?|seats?|offer)|only \\d+ (?:slots?|seats?) left|before (?:you )?(?:lose|miss)|\\b(?:click|claim|act|apply) (?:it |this |here |the link )?now\\b"
   },
   {
     "id": "NO_INTERVIEW",
@@ -112,7 +112,7 @@ window.PAKKA_RULES = [
     "name": "A prize you never entered for",
     "why": "You cannot win a lottery you never entered. Every version of this ends with a fee to release the winnings.",
     "weight": 4,
-    "re": "(?:won|winner).{0,30}(?:lottery|lucky draw|prize|kbc)|\\bkbc\\b|lucky (?:winner|draw)|congratulations.{0,30}\\b(?:won|winning|winner)\\b|\\b(?:won|winning|win a)\\b.{0,40}(?:iphone|mac ?book|laptop|smartphone|scooter|\\bcar\\b|\\bbike\\b|gift (?:card|voucher|hamper)|voucher|cash prize|\\bgift\\b)"
+    "re": "(?:won|winner).{0,30}(?:lottery|lucky draw|prize|kbc)|\\bkbc\\b|lucky (?:winner|draw)|congratulations.{0,30}\\b(?:won|winning|winner)\\b|\\b(?:won|winning|win a)\\b.{0,40}(?:iphone|mac ?book|laptop|smartphone|scooter|\\bcar\\b|\\bbike\\b|gift (?:card|voucher|hamper)|voucher|cash prize|\\bgift\\b)|\\bfree\\b.{0,20}(?:iphone|mac ?book|laptop|smartphone|\\bcar\\b|scooter|\\bbike\\b)"
   },
   {
     "id": "QR_SCAN",
@@ -153,8 +153,8 @@ window.PAKKA_RULES = [
     "id": "ID_DOCUMENTS",
     "name": "Asks for your Aadhaar or PAN",
     "why": "A photo of your Aadhaar or PAN is enough to open accounts and take loans in your name. Nobody legitimate collects it over a chat message.",
-    "weight": 2,
-    "re": "(?:photo|copy|scan|pic|image|soft copy) .{0,25}(?:of )?(?:your )?(?:aadhaar|aadhar|pan card|passport|voter id|driving licen[cs]e)|(?:send|share|whatsapp|forward) .{0,25}\\b(?:aadhaar|aadhar|pan card)\\b"
+    "weight": 3,
+    "re": "(?:photo|copy|scan|pic|image|soft copy) .{0,25}(?:of )?(?:your )?(?:aadhaar|aadhar|pan card|passport|voter id|driving licen[cs]e)|(?:send|share|whatsapp|forward) .{0,25}\\b(?:aadhaar|aadhar|pan card)\\b|selfie .{0,30}(?:with|holding) .{0,20}(?:aadhaar|aadhar|pan|id)|(?:aadhaar|aadhar|pan card).{0,30}(?:and|\\+) .{0,15}selfie"
   },
   {
     "id": "CALLBACK_NUMBER",
@@ -189,7 +189,7 @@ window.PAKKA_RULES = [
     "name": "Wants your account number to send you money",
     "why": "Money already owed to you goes to the account it came from. Being asked for fresh bank details is how the account gets emptied, not filled.",
     "weight": 3,
-    "re": "(?:refund|amount|salary|payment|prize|claim).{0,60}(?:submit|share|send|provide|enter|fill) .{0,25}(?:bank account|account number|account details|ifsc)|(?:submit|share|send|provide) .{0,25}(?:bank account|account number|ifsc).{0,40}(?:receive|refund|credit|transfer)"
+    "re": "(?:refund|amount|salary|payment|prize|claim).{0,60}(?:submit|share|send|provide|enter|fill) .{0,25}(?:bank account|account number|account details|ifsc)|(?:bank account|account number|ifsc).{0,40}(?:to )?(?:receive|claim) (?:your |the )?(?:refund|prize|amount|winnings|money)"
   },
   {
     "id": "SIM_BLOCK",
@@ -197,6 +197,13 @@ window.PAKKA_RULES = [
     "why": "Your operator does not disconnect you over a text with a link. The panic is the product.",
     "weight": 3,
     "re": "(?:sim(?: card)?|mobile number|connection|outgoing).{0,30}(?:will be |going to be |about to be )?(?:block|deactivat|disconnect|barred|suspend)"
+  },
+  {
+    "id": "NEW_NUMBER",
+    "name": "A new number that needs money",
+    "why": "Someone claiming a new number and then asking for money is how a family member's identity gets borrowed. Call them on the number you already have.",
+    "weight": 3,
+    "re": "(?:this is|it'?s) (?:my |me,? )?(?:new|changed) number.{0,120}(?:send|transfer|urgent|money|pay\\b|rs\\.?\\s?\\d|\\u20b9)|\\b(?:mom|mum|mummy|dad|papa|mama)\\b.{0,60}\\bnew number\\b.{0,120}(?:send|transfer|urgent|money|pay\\b|rs\\.?\\s?\\d)|(?:lost|broke|damaged|changed) my phone.{0,80}(?:send|transfer|money|rs\\.?\\s?\\d)"
   },
   {
     "id": "STRANDED_PLEA",
@@ -263,6 +270,7 @@ window.PAKKA_ADVICE = {
     "ADVANCE_FEE": "it offers a fortune from a stranger, which does not happen",
     "BANK_DETAILS": "it wants fresh bank details in order to send you money, which is backwards",
     "SIM_BLOCK": "it threatens to block your SIM, which your operator does not do over text",
+    "NEW_NUMBER": "it claims a new number and then asks for money, so call the old one first",
     "STRANDED_PLEA": "it is the stranded friend story, so call them on the number you already have",
     "QR_SCAN": "it tells you to scan a QR code to receive something, which is not a thing QR codes do",
     "LOAN_HARASSMENT": "it threatens to contact the people in your phone",

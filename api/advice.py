@@ -36,6 +36,7 @@ CLAUSE = {
     "ADVANCE_FEE": "it offers a fortune from a stranger, which does not happen",
     "BANK_DETAILS": "it wants fresh bank details in order to send you money, which is backwards",
     "SIM_BLOCK": "it threatens to block your SIM, which your operator does not do over text",
+    "NEW_NUMBER": "it claims a new number and then asks for money, so call the old one first",
     "STRANDED_PLEA": "it is the stranded friend story, so call them on the number you already have",
     "QR_SCAN": "it tells you to scan a QR code to receive something, which is not a thing QR codes do",
     "LOAN_HARASSMENT": "it threatens to contact the people in your phone",

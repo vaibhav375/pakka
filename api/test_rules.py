@@ -104,6 +104,22 @@ CASES = [
      "Can you send me a photo of your notes from today's class?",
      set()),
 
+    ("new number asking for money",
+     "Hi mom, this is my new number. My phone broke. Please send Rs 15,000 urgently.",
+     {"NEW_NUMBER", "URGENCY"}),
+
+    ("a genuine new number, must stay clean",
+     "Hi, this is my new number, please save it. See you Saturday. - Rahul",
+     set()),
+
+    ("a payment receipt, must stay clean",
+     "Your electricity bill payment of Rs 1,240 was successful. Receipt in the app.",
+     set()),
+
+    ("a friend needing your account number, must stay clean",
+     "Can you share your bank account number? I need to transfer your share of the trip money.",
+     set()),
+
     ("ordinary message, must stay clean",
      "Hi Vaibhav, this is Priya from the placement cell. Your Infosys interview is "
      "on Monday at 10am in Seminar Hall 2. Please carry two copies of your resume.",
