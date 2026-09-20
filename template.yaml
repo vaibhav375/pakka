@@ -30,7 +30,13 @@ Resources:
   ScansTable:
     Type: AWS::DynamoDB::Table
     Properties:
-      BillingMode: PAY_PER_REQUEST      # nothing to pay when nobody is scanning
+      # 1 read and 1 write unit sit well inside the always-free 25 of each.
+      # On-demand would be the right call once traffic is spiky and real, but
+      # it bills per request from the first one, so it is not free-tier work.
+      BillingMode: PROVISIONED
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
       AttributeDefinitions:
         - AttributeName: id
           AttributeType: S
