@@ -7,6 +7,7 @@ written to a JSON file instead of DynamoDB.
 from __future__ import annotations
 
 import json
+import urllib.parse
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 from handler import lambda_handler
@@ -18,9 +19,21 @@ class Handler(BaseHTTPRequestHandler):
     def _run(self, method: str) -> None:
         length = int(self.headers.get("content-length") or 0)
         body = self.rfile.read(length).decode() if length else ""
-        result = lambda_handler(
-            {"httpMethod": method, "path": self.path, "body": body}
-        )
+        # A Function URL hands the handler the path and the query separately.
+        # Passing self.path whole would keep the "?..." on the end of the path,
+        # so a route would match in production and miss here, which is the one
+        # thing this file exists to prevent.
+        parsed = urllib.parse.urlsplit(self.path)
+        result = lambda_handler({
+            "httpMethod": method,
+            "path": parsed.path,
+            "rawQueryString": parsed.query,
+            "queryStringParameters": {
+                k: v[-1] for k, v in urllib.parse.parse_qs(parsed.query, keep_blank_values=True).items()
+            },
+            "headers": {k.lower(): v for k, v in self.headers.items()},
+            "body": body,
+        })
         payload = (result.get("body") or "").encode()
         self.send_response(result["statusCode"])
         for k, v in result.get("headers", {}).items():

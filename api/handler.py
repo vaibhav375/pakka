@@ -1,7 +1,10 @@
-"""One Lambda, two routes.
+"""One Lambda, four routes.
 
-POST /scan      a message in, a verdict out, saved so it can be linked to
-GET  /v/{id}    that saved verdict, for the person you forwarded it to
+POST /scan        a message in, a verdict out, saved so it can be linked to
+GET  /v/{id}      that saved verdict, for the person you forwarded it to
+GET  /whatsapp    Meta's one-time webhook verification handshake
+POST /whatsapp    a message forwarded to the WhatsApp number, answered in the
+                  same thread, which is where the scam arrived in the first place
 
 The same function object serves the local development server, so what runs on
 a laptop is the code that runs in production rather than a sibling of it.
@@ -18,10 +21,12 @@ import pathlib
 sys.path.insert(0, str(pathlib.Path(__file__).parent))
 
 import store
+import whatsapp
 from advice import build as build_advice
 from rules import evaluate
 
 MAX_CHARS = 4000
+PUBLIC_URL = os.environ.get("PAKKA_PUBLIC_URL", "").rstrip("/")
 
 # A Lambda Function URL with CORS configured adds these itself. Sending them
 # from here as well produces "Access-Control-Allow-Origin: *, *", which every
@@ -71,6 +76,54 @@ def scan(text: str) -> dict:
     return _reply(200, {**record, "id": scan_id})
 
 
+def _verdict_for(text: str) -> tuple[dict, dict, str | None]:
+    """The scan, the advice, and a link to it, shared by every front door."""
+    verdict = evaluate(text)
+    advice = build_advice(verdict)
+    link = None
+    try:
+        scan_id = store.new_id()
+        store.put(scan_id, {"text": text, **verdict, "advice": advice})
+        link = f"{PUBLIC_URL}/v/{scan_id}" if PUBLIC_URL else None
+    except Exception:
+        traceback.print_exc()          # a storage failure must not cost the answer
+    return verdict, advice, link
+
+
+def whatsapp_webhook(event, send=whatsapp.send) -> dict:
+    """Answer every message in the payload, then return 200 no matter what.
+
+    Meta retries any webhook that does not return 200, and a retry would scan
+    the message again and send a second answer, so a failure inside the loop is
+    logged and swallowed rather than surfaced as an error status.
+    """
+    body = event.get("body") or ""
+    headers = {k.lower(): v for k, v in (event.get("headers") or {}).items()}
+    secret = os.environ.get("WHATSAPP_APP_SECRET", "")
+    if not whatsapp.signature_ok(body, headers.get("x-hub-signature-256"), secret):
+        print("whatsapp: rejected an unsigned or badly signed request")
+        return {"statusCode": 403, "body": "bad signature"}
+
+    try:
+        payload = json.loads(body or "{}")
+    except json.JSONDecodeError:
+        return {"statusCode": 200, "body": "ignored"}
+
+    for msg in whatsapp.incoming(payload):
+        try:
+            text = (msg["text"] or "").strip()[:MAX_CHARS]
+            if msg["type"] != "text" or not text:
+                send(msg["from"], whatsapp.reply_for(None, None, None, kind=msg["type"]),
+                     msg["phone_number_id"])
+                continue
+            verdict, advice, link = _verdict_for(text)
+            send(msg["from"], whatsapp.reply_for(verdict, advice, link),
+                 msg["phone_number_id"])
+        except Exception:               # one bad message must not drop the rest
+            traceback.print_exc()
+    return {"statusCode": 200, "body": "ok"}
+
+
 def lambda_handler(event, context=None):
     """A crash here becomes a bare 502 with an empty body, which tells the
     caller nothing and tells the developer less. Catch it, log it, and answer
@@ -90,6 +143,15 @@ def _route(event):
 
     if method == "OPTIONS":
         return {"statusCode": 204, "headers": CORS, "body": ""}
+
+    if path.rstrip("/").endswith("/whatsapp"):
+        if method == "GET":
+            status, text = whatsapp.verify(event, os.environ.get("WHATSAPP_VERIFY_TOKEN", ""))
+            return {"statusCode": status, "headers": {"content-type": "text/plain"},
+                    "body": text}
+        if method == "POST":
+            return whatsapp_webhook(event)
+        return _reply(405, {"error": "Method not allowed."})
 
     if method == "POST" and path.rstrip("/").endswith("/scan"):
         try:

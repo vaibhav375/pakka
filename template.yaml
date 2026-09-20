@@ -8,6 +8,30 @@ Globals:
     Timeout: 10
     MemorySize: 256
 
+Parameters:
+  PublicUrl:
+    Type: String
+    Default: ""
+    Description: Where the site is served, for example https://pakka.example
+  WhatsAppVerifyToken:
+    Type: String
+    Default: ""
+    Description: Any string you choose; Meta echoes it back once to verify the webhook
+  WhatsAppToken:
+    Type: String
+    Default: ""
+    NoEcho: true
+    Description: The WhatsApp access token from the Meta app dashboard
+  WhatsAppPhoneId:
+    Type: String
+    Default: ""
+    Description: The phone number ID from the same dashboard
+  WhatsAppAppSecret:
+    Type: String
+    Default: ""
+    NoEcho: true
+    Description: The app secret, used to check that a webhook really came from Meta
+
 Resources:
   PakkaApi:
     Type: AWS::Serverless::Function
@@ -17,6 +41,15 @@ Resources:
       Environment:
         Variables:
           PAKKA_TABLE: !Ref ScansTable
+          # Where saved scans are readable, so the WhatsApp reply can link to
+          # one. Leave it blank and the reply simply carries no link.
+          PAKKA_PUBLIC_URL: !Ref PublicUrl
+          # The WhatsApp front door. All four are optional: with none of them
+          # set the webhook refuses verification and nothing else changes.
+          WHATSAPP_VERIFY_TOKEN: !Ref WhatsAppVerifyToken
+          WHATSAPP_TOKEN: !Ref WhatsAppToken
+          WHATSAPP_PHONE_ID: !Ref WhatsAppPhoneId
+          WHATSAPP_APP_SECRET: !Ref WhatsAppAppSecret
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref ScansTable

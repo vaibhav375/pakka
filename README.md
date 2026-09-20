@@ -139,6 +139,54 @@ free tier on every axis. At 100,000 scans a month the Lambda invocations are sti
 free, DynamoDB would move to on-demand at roughly $0.13 for the writes, and the
 bill is dominated by data transfer rather than compute.
 
+## The WhatsApp front door
+
+The scam arrives on WhatsApp. Asking someone to copy it, open a browser, paste
+it and read a page is asking them to do four things while they are being
+rushed, which is the moment they are least able to. So Pakka is also a number
+you forward the message to, and the answer comes back in the same thread.
+
+```
+GET  /whatsapp    Meta's one-time verification handshake
+POST /whatsapp    a forwarded message, answered in the same thread
+```
+
+The webhook checks Meta's `X-Hub-Signature-256` against the app secret before
+it reads anything, refuses verification when no token is configured rather than
+accepting whoever asks, and always answers 200 once the signature passes,
+because Meta retries anything else and a retry would send the answer twice.
+
+Four environment variables switch it on, and with none of them set nothing else
+about the project changes:
+
+| | |
+|---|---|
+| `WHATSAPP_VERIFY_TOKEN` | any string you choose, echoed back once |
+| `WHATSAPP_TOKEN` | access token from the Meta app dashboard |
+| `WHATSAPP_PHONE_ID` | phone number ID from the same dashboard |
+| `WHATSAPP_APP_SECRET` | app secret, used to check the signature |
+| `PAKKA_PUBLIC_URL` | where scans are readable, so the reply can link to one |
+
+Setting it up, all on free tiers:
+
+1. **developers.facebook.com/apps** → Create app → Business → add the
+   **WhatsApp** product. You get a test number and a temporary token.
+2. **WhatsApp → API Setup** gives you the phone number ID and the token.
+   **App settings → Basic** gives you the app secret.
+3. Put all four in **Lambda → Configuration → Environment variables**.
+4. **WhatsApp → Configuration → Edit** the webhook. Callback URL is your
+   Function URL with `/whatsapp` on the end; verify token is the string you
+   chose. Subscribe to the **messages** field.
+5. Send anything to the test number from the phone you registered.
+
+Run it locally with no Meta account at all:
+
+```
+WHATSAPP_VERIFY_TOKEN=test python3 api/local_server.py
+curl "localhost:8787/whatsapp?hub.mode=subscribe&hub.verify_token=test&hub.challenge=HELLO"
+python3 api/test_whatsapp.py     # the webhook, end to end, network stubbed out
+```
+
 ## How well does it actually work
 
 `tools/eval_set.py` holds 129 labelled messages: 76 fraud across 20 families and
