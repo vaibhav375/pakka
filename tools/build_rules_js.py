@@ -14,6 +14,7 @@ import pathlib
 import sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent / "api"))
+from advice import CLAUSE, IMPERSONATION, JOB, MONEY, PROPERTY  # noqa: E402
 from rules import BANDS, RULES  # noqa: E402
 
 OUT = pathlib.Path(__file__).resolve().parent.parent / "web" / "rules.generated.js"
@@ -24,10 +25,21 @@ rules = [
 ]
 bands = [[t, k, l] for t, k, l in BANDS]
 
+# the advice tables travel with the rules, so the on-device answer can say what
+# to do next without a round trip and without a second copy to keep in step
+advice = {
+    "clause": CLAUSE,
+    "money": sorted(MONEY),
+    "job": sorted(JOB),
+    "impersonation": sorted(IMPERSONATION),
+    "property": sorted(PROPERTY),
+}
+
 OUT.write_text(f"""/* Generated from api/rules.py by tools/build_rules_js.py — do not edit.
    Running the check here means the message never leaves the device unless the
    person presses Share. */
 window.PAKKA_RULES = {json.dumps(rules, indent=2, ensure_ascii=False)};
+window.PAKKA_ADVICE = {json.dumps(advice, indent=2, ensure_ascii=False)};
 window.PAKKA_BANDS = {json.dumps(bands)};
 
 window.pakkaEvaluate = function (text) {{

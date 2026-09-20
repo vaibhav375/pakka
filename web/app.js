@@ -201,6 +201,47 @@ const countUp = (el, to) => {
   requestAnimationFrame(step);
 };
 
+/* what to do next, assembled from the rules that fired — the same tables the
+   server uses, shipped with the rules so it works with no network */
+function adviceFor(findings) {
+  const A = window.PAKKA_ADVICE;
+  if (!A) return { actions: [], forward: '' };
+  const ids = findings.map((f) => f.id);
+  const has = (group) => ids.some((id) => A[group].includes(id));
+  if (!ids.length) {
+    return {
+      actions: [
+        'Nothing matched, but that is not proof it is safe — it means this message ' +
+        'does not use any of the twenty patterns Pakka knows.',
+        'If it still feels wrong, verify on a number you already had, not one from the message.',
+      ],
+      forward: '',
+    };
+  }
+  const actions = ['Do not pay anything and do not share any code, however small the amount.'];
+  if (ids.includes('ASKS_FOR_SECRET'))
+    actions.push('Never share an OTP, PIN or CVV. No bank, delivery agent or employer will ever ask for one.');
+  if (has('money'))
+    actions.push('Money sent to a personal UPI ID or account is very hard to get back, which is exactly why they ask for it that way.');
+  if (has('job'))
+    actions.push('Search the company name with the word careers and apply only from its own site.');
+  if (has('impersonation'))
+    actions.push('If you think it might be genuine, call the number printed on your own bill, card or the official website — never the one in the message.');
+  if (has('property'))
+    actions.push('See the place in person and meet the owner before any money moves. No photo, video call or document replaces that.');
+  actions.push('Report it at cybercrime.gov.in or call 1930. If money has already gone, report within the first hour, while it can still be frozen.');
+  actions.push('Block the sender, then tell whoever forwarded it to you.');
+
+  const top = ids.slice(0, 2).map((id) => A.clause[id]).filter(Boolean);
+  const reasons = top.length ? top.join(' and ') : 'it matches known scam patterns';
+  return {
+    actions,
+    forward: `I checked this before replying — ${reasons}. That is how this kind of scam ` +
+             `works, so I am not paying or sharing anything. Please do not send money ` +
+             `either. (Checked with Pakka)`,
+  };
+}
+
 async function check() {
   const text = t.value;
 
@@ -258,7 +299,7 @@ function render(d) {
          patterns Pakka knows about. If something still feels wrong, trust that.</p></div></div>`;
 
   /* what to do about it, and what to send back */
-  const adv = d.advice || { actions: [], forward: '' };
+  const adv = d.advice || adviceFor(d.findings || []);
   $('advice').hidden = !adv.actions.length;
   $('actions').innerHTML = adv.actions.map((a) => `<li>${a}</li>`).join('');
   $('fwd').hidden = !adv.forward;
@@ -311,6 +352,12 @@ fetch('rules.json')
         <h4>${r.name}</h4><p>${r.why}</p></div>`).join('');
   })
   .catch(() => {});
+
+/* the header count comes from the generated rules, so it cannot go stale again */
+(() => {
+  const el = document.getElementById('rulecount');
+  if (el && window.PAKKA_RULES) el.textContent = window.PAKKA_RULES.length;
+})();
 
 /* ---------- rules gallery: a column that walks itself ---------- */
 (() => {

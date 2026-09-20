@@ -143,6 +143,56 @@ window.PAKKA_RULES = [
     "re": "(?:army|military|cisf|crpf|bsf|navy) (?:officer|jawan|personnel)|(?:posted|deployed) (?:in|at) .{0,30}(?:cannot|can't) (?:meet|come)|transfer(?:red)? .{0,25}urgent(?:ly)? .{0,25}sell"
   }
 ];
+window.PAKKA_ADVICE = {
+  "clause": {
+    "PAY_TO_GET_JOB": "it asks for money before a job",
+    "ASKS_FOR_SECRET": "it asks for an OTP or PIN",
+    "PAY_TO_RECEIVE": "it wants a payment before releasing money to you",
+    "KYC_PANIC": "it uses a KYC or account-block scare",
+    "URGENCY": "it pushes you to act within hours",
+    "NO_INTERVIEW": "it offers a job with no interview",
+    "TOO_GOOD": "the pay does not match the work",
+    "PERSONAL_PAYMENT": "the money goes to a personal account",
+    "FREE_EMAIL_AS_COMPANY": "a company is writing from a free Gmail address",
+    "HIDDEN_LINK": "the link is shortened so you cannot see where it goes",
+    "CHAT_ONLY": "it exists only on WhatsApp or Telegram",
+    "THREAT": "it threatens legal or police action",
+    "SIGHT_UNSEEN": "it wants rent before you have seen the place",
+    "COURIER_CUSTOMS": "it wants a fee to release a parcel",
+    "ELECTRICITY_CUT": "it threatens to cut your electricity",
+    "LOTTERY_WIN": "it claims a prize you never entered for",
+    "LOAN_HARASSMENT": "it threatens to contact the people in your phone",
+    "INVESTMENT_TIP": "it promises guaranteed returns",
+    "TASK_COMMISSION": "it is a prepaid-task scheme",
+    "ARMY_OFFICER": "it uses the posted-far-away story to avoid meeting"
+  },
+  "money": [
+    "COURIER_CUSTOMS",
+    "INVESTMENT_TIP",
+    "LOTTERY_WIN",
+    "PAY_TO_GET_JOB",
+    "PAY_TO_RECEIVE",
+    "PERSONAL_PAYMENT",
+    "TASK_COMMISSION"
+  ],
+  "job": [
+    "NO_INTERVIEW",
+    "PAY_TO_GET_JOB",
+    "TASK_COMMISSION",
+    "TOO_GOOD"
+  ],
+  "impersonation": [
+    "COURIER_CUSTOMS",
+    "ELECTRICITY_CUT",
+    "KYC_PANIC",
+    "LOAN_HARASSMENT",
+    "THREAT"
+  ],
+  "property": [
+    "ARMY_OFFICER",
+    "SIGHT_UNSEEN"
+  ]
+};
 window.PAKKA_BANDS = [[8, "almost_certainly", "Almost certainly a scam"], [5, "likely", "Likely a scam"], [2, "careful", "Be careful"], [1, "one_flag", "One thing to check"], [0, "clear", "Nothing suspicious found"]];
 
 window.pakkaEvaluate = function (text) {
