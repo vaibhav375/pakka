@@ -25,6 +25,7 @@ from eval_set import FRAUD, LEGIT  # noqa: E402
 texts = [t for _, t, _ in CASES]
 js = f"""
 globalThis.window = globalThis;
+{(ROOT / 'web' / 'urls.js').read_text()}
 {(ROOT / 'web' / 'rules.generated.js').read_text()}
 const out = {json.dumps(texts)}.map((t) => {{
   const r = window.pakkaEvaluate(t);
@@ -53,10 +54,12 @@ for (name, text, _), j in zip(CASES, from_js):
 corpus = [t for _, t in FRAUD] + [t for _, t in LEGIT]
 js = f"""
 globalThis.window = globalThis;
+{(ROOT / 'web' / 'urls.js').read_text()}
 {(ROOT / 'web' / 'rules.generated.js').read_text()}
 const out = {json.dumps(corpus, ensure_ascii=False)}.map((t) => {{
   const r = window.pakkaEvaluate(t);
   return {{ score: r.score, band: r.band, ids: r.findings.map((f) => f.id).sort(),
+           why: r.findings.map((f) => f.why).sort(),
            norm: window.pakkaNormalise(t)[0],
            quotes: r.findings.map((f) => f.quotes.join('|')) }};
 }});
@@ -70,9 +73,10 @@ for text, j in zip(corpus, json.loads(proc.stdout)):
     p = evaluate(text)
     mine = {"score": p["score"], "band": p["band"],
             "ids": sorted(f["id"] for f in p["findings"]),
+            "why": sorted(f["why"] for f in p["findings"]),
             "norm": normalise(text)[0],
             "quotes": ["|".join(f["quotes"]) for f in p["findings"]]}
-    for key in ("score", "band", "ids", "norm", "quotes"):
+    for key in ("score", "band", "ids", "why", "norm", "quotes"):
         if mine[key] != j[key]:
             drift += 1
             print(f"  DIFFER {key}: {text[:46]}")
@@ -85,6 +89,7 @@ print(f"  corpus: {len(corpus) - drift}/{len(corpus)} identical, "
 if (ROOT / "web" / "model.generated.js").exists():
     js = f"""
 globalThis.window = globalThis;
+{(ROOT / 'web' / 'urls.js').read_text()}
 {(ROOT / 'web' / 'rules.generated.js').read_text()}
 {(ROOT / 'web' / 'model.generated.js').read_text()}
 {(ROOT / 'web' / 'model.js').read_text()}

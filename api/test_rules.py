@@ -140,6 +140,18 @@ CASES = [
      "Congratulations 🎉 you have W-O-N a lucky draw prize of Rs 10,00,000",
      {"LOTTERY_WIN"}),
 
+    ("a cyrillic letter inside a brand name",
+     "Update your account at http://\u0430mazon.in/verify now",
+     {"LOOKALIKE_URL", "VERIFY_DETAILS"}),
+
+    ("punycode",
+     "Apple ID locked. Sign in at https://xn--80ak6aa92e.com/login to restore it",
+     {"LOOKALIKE_URL"}),
+
+    ("a real brand address, must stay clean",
+     "Your order at https://www.amazon.in/orders is out for delivery today.",
+     set()),
+
     ("ordinary message, must stay clean",
      "Hi Vaibhav, this is Priya from the placement cell. Your Infosys interview is "
      "on Monday at 10am in Seminar Hall 2. Please carry two copies of your resume.",

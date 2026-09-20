@@ -228,7 +228,7 @@ function adviceFor(findings) {
     return {
       actions: [
         'Nothing matched, but that is not proof it is safe — it means this message ' +
-        'does not use any of the thirty-four patterns Pakka knows.',
+        'does not use any of the thirty-five patterns Pakka knows.',
         'If it still feels wrong, verify on a number you already had, not one from the message.',
       ],
       forward: '',
@@ -349,7 +349,7 @@ function render(d) {
       </div>
     </div>`).join('') || `
     <div class="flag in"><div class="w" style="color:var(--acid)">\u2713</div>
-      <div><h4>None of the thirty-four checks fired</h4>
+      <div><h4>None of the thirty-five checks fired</h4>
       <p>That is not a guarantee \u2014 it means this message does not use any of the
          patterns Pakka knows about. If something still feels wrong, trust that.</p></div></div>`;
 
@@ -438,7 +438,7 @@ fetch('rules.json')
     const el = document.getElementById(id);
     if (el) el.textContent = n;
   });
-  document.querySelectorAll('b[data-to="34"]').forEach((el) => { el.dataset.to = n; });
+  document.querySelectorAll('b[data-to="35"]').forEach((el) => { el.dataset.to = n; });
 })();
 
 /* ---------- rules gallery: a column that walks itself ---------- */

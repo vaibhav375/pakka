@@ -180,6 +180,12 @@
   "weight": 2
  },
  {
+  "id": "LOOKALIKE_URL",
+  "name": "A web address that is not the characters it appears to be",
+  "why": "Letters from another alphabet, punycode, digits inside a brand name or a bare IP address. The address reads correctly to a person and goes somewhere else.",
+  "weight": 3
+ },
+ {
   "id": "LOAN_HARASSMENT",
   "name": "Loan-app style pressure",
   "why": "Threatening to contact your phonebook over a loan is illegal recovery practice, not a legitimate demand.",

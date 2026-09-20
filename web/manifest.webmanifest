@@ -1,7 +1,7 @@
 {
   "name": "Pakka, check before you pay",
   "short_name": "Pakka",
-  "description": "Paste or share a message and find out what is wrong with it and why. Thirty-four rules, running on your device.",
+  "description": "Paste or share a message and find out what is wrong with it and why. Thirty-five rules, running on your device.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

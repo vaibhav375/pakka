@@ -26,7 +26,7 @@ WELCOME = (
     "Forward me any message you are unsure about and I will tell you what is "
     "wrong with it and why.\n\n"
     "A PG listing, an internship offer, a bank SMS, a KYC warning, anything. I "
-    "check it against 34 rules, quote the exact words that are a problem, tell "
+    "check it against 35 rules, quote the exact words that are a problem, tell "
     "you what to do next, and write a reply you can send back to whoever "
     "forwarded it to you.\n\n"
     "I am not a model guessing. The same message always gets the same answer."

@@ -12,6 +12,8 @@ from __future__ import annotations
 
 import re
 import unicodedata
+
+import urls
 from dataclasses import dataclass, field
 
 
@@ -437,6 +439,17 @@ RULES: tuple[Rule, ...] = (
            r"lost my (?:wallet|phone|passport|bag).{0,60}(?:send|transfer|need) .{0,20}money"),
     ),
     Rule(
+        # Checked by api/urls.py rather than by this pattern, which never
+        # matches. A rule can look for the word "sbi". It cannot tell you the
+        # "a" in this address is Cyrillic.
+        "LOOKALIKE_URL", "A web address that is not the characters it appears to be",
+        "Letters from another alphabet, punycode, digits inside a brand name or "
+        "a bare IP address. The address reads correctly to a person and goes "
+        "somewhere else.",
+        3,
+        _p(r"(?!x)x"),
+    ),
+    Rule(
         "LOAN_HARASSMENT", "Loan-app style pressure",
         "Threatening to contact your phonebook over a loan is illegal recovery "
         "practice, not a legitimate demand.",
@@ -494,7 +507,14 @@ BANDS = (
 def evaluate(text: str) -> dict:
     """Score a message. Same input, same output, every time."""
     norm, idx = normalise(text)
-    findings = [Finding(r, s) for r in RULES if (s := r.spans(text, norm, idx))]
+    findings = [Finding(r, s) for r in RULES
+                if r.id != "LOOKALIKE_URL" and (s := r.spans(text, norm, idx))]
+
+    # the one check that is about the characters rather than the words
+    url_hits = urls.suspicious(text)
+    if url_hits:
+        rule = next(r for r in RULES if r.id == "LOOKALIKE_URL")
+        findings.append(Finding(rule, sorted({(a, b) for _, _, a, b in url_hits})))
     score = sum(f.rule.weight for f in findings)
     key, label = next((k, l) for threshold, k, l in BANDS if score >= threshold)
     return {
@@ -505,7 +525,9 @@ def evaluate(text: str) -> dict:
             {
                 "id": f.rule.id,
                 "name": f.rule.name,
-                "why": f.rule.why,
+                "why": (f.rule.why if f.rule.id != "LOOKALIKE_URL"
+                        else "; ".join(dict.fromkeys(
+                            r for _, r, _, _ in urls.suspicious(text)))),
                 "weight": f.rule.weight,
                 "spans": f.spans,
                 "quotes": [text[a:b] for a, b in f.spans],

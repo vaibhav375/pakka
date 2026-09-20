@@ -27,7 +27,7 @@ So Pakka answers in sentences, points at the exact words, and gives you a link.
 
 ## How it decides
 
-**Thirty-four rules, in plain Python. No model gets a vote.**
+**Thirty-five rules, in plain Python. No model gets a vote.**
 
 A scam verdict has to be identical every time and has to survive being explained
 to the person who nearly paid. A language model can do neither reliably, so the
@@ -66,10 +66,11 @@ in the message and say in one sentence why what it found is a problem.
 | 28 | Threatens to block your SIM or connection | 3 |
 | 29 | A new number that needs money | 3 |
 | 30 | Stranded somewhere and needs money now | 2 |
-| 31 | Loan-app style pressure | 3 |
-| 32 | Guaranteed returns or a tips group | 3 |
-| 33 | Prepaid task or commission work | 3 |
-| 34 | Claims to be posted far away and cannot meet | 3 |
+| 31 | A web address that is not the characters it appears to be | 3 |
+| 32 | Loan-app style pressure | 3 |
+| 33 | Guaranteed returns or a tips group | 3 |
+| 34 | Prepaid task or commission work | 3 |
+| 35 | Claims to be posted far away and cannot meet | 3 |
 
 Weights add up to a score, the score picks a band. Ordinary messages have to come
 back clean — a checker that flags everything gets ignored, so a real placement-cell
@@ -254,6 +255,26 @@ curl "localhost:8787/whatsapp?hub.mode=subscribe&hub.verify_token=test&hub.chall
 python3 api/test_whatsapp.py     # the webhook, end to end, network stubbed out
 ```
 
+## The check that is not about words at all
+
+A pattern can look for the word "sbi". It cannot tell you that the **а** in
+`аmazon.in` is Cyrillic, that `xn--80ak6aa92e.com` is displayed in the address
+bar as `аррӏе.com`, or that a hostname made of digits is not a name anybody
+registered. Those are properties of the characters and the structure, so
+`api/urls.py` answers them instead, and the rule it backs reports the reason in
+words:
+
+> the word "аmazon" is written in two alphabets at once (Cyrillic, Latin),
+> which is how an address is made to look like a different one
+
+The browser has no punycode decoder to borrow — `new URL()` hands back the
+`xn--` form, which is the form that hides the problem — so `web/urls.js`
+contains an RFC 3492 decoder written out, and the parity check compares the
+decoded strings character for character against Python's.
+
+Meanwhile `https://www.amazon.in/orders` and `https://developer.mozilla.org/...`
+stay clean, which is the part that took the care.
+
 ## The model that sits beside the rules
 
 Rules have perfect precision on what they describe and no opinion at all about
@@ -284,16 +305,16 @@ messages:
 
 | | precision | recall |
 |---|---|---|
-| rules alone | 0.75 | 0.04 |
-| model alone | 0.89 | 0.93 |
-| both together | 0.89 | 0.93 |
+| rules alone | 0.80 | 0.06 |
+| model alone | 0.85 | 0.93 |
+| both together | 0.84 | 0.93 |
 
-The rules are nearly blind out of domain. The model catches **129 spam messages
+The rules are nearly blind out of domain. The model catches **127 spam messages
 that no rule fires on**. That is the entire argument for it.
 
 **And on the domain that matters**, five-fold cross validation on the Indian
-corpus with UCI always in the training half: AUC 0.78, precision 0.74, recall
-0.79. Worse than the rules score there, which is the honest way round: the rules
+corpus with UCI always in the training half: AUC 0.80, precision 0.76, recall
+0.80. Worse than the rules score there, which is the honest way round: the rules
 were built for exactly these messages.
 
 **Calibration.** The probability is Platt-scaled on out-of-fold predictions
@@ -301,11 +322,11 @@ only, so 0.8 means roughly eight in ten rather than just "high":
 
 | predicted | actually fraud |
 |---|---|
-| 0.0 – 0.2 | 0.25 |
-| 0.2 – 0.4 | 0.29 |
-| 0.4 – 0.6 | 0.54 |
-| 0.6 – 0.8 | 0.67 |
-| 0.8 – 1.0 | 0.90 |
+| 0.0 – 0.2 | 0.20 |
+| 0.2 – 0.4 | 0.32 |
+| 0.4 – 0.6 | 0.45 |
+| 0.6 – 0.8 | 0.68 |
+| 0.8 – 1.0 | 0.94 |
 
 **The boundary.** Rules decide. The model is shown underneath them, never
 instead of them. It may raise concern and it may never clear it: a headline of
@@ -318,7 +339,7 @@ from.
 2012. It teaches the model "free", "win", "claim" and "txt" and teaches it
 nothing about KYC, UPI, APK sideloading or AnyDesk. The Indian corpus supplies
 those and is upweighted twelvefold in training to stop 2% of the rows being
-drowned out, but 129 messages is 129 messages. Real forwards would help more
+drowned out, but 134 messages is 134 messages. Real forwards would help more
 than any change to the model.
 
 ## How well does it actually work
@@ -375,7 +396,7 @@ browser JavaScript.
 
 ## What it does not do
 
-It does not detect scams it has never seen — thirty-four patterns are thirty-four
+It does not detect scams it has never seen — thirty-five patterns are thirty-five
 patterns, and a clean result says only that none of them fired. The page says so
 rather than implying safety. It reads English and Hinglish written in Latin
 script; Devanagari input is not handled yet. And it is not legal or financial

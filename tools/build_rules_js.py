@@ -104,6 +104,19 @@ window.pakkaEvaluate = function (text) {{
   const [norm, idx, ends] = window.pakkaNormalise(text);
   const findings = [];
   for (const r of window.PAKKA_RULES) {{
+    /* the one check that is about the characters rather than the words, so it
+       is answered by web/urls.js instead of by a pattern */
+    if (r.id === 'LOOKALIKE_URL') {{
+      const hits = (window.pakkaUrls ? window.pakkaUrls(text) : []);
+      if (hits.length) {{
+        const why = [...new Set(hits.map(([, reason]) => reason))].join('; ');
+        const sp = [...new Set(hits.map(([, , a, b]) => a + ':' + b))]
+          .map((k) => k.split(':').map(Number)).sort((x, y) => x[0] - y[0]);
+        findings.push({{ id: r.id, name: r.name, why, weight: r.weight,
+                        spans: sp, quotes: sp.map(([a, b]) => text.slice(a, b)) }});
+      }}
+      continue;
+    }}
     const re = new RegExp(r.re, 'gi');
     const spans = [];
     let m;

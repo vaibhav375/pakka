@@ -104,6 +104,10 @@ FRAUD = [
  ("hinglish", "Aapke naam par parcel customs me ruka hai, clearance fee pay kijiye."),
  ("hinglish", "Ghar baithe kamaye 3000 rupaye daily. Whatsapp par contact kare."),
  ("hinglish", "Apna OTP share kijiye, hum bank se bol rahe hai."),
+ # --- addresses that are not the characters they appear to be
+ ("lookalike", "Your account needs verification. Update it at http://\u0430mazon.in/verify now"),
+ ("lookalike", "Apple ID locked. Sign in at https://xn--80ak6aa92e.com/login to restore access"),
+ ("lookalike", "Confirm your KYC details here http://192.168.4.11:8080/kyc immediately"),
 ]
 
 LEGIT = [
@@ -167,4 +171,6 @@ LEGIT = [
  ("service", "The library book is due in 3 days. Please return or renew it online."),
  ("service", "Your insurance policy renews on 30 September. Premium Rs 8,400. Renew on our website."),
  ("service", "Fee payment reminder: semester fee due 30 Sept. Pay via the college ERP portal."),
+ ("service", "Track your shipment at https://www.bluedart.com/tracking or in the app."),
+ ("service", "Read the docs at https://developer.mozilla.org/en-US/docs/Web/Manifest"),
 ]
