@@ -134,15 +134,6 @@ const EXAMPLES = {
   'Electricity cut':
     'Dear consumer, your electricity will be disconnected tonight at 9:30 pm because ' +
     'your previous bill was not updated. Immediately contact our officer on 9812345678.',
-  'Parcel at customs':
-    'Your international parcel is held at customs. Pay Rs 850 clearance charge ' +
-    'within 2 hours to release the shipment, otherwise it will be returned to sender.',
-  'Prize message':
-    'Congratulations! Your number has won KBC lucky draw of Rs 25,00,000. To claim ' +
-    'your prize pay Rs 6,500 processing charge and share your bank details.',
-  'Work from home':
-    'Complete 5 simple tasks daily like rating hotels and earn Rs 3,000. Start with ' +
-    'a prepaid task of Rs 1,000, fully refundable with commission. Join our telegram.',
   'Marketplace seller':
     'I am an army officer posted in Leh so I cannot meet you. Pay the token amount ' +
     'to 9845012345 on google pay and the bike will be delivered by CSD courier.',
