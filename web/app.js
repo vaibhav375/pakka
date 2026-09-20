@@ -237,39 +237,54 @@ function render(d) {
   countUp($('vscore'), d.score);
   $('msg').innerHTML = highlight(d.text, d.findings);
 
+  /* the score, shown as the pieces it is made of */
+  const total = d.findings.reduce((n, f) => n + f.weight, 0) || 1;
+  $('weights').innerHTML = d.findings
+    .map((f) => `<i style="width:${(f.weight / total) * 100}%" title="${f.name} +${f.weight}"></i>`)
+    .join('');
+
   $('flags').innerHTML = d.findings.map((f) => `
     <div class="flag" data-id="${f.id}">
       <div class="w">+${f.weight}</div>
       <div>
         <h4>${f.name}</h4>
         <p>${f.why}</p>
-        ${f.quotes.length ? `<div class="quote">“${f.quotes.slice(0, 3).join('” · “')}”</div>` : ''}
+        ${f.quotes.length ? `<div class="quote">\u201c${f.quotes.slice(0, 3).join('\u201d \u00b7 \u201c')}\u201d</div>` : ''}
       </div>
     </div>`).join('') || `
-    <div class="flag in"><div class="w" style="color:var(--acid)">✓</div>
-      <div><h4>None of the thirteen checks fired</h4>
-      <p>That is not a guarantee — it means this message does not use any of the
+    <div class="flag in"><div class="w" style="color:var(--acid)">\u2713</div>
+      <div><h4>None of the twenty checks fired</h4>
+      <p>That is not a guarantee \u2014 it means this message does not use any of the
          patterns Pakka knows about. If something still feels wrong, trust that.</p></div></div>`;
+
+  /* what to do about it, and what to send back */
+  const adv = d.advice || { actions: [], forward: '' };
+  $('advice').hidden = !adv.actions.length;
+  $('actions').innerHTML = adv.actions.map((a) => `<li>${a}</li>`).join('');
+  $('fwd').hidden = !adv.forward;
+  $('fwdtext').value = adv.forward || '';
+
+  $('link').value = d.id
+    ? `${location.origin}${location.pathname}#${d.id}`
+    : 'Could not create a link \u2014 the verdict above still stands';
+
+  if (window.pakkaScene) window.pakkaScene(d.findings.map((f) => f.id), d.band);
 
   out.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
-  /* the signature moment: phrases ignite in sequence, each one a beat after the
-     last, and its card slides in with it */
-  if (window.pakkaScene) window.pakkaScene(d.findings.map((f) => f.id), d.band);
-
-  window.PakkaScene?.light(d.findings.map((f) => f.id));
-
   const msg = $('msg');
   msg.classList.remove('scanning');
-  void msg.offsetWidth;            /* restart the sweep on a repeat check */
+  void msg.offsetWidth;                /* restart the sweep on a repeat check */
   msg.classList.add('scanning');
-  setTimeout(() => msg.classList.remove('scanning'), 1120);  /* clear it, don't park it */
 
+  /* the sweep passes first, then each phrase lights as it is found, then its
+     explanation slides in beside it */
   const marks = [...msg.querySelectorAll('mark')];
   const cards = [...$('flags').querySelectorAll('.flag')];
-  /* the sweep passes first, then each phrase lights as it is "found" */
   marks.forEach((m, i) => setTimeout(() => m.classList.add('lit'), 900 + i * 170));
   cards.forEach((c, i) => setTimeout(() => c.classList.add('in'), 1040 + i * 170));
+  setTimeout(() => $('weights').querySelectorAll('i')
+    .forEach((b, i) => setTimeout(() => b.classList.add('in'), i * 90)), 900);
 }
 
 /* hovering a flag lights only its own phrases, and the reverse — the link
@@ -302,6 +317,14 @@ fetch('rules.json')
   const col = document.getElementById('gcol');
   const R = window.PAKKA_RULES || [];
   if (!col || !R.length) return;
+
+  /* the first alternative of a rule's pattern, tidied into something readable:
+     what that rule is actually hunting for */
+  const hunts = (re) => (re || '').split('|')[0]
+    .replace(/\(\?:/g, '').replace(/\\b/g, '')
+    .replace(/\.\{[^}]*\}/g, ' … ').replace(/\\s\?/g, ' ')
+    .replace(/\\\./g, '.').replace(/[()?\[\]]/g, '')
+    .replace(/\s+/g, ' ').trim();
   col.innerHTML = '<ul>' + R.map((r, i) =>
     `<li data-i="${i}"><b>${String(i + 1).padStart(2, '0')}</b>${r.name}</li>`).join('') + '</ul>';
   const ul = col.querySelector('ul');
@@ -317,7 +340,7 @@ fetch('rules.json')
     ul.style.transform = `translateY(${-top * ROW}px)`;
     $('gnum').textContent = String(i + 1).padStart(2, '0') + ' / 20';
     $('gname').textContent = R[i].name;
-    $('ghunt').textContent = '“' + R[i].hunts + '”';
+    $('ghunt').textContent = '“' + hunts(R[i].re) + '”';
   };
   const play = () => { clearInterval(timer); timer = setInterval(() => show(i + 1), 2300); };
   items.forEach((el) => el.addEventListener('click', () => { show(+el.dataset.i); play(); }));

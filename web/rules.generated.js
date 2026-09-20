@@ -92,6 +92,55 @@ window.PAKKA_RULES = [
     "why": "Paying a token or advance before visiting is how fake listings work. The photos are usually taken from a real listing elsewhere.",
     "weight": 3,
     "re": "(?:token|advance|booking) (?:amount|money|fee).{0,40}(?:before|without) .{0,20}(?:visit|see)|(?:i am|i'm|currently) (?:abroad|out of (?:town|country)|in another city).{0,60}(?:send|transfer|pay)|book (?:it )?(?:now|today) .{0,20}without (?:a )?visit"
+  },
+  {
+    "id": "COURIER_CUSTOMS",
+    "name": "Parcel held, pay a fee to release it",
+    "why": "Couriers do not hold parcels for a fee over SMS. Customs duty is paid to the government, never to a WhatsApp number.",
+    "weight": 3,
+    "re": "(?:parcel|package|courier|shipment|consignment).{0,40}(?:held|stuck|seized|customs|clearance)|customs (?:duty|clearance|charge).{0,30}(?:pay|transfer)|(?:fedex|dhl|bluedart|india post).{0,40}(?:pay|fee|charge)"
+  },
+  {
+    "id": "ELECTRICITY_CUT",
+    "name": "Electricity disconnection threat",
+    "why": "Power utilities do not warn you by SMS from a personal number, and they never ask you to call one to avoid disconnection tonight.",
+    "weight": 3,
+    "re": "electricity .{0,30}(?:disconnect|cut off|discontinue)|power .{0,20}(?:will be )?disconnect|bill .{0,20}not updated.{0,30}disconnect"
+  },
+  {
+    "id": "LOTTERY_WIN",
+    "name": "A prize you never entered for",
+    "why": "You cannot win a lottery you never entered. Every version of this ends with a fee to release the winnings.",
+    "weight": 4,
+    "re": "(?:won|winner).{0,30}(?:lottery|lucky draw|prize|kbc)|\\bkbc\\b|lucky (?:winner|draw)|congratulations.{0,30}\\bwon\\b"
+  },
+  {
+    "id": "LOAN_HARASSMENT",
+    "name": "Loan-app style pressure",
+    "why": "Threatening to contact your phonebook over a loan is illegal recovery practice, not a legitimate demand.",
+    "weight": 3,
+    "re": "(?:inform|contact|call).{0,25}(?:your )?(?:contacts|family|friends|relatives).{0,30}(?:loan|due|payment)|loan .{0,25}(?:overdue|default).{0,30}(?:legal|action|contacts)|defaulter.{0,30}(?:list|notice)"
+  },
+  {
+    "id": "INVESTMENT_TIP",
+    "name": "Guaranteed returns or a tips group",
+    "why": "Guaranteed returns do not exist. Groups offering them exist to take deposits that cannot be withdrawn.",
+    "weight": 3,
+    "re": "guaranteed (?:returns?|profit|income)|(?:double|triple) your money|(?:stock|trading|crypto|forex) (?:tips?|group|signals?)|\\b\\d{2,3}% (?:returns?|profit)"
+  },
+  {
+    "id": "TASK_COMMISSION",
+    "name": "Prepaid task or commission work",
+    "why": "Task scams start with small payouts that work, then ask you to deposit for a bigger task. The deposit is the point.",
+    "weight": 3,
+    "re": "(?:complete|do) .{0,20}tasks?.{0,30}(?:earn|commission|payout)|(?:like|subscribe|rate).{0,25}(?:videos?|hotels?|products?).{0,30}(?:earn|paid|commission)|prepaid task|recharge .{0,20}to (?:unlock|continue).{0,20}task"
+  },
+  {
+    "id": "ARMY_OFFICER",
+    "name": "Claims to be posted far away and cannot meet",
+    "why": "The soldier-being-transferred story is the oldest marketplace scam in India. It exists to explain why you must pay before meeting.",
+    "weight": 3,
+    "re": "(?:army|military|cisf|crpf|bsf|navy) (?:officer|jawan|personnel)|(?:posted|deployed) (?:in|at) .{0,30}(?:cannot|can't) (?:meet|come)|transfer(?:red)? .{0,25}urgent(?:ly)? .{0,25}sell"
   }
 ];
 window.PAKKA_BANDS = [[8, "almost_certainly", "Almost certainly a scam"], [5, "likely", "Likely a scam"], [2, "careful", "Be careful"], [1, "one_flag", "One thing to check"], [0, "clear", "Nothing suspicious found"]];
