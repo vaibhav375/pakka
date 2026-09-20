@@ -10,7 +10,7 @@
 
   const RULES = window.PAKKA_RULES || [];
   const N = RULES.length || 20;
-  const DIM = new THREE.Color('#3a3a46');
+  const DIM = new THREE.Color('#6a6a80');
   const HOT = new THREE.Color('#ff5d47');
   const CORE = new THREE.Color('#c6ff3d');
 
@@ -20,6 +20,20 @@
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
   renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
   host.appendChild(renderer.domElement);
+
+  /* a soft round sprite: default points are hard squares, which read as dust */
+  const dot = (() => {
+    const c = document.createElement('canvas');
+    c.width = c.height = 64;
+    const g = c.getContext('2d').createRadialGradient(32, 32, 0, 32, 32, 32);
+    g.addColorStop(0, 'rgba(255,255,255,1)');
+    g.addColorStop(0.45, 'rgba(255,255,255,.85)');
+    g.addColorStop(1, 'rgba(255,255,255,0)');
+    const ctx = c.getContext('2d');
+    ctx.fillStyle = g; ctx.fillRect(0, 0, 64, 64);
+    const t = new THREE.CanvasTexture(c);
+    return t;
+  })();
 
   const group = new THREE.Group();
   scene.add(group);
@@ -40,20 +54,21 @@
   for (let i = 0; i < N; i++) DIM.toArray(colors, i * 3);
   nodeGeo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
   const nodes = new THREE.Points(nodeGeo, new THREE.PointsMaterial({
-    size: 0.16, vertexColors: true, transparent: true, opacity: 0.95,
-    sizeAttenuation: true, depthWrite: false,
+    size: 0.3, map: dot, vertexColors: true, transparent: true, opacity: 1,
+    sizeAttenuation: true, depthWrite: false, blending: THREE.AdditiveBlending,
   }));
   group.add(nodes);
 
   /* faint shell so the sphere reads as a volume, not scattered dots */
   group.add(new THREE.LineSegments(
     new THREE.EdgesGeometry(new THREE.IcosahedronGeometry(1.85, 1)),
-    new THREE.LineBasicMaterial({ color: '#1e1e26', transparent: true, opacity: 0.6 })
+    new THREE.LineBasicMaterial({ color: '#26262f', transparent: true, opacity: 0.75 })
   ));
 
   const core = new THREE.Points(
     new THREE.BufferGeometry().setAttribute('position', new THREE.Float32BufferAttribute([0, 0, 0], 3)),
-    new THREE.PointsMaterial({ size: 0.34, color: CORE, transparent: true, opacity: 0.95, depthWrite: false })
+    new THREE.PointsMaterial({ size: 0.7, map: dot, color: CORE, transparent: true,
+      opacity: 1, depthWrite: false, blending: THREE.AdditiveBlending })
   );
   group.add(core);
 
@@ -93,7 +108,7 @@
 
   const size = () => {
     const w = host.clientWidth, h = host.clientHeight || 420;
-    camera.aspect = w / h; camera.updateProjectionMatrix(); renderer.setSize(w, h, false);
+    camera.aspect = w / h; camera.updateProjectionMatrix(); renderer.setSize(w, h);
   };
   size();
   addEventListener('resize', size, { passive: true });
@@ -106,9 +121,8 @@
     if (!visible) return;
     spin += (0.0022 - spin) * 0.04;
     group.rotation.y += spin;
-    group.rotation.x += (my - group.rotation.x) * 0.04;
-    group.rotation.y += (mx - group.rotation.y) * 0.004;
-    core.material.size = 0.3 + Math.sin(performance.now() / 420) * 0.05;
+    group.rotation.x += (my * 0.5 - group.rotation.x) * 0.05;
+    core.material.size = 0.62 + Math.sin(performance.now() / 420) * 0.1;
     renderer.render(scene, camera);
   })();
 })();

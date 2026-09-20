@@ -272,6 +272,9 @@ async function check() {
 go.onclick = check;
 
 function render(d) {
+  /* the constellation lights from the same findings that draw the cards */
+  window.PakkaScene?.light((d.findings || []).map((f) => f.id));
+
   out.classList.add('show');
   card.className = `verdict band-${d.band}`;
   $('vlabel').textContent = d.label;
