@@ -37,8 +37,33 @@ document.documentElement.classList.add('loading');
   };
   loop();
   const grow = 'button, a, textarea, input, .chip';
-  addEventListener('mouseover', (e) => e.target.closest(grow) && cur.classList.add('big'));
+  const label = (el) => {
+    if (el.id === 'go') return 'check';
+    if (el.id === 'copy' || el.id === 'copyfwd') return 'copy';
+    if (el.classList.contains('chip')) return 'try';
+    if (el.tagName === 'TEXTAREA') return 'paste';
+    return '';
+  };
+  addEventListener('mouseover', (e) => {
+    const el = e.target.closest(grow);
+    if (!el) return;
+    cur.dataset.label = label(el);
+    cur.classList.add('big');
+  });
   addEventListener('mouseout', (e) => e.target.closest(grow) && cur.classList.remove('big'));
+})();
+
+/* ---------- how far down the page you are ---------- */
+(() => {
+  const bar = document.getElementById('prog');
+  if (!bar) return;
+  const set = () => {
+    const max = document.documentElement.scrollHeight - innerHeight;
+    bar.style.width = (max > 0 ? (scrollY / max) * 100 : 0) + '%';
+  };
+  addEventListener('scroll', set, { passive: true });
+  addEventListener('resize', set);
+  set();
 })();
 
 /* ---------- marquee: the actual phrases the rules look for ---------- */
@@ -263,6 +288,7 @@ async function check() {
 go.onclick = check;
 
 function render(d) {
+  remember(d);
   /* the constellation lights from the same findings that draw the cards */
   window.PakkaScene?.light((d.findings || []).map((f) => f.id));
 
@@ -270,6 +296,11 @@ function render(d) {
   card.className = `verdict band-${d.band}`;
   $('vlabel').textContent = d.label;
   countUp($('vscore'), d.score);
+  const g = document.getElementById('gfill');
+  if (g) {                       /* 198 is the dash length of the three-quarter arc */
+    const frac = Math.max(0, Math.min(1, d.score / 10));
+    setTimeout(() => (g.style.strokeDashoffset = String(198 - 198 * frac)), 60);
+  }
   $('msg').innerHTML = highlight(d.text, d.findings);
 
   /* the score, shown as the pieces it is made of */
@@ -317,6 +348,21 @@ function render(d) {
 
   /* the sweep passes first, then each phrase lights as it is found, then its
      explanation slides in beside it */
+  /* point at a rule and its evidence lights up in the message above */
+  const flagsBox = $('flags');
+  flagsBox.onmouseover = (e) => {
+    const card = e.target.closest('.flag');
+    if (!card || !card.dataset.id) return;
+    flagsBox.classList.add('dim');
+    card.classList.add('peek');
+    msg.querySelectorAll(`mark[data-id="${card.dataset.id}"]`).forEach((m) => m.classList.add('peek'));
+  };
+  flagsBox.onmouseout = () => {
+    flagsBox.classList.remove('dim');
+    flagsBox.querySelectorAll('.peek').forEach((el) => el.classList.remove('peek'));
+    msg.querySelectorAll('mark.peek').forEach((m) => m.classList.remove('peek'));
+  };
+
   const marks = [...msg.querySelectorAll('mark')];
   const cards = [...$('flags').querySelectorAll('.flag')];
   marks.forEach((m, i) => setTimeout(() => m.classList.add('lit'), 900 + i * 170));
@@ -394,6 +440,29 @@ fetch('rules.json')
   new IntersectionObserver((es) => (es[0].isIntersecting ? play() : clearInterval(timer)),
     { threshold: 0.25 }).observe(col);
 })();
+
+/* ---------- what you have checked this session ---------- */
+const HIST = [];
+function remember(d) {
+  const text = d.text || t.value;
+  if (HIST.some((h) => h.text === text)) return;
+  HIST.unshift({ text, band: d.band, label: d.label, score: d.score });
+  HIST.length = Math.min(HIST.length, 6);
+  const box = $('hist');
+  box.classList.add('on');
+  box.innerHTML = '<span class="mono" style="color:var(--dim)">This session</span>' +
+    HIST.map((h, i) =>
+      `<button data-h="${i}" title="${h.label}"><i class="${h.band}"></i>` +
+      `${h.text.slice(0, 26).replace(/[<>&]/g, '')}…<span class="mono">${h.score}</span></button>`
+    ).join('');
+  box.onclick = (e) => {
+    const b = e.target.closest('button[data-h]');
+    if (!b) return;
+    t.value = HIST[+b.dataset.h].text;
+    sync();
+    check();
+  };
+}
 
 $('copyfwd').onclick = async () => {
   const v = $('fwdtext').value;

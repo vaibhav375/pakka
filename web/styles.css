@@ -268,3 +268,40 @@ mark{cursor:default}
 .gname{font-size:clamp(21px,2.6vw,30px);line-height:1.12;letter-spacing:-.025em;font-weight:600}
 .ghunt{margin-top:16px;color:var(--bad);font-size:12px;text-transform:none;letter-spacing:.02em}
 @media (max-width:760px){.gallery{grid-template-columns:1fr}.gcol{height:250px}}
+
+/* ---------- linking a rule to its evidence ---------- */
+mark.peek{background:rgba(198,255,61,.22)!important;color:#eaffc0!important;
+          box-shadow:inset 0 -1px 0 rgba(198,255,61,.8)!important}
+.flag{cursor:default;transition:opacity .5s,transform .5s,background .25s}
+.flag.peek{background:#131318}
+.flags.dim .flag:not(.peek){opacity:.42}
+
+/* ---------- risk gauge ---------- */
+.gauge{display:flex;align-items:center;gap:16px}
+.gauge svg{width:86px;height:86px;transform:rotate(-135deg)}
+.gauge circle{fill:none;stroke-width:7;stroke-linecap:round}
+.gauge .track{stroke:#1e1e24}
+.gauge .fill{stroke:currentColor;transition:stroke-dashoffset 1.1s cubic-bezier(.2,.8,.2,1)}
+.band-clear .gauge{color:var(--acid)}
+.band-one_flag .gauge,.band-careful .gauge{color:var(--warn)}
+.band-likely .gauge,.band-almost_certainly .gauge{color:var(--bad)}
+
+/* ---------- session history ---------- */
+.hist{margin-top:26px;display:none;gap:9px;flex-wrap:wrap;align-items:center}
+.hist.on{display:flex}
+.hist button{background:none;border:1px solid var(--line);color:var(--muted);border-radius:99px;
+             padding:7px 14px;cursor:pointer;font:inherit;font-size:12.5px;
+             display:flex;align-items:center;gap:9px;transition:.2s}
+.hist button:hover{border-color:var(--acid);color:var(--ink)}
+.hist i{width:7px;height:7px;border-radius:50%;display:block}
+.hist i.clear{background:var(--acid)}.hist i.careful{background:var(--warn)}
+.hist i.one_flag{background:var(--warn)}.hist i.likely,.hist i.almost_certainly{background:var(--bad)}
+
+/* ---------- cursor label + scroll progress ---------- */
+#cur::after{content:attr(data-label);position:absolute;left:50%;top:50%;
+  transform:translate(-50%,-50%) scale(.7);opacity:0;white-space:nowrap;
+  font-family:"Space Mono",monospace;font-size:9px;letter-spacing:.14em;
+  text-transform:uppercase;color:#0d1400;transition:opacity .2s,transform .2s}
+#cur.big::after{opacity:1;transform:translate(-50%,-50%) scale(1)}
+#prog{position:fixed;top:0;left:0;height:2px;width:0;background:var(--acid);z-index:31;
+      transition:width .12s linear}
