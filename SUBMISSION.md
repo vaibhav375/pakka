@@ -83,8 +83,8 @@ got the thing working tonight.
 **AWS IAM** for the execution role scoped to just that one table.
 
 On cost: at a thousand scans a month the whole stack stays inside the free
-tier. At a hundred thousand, the Lambda invocations are still free and DynamoDB
-would move to on demand at roughly thirteen cents for the writes.
+tier. At a hundred thousand, the Lambda invocations are still free and the only
+line that starts costing anything is the DynamoDB writes.
 
 ### Build it: AWS open source stack
 
