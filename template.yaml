@@ -1,0 +1,49 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Pakka - scam check API. One function, one table, no servers.
+
+Globals:
+  Function:
+    Runtime: python3.12
+    Timeout: 10
+    MemorySize: 256
+
+Resources:
+  PakkaApi:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: api/
+      Handler: handler.lambda_handler
+      Environment:
+        Variables:
+          PAKKA_TABLE: !Ref ScansTable
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ScansTable
+      FunctionUrlConfig:
+        AuthType: NONE
+        Cors:
+          AllowOrigins: ['*']
+          AllowMethods: [GET, POST, OPTIONS]
+          AllowHeaders: [content-type]
+
+  ScansTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      BillingMode: PAY_PER_REQUEST      # nothing to pay when nobody is scanning
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      TimeToLiveSpecification:          # scans are evidence, not archives
+        AttributeName: expires_at
+        Enabled: true
+
+Outputs:
+  ApiUrl:
+    Description: Public endpoint for the scan API
+    Value: !GetAtt PakkaApiUrl.FunctionUrl
+  TableName:
+    Value: !Ref ScansTable
