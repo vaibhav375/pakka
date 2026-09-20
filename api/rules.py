@@ -92,6 +92,20 @@ def normalise(text: str) -> tuple[str, list[int]]:
     return "".join(out), oidx
 
 
+def _word(c: str) -> bool:
+    return c.isalnum() or c == "_"
+
+
+def _whole_words(text: str, a: int, b: int) -> tuple[int, int]:
+    """Grow a span out to word edges, so a highlight never cuts "expired"
+    into "expire" and a stranded "d"."""
+    while a > 0 and _word(text[a - 1]) and _word(text[a]):
+        a -= 1
+    while b < len(text) and _word(text[b]) and _word(text[b - 1]):
+        b += 1
+    return a, b
+
+
 @dataclass(frozen=True)
 class Rule:
     id: str
@@ -109,7 +123,7 @@ class Rule:
         for m in self.pattern.finditer(norm):
             a, b = m.span()
             if b > a and idx:
-                out.append((idx[a], idx[min(b, len(idx)) - 1] + 1))
+                out.append(_whole_words(text, idx[a], idx[min(b, len(idx)) - 1] + 1))
         return out
 
 

@@ -352,14 +352,17 @@ function render(d) {
      explanation slides in beside it */
   /* point at a rule and its evidence lights up in the message above */
   const flagsBox = $('flags');
-  flagsBox.onmouseover = (e) => {
+  /* a hover idea only. On a touch screen the tap fires mouseover and leaves a
+     phrase stuck in the peek colour with nothing pointing at it. */
+  const canHover = matchMedia('(hover: hover)').matches;
+  flagsBox.onmouseover = !canHover ? null : (e) => {
     const card = e.target.closest('.flag');
     if (!card || !card.dataset.id) return;
     flagsBox.classList.add('dim');
     card.classList.add('peek');
     msg.querySelectorAll(`mark[data-id="${card.dataset.id}"]`).forEach((m) => m.classList.add('peek'));
   };
-  flagsBox.onmouseout = () => {
+  flagsBox.onmouseout = !canHover ? null : () => {
     flagsBox.classList.remove('dim');
     flagsBox.querySelectorAll('.peek').forEach((el) => el.classList.remove('peek'));
     msg.querySelectorAll('mark.peek').forEach((m) => m.classList.remove('peek'));

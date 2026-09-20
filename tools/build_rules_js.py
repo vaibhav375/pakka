@@ -91,6 +91,15 @@ window.pakkaNormalise = function (text) {{
   return [out, oidx, oend];
 }};
 
+/* grow a span out to word edges, so a highlight never cuts "expired" into
+   "expire" and a stranded "d" */
+const pakkaWord = (c) => !!c && /[A-Za-z0-9_]/.test(c);
+function pakkaWholeWords(text, a, b) {{
+  while (a > 0 && pakkaWord(text[a - 1]) && pakkaWord(text[a])) a -= 1;
+  while (b < text.length && pakkaWord(text[b]) && pakkaWord(text[b - 1])) b += 1;
+  return [a, b];
+}}
+
 window.pakkaEvaluate = function (text) {{
   const [norm, idx, ends] = window.pakkaNormalise(text);
   const findings = [];
@@ -101,7 +110,7 @@ window.pakkaEvaluate = function (text) {{
     while ((m = re.exec(norm)) !== null) {{
       if (m[0] === '') {{ re.lastIndex++; continue; }}
       const a = m.index, b = m.index + m[0].length;
-      if (idx.length) spans.push([idx[a], ends[Math.min(b, ends.length) - 1]]);
+      if (idx.length) spans.push(pakkaWholeWords(text, idx[a], ends[Math.min(b, ends.length) - 1]));
     }}
     if (spans.length) findings.push({{
       id: r.id, name: r.name, why: r.why, weight: r.weight,

@@ -224,13 +224,8 @@ mark{cursor:default}
 .rulecard:hover::after{transform:none}
 
 /* ---------- the rule space ---------- */
-.scene{position:relative;height:340px;border:1px solid var(--line);border-top-left-radius:var(--r);
-       border-top-right-radius:var(--r);overflow:hidden;background:#08080a}
-.scene canvas{display:block;width:100%;height:100%}
-.scenelab{position:absolute;left:22px;bottom:16px;color:var(--dim)}
 .scenelab span{color:var(--acid)}
 #card{border-top-left-radius:0;border-top-right-radius:0}
-@media (max-width:640px){.scene{height:230px}}
 
 /* ---------- stats ---------- */
 .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1px;
