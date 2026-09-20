@@ -27,11 +27,26 @@ def _local_load() -> dict:
     return {}
 
 
+# Storage is allowed to fail, but it is not allowed to take the answer down
+# with it: short timeouts and a single attempt, so a slow or unreachable table
+# costs a second and the user still gets their verdict.
+_BOTO_CFG = dict(connect_timeout=2, read_timeout=2, retries={"max_attempts": 1})
+_table = None
+
+
+def _get_table():
+    global _table
+    if _table is None:
+        import boto3  # only present in the Lambda runtime
+        from botocore.config import Config
+        _table = boto3.resource("dynamodb", config=Config(**_BOTO_CFG)).Table(TABLE)
+    return _table
+
+
 def put(scan_id: str, record: dict) -> None:
     record = {**record, "id": scan_id, "created_at": int(time.time())}
     if TABLE:
-        import boto3  # only present in the Lambda runtime
-        boto3.resource("dynamodb").Table(TABLE).put_item(
+        _get_table().put_item(
             Item={**record, "expires_at": record["created_at"] + TTL_DAYS * 86400}
         )
         return
@@ -42,7 +57,5 @@ def put(scan_id: str, record: dict) -> None:
 
 def get(scan_id: str) -> dict | None:
     if TABLE:
-        import boto3
-        got = boto3.resource("dynamodb").Table(TABLE).get_item(Key={"id": scan_id})
-        return got.get("Item")
+        return _get_table().get_item(Key={"id": scan_id}).get("Item")
     return _local_load().get(scan_id)

@@ -67,7 +67,10 @@ def lambda_handler(event, _context=None):
         return scan(body.get("text", ""))
 
     if method == "GET" and "/v/" in path:
-        record = store.get(path.rsplit("/v/", 1)[1].strip("/"))
+        try:
+            record = store.get(path.rsplit("/v/", 1)[1].strip("/"))
+        except Exception:
+            return _reply(503, {"error": "Saved scans are unavailable right now."})
         if not record:
             return _reply(404, {"error": "No scan with that link."})
         return _reply(200, record)
