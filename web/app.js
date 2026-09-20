@@ -311,6 +311,9 @@ function render(d) {
   msg.classList.remove('scanning');
   void msg.offsetWidth;                /* restart the sweep on a repeat check */
   msg.classList.add('scanning');
+  /* the sweep is a pass over the text, not a bar that stays: clear the class
+     when it finishes or the gradient snaps back to the top and sits there */
+  setTimeout(() => msg.classList.remove('scanning'), 1150);
 
   /* the sweep passes first, then each phrase lights as it is found, then its
      explanation slides in beside it */

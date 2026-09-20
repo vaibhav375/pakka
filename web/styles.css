@@ -149,7 +149,7 @@ html.loading{overflow:hidden}
 @media (hover:none){#cur{display:none}}
 
 /* ---------- type that arrives ---------- */
-.line{display:block;overflow:hidden}
+.line{display:block;overflow:hidden;padding-bottom:.16em;margin-bottom:-.16em}
 .line > span{display:block;transform:translateY(102%);transition:transform 1s cubic-bezier(.2,.8,.2,1)}
 .ready .line > span{transform:none}
 .line:nth-child(2) > span{transition-delay:.09s}
