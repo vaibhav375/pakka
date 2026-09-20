@@ -599,12 +599,18 @@ function hunch(text, verdict) {
     label.classList.remove('warn');
   }
 
+  /* 0.75, not 0.6. The calibration table says 0.6 to 0.8 is only about seven in
+     ten, and telling somebody their delivery notification reads like a scam on
+     those odds is how a tool stops being believed. */
   let line;
-  if (!fired && r.p >= 0.6) {
+  if (!fired && r.p >= 0.75) {
     line = `<b>No rule fired, but this still reads like a scam.</b> The model puts it at
-            ${pct} out of 100, which is where about ${pct > 80 ? 'nine' : 'seven'} in ten
-            messages turn out to be fraud. That is a reason to be careful, not proof, and
-            it is also how new rules get found.`;
+            ${pct} out of 100, which is where about nine in ten messages turn out to be
+            fraud. That is a reason to be careful, not proof, and it is also how new
+            rules get found.`;
+  } else if (!fired && r.p >= 0.5) {
+    line = `Nothing matched, and the model is not certain either, at ${pct} out of 100.
+            Around half of the messages it reads that way are fine.`;
   } else if (fired && r.p >= 0.6) {
     line = `The model agrees with the rules independently, putting this at ${pct} out of 100.`;
   } else if (fired) {

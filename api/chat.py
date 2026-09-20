@@ -60,7 +60,7 @@ def reply_for(verdict: dict | None, advice: dict | None, link: str | None,
     # the message still reads like fraud, which is where rules are blind.
     if hunch is not None:
         pct = round(hunch["p"] * 100)
-        if not verdict["findings"] and hunch["p"] >= 0.6:
+        if not verdict["findings"] and hunch["p"] >= 0.75:
             parts.append(f"\nNo rule fired, but this still reads like a scam to the "
                          f"model, at {pct} out of 100. Treat that as a reason to be "
                          f"careful rather than proof.")
