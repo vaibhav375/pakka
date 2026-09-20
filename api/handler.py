@@ -11,6 +11,7 @@ from __future__ import annotations
 import decimal
 import json
 import sys
+import traceback
 import pathlib
 
 sys.path.insert(0, str(pathlib.Path(__file__).parent))
@@ -61,7 +62,19 @@ def scan(text: str) -> dict:
     return _reply(200, {**record, "id": scan_id})
 
 
-def lambda_handler(event, _context=None):
+def lambda_handler(event, context=None):
+    """A crash here becomes a bare 502 with an empty body, which tells the
+    caller nothing and tells the developer less. Catch it, log it, and answer
+    in the same JSON shape as everything else."""
+    try:
+        return _route(event)
+    except Exception as exc:  # noqa: BLE001 - last line before a 502
+        traceback.print_exc()
+        return _reply(500, {"error": "Something broke handling that.",
+                            "detail": f"{type(exc).__name__}: {exc}"[:300]})
+
+
+def _route(event):
     method = (event.get("requestContext", {}).get("http", {}).get("method")
               or event.get("httpMethod") or "GET").upper()
     path = (event.get("rawPath") or event.get("path") or "/")
