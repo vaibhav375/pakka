@@ -2,147 +2,146 @@
 
 **Check before you pay.**
 
-Paste a message you were sent — a PG listing, an internship offer, a bank SMS —
-and Pakka tells you which parts of it are a problem and why, in words you can
-forward straight back to the person who sent it to you.
+Paste a message you were sent — a PG listing, an internship offer, a "your KYC
+has expired" SMS — and Pakka tells you which specific parts of it are a problem
+and why, then gives you a link you can forward straight back to whoever sent it.
 
-**Live:** https://vaibhav375.github.io/pakka/ · **Run it locally:** see below.
+Built at **First Commit (AWS × WeMakeDevs)**, 17–20 September 2026.
 
 ---
 
 ## The problem
 
-A friend forwards you a WhatsApp message. *Selected without interview, pay ₹1,499
-registration fee within 2 hours.* You are fairly sure it is a scam. Your cousin
-in second year is not, and by the time they ask anyone, the money is gone.
+My mother forwards me messages to check. So do my juniors, about PG listings and
+internship offers. Every time, the answer is the same shape: *this line here is
+the problem, and here is why.* The person asking usually already felt something
+was off — what they lacked was the confidence to say no, and the words to explain
+it to whoever sent it.
 
-Scam-spotting is a skill people acquire by being scammed. Every tool that exists
-to help is either an app you have to install, a helpline you have to call after
-the fact, or a "report this" button that helps somebody else next month.
+Existing "is this a scam" tools answer with a percentage. A percentage is not
+something you can forward to your mother. It also cannot be argued with, which
+matters, because the person you are trying to protect is often mid-argument with
+a stranger who sounds official.
 
-What is missing is small: a way to check a message in ten seconds, and — this is
-the part that matters — **something you can send back**. Telling your cousin "that
-looks fake" is an opinion. Sending them a page that quotes their own message and
-explains that legitimate employers never charge candidates is an argument.
+So Pakka answers in sentences, points at the exact words, and gives you a link.
 
-## What it does
+## How it decides
 
-1. You paste the message.
-2. Thirteen rules run **in your browser**. Each one knows how to find itself in
-   the text and can say, in a sentence, why what it found is a problem.
-3. You get a verdict, the exact phrases that caused it, and the reasoning.
-4. If you want to forward it, one button mints a link. That is the only moment
-   anything leaves your device.
+**Thirteen rules, in plain Python. No model gets a vote.**
 
-## Why the verdict is not decided by a model
+A scam verdict has to be identical every time and has to survive being explained
+to the person who nearly paid. A language model can do neither reliably, so the
+decision lives in [`api/rules.py`](api/rules.py), where each rule can find itself
+in the message and say in one sentence why what it found is a problem.
 
-A language model would be the obvious way to build this, and it is the wrong one.
+| | Rule | Weight |
+|---|---|---|
+| 1 | Asks for money before a job | 3 |
+| 2 | Asks for an OTP, PIN or password | 4 |
+| 3 | Asks you to pay to receive money | 4 |
+| 4 | KYC or account-block scare | 3 |
+| 5 | Manufactured urgency | 1 |
+| 6 | Selected without any interview | 2 |
+| 7 | Pay that does not match the work | 2 |
+| 8 | Money goes to a personal account | 3 |
+| 9 | Company mail sent from a free inbox | 2 |
+| 10 | Shortened or disguised link | 2 |
+| 11 | Exists only on WhatsApp or Telegram | 1 |
+| 12 | Threatens legal or police action | 2 |
+| 13 | Asks for rent before you have seen the place | 3 |
 
-A scam verdict has to be **the same every time** — the same message cannot be
-"probably fine" on Tuesday. It has to be **explainable to someone who is about to
-lose money**, which means quoting their message and naming the reason, not
-producing a confidence score. And it must never **invent** a reason, because a
-plausible-sounding wrong explanation is worse than no explanation.
+Weights add up to a score, the score picks a band. Ordinary messages have to come
+back clean — a checker that flags everything gets ignored, so a real placement-cell
+message is a test case, not an afterthought.
 
-So the decision lives in `api/rules.py`, in thirteen regular expressions with
-weights and human-written reasons. No model gets a vote. The trade-off is real
-and worth stating: rules only catch patterns someone thought of, so Pakka will
-miss novel scams. The interface says so rather than implying it is a guarantee.
+```
+python3 api/test_rules.py
+```
 
 ## Architecture
 
-```mermaid
-flowchart TD
-    U["Someone pastes a message"] --> B["Browser<br/>rules.generated.js"]
-    B --> V["Verdict, quoted phrases,<br/>reasons — no network"]
-    V -->|"only if they press Copy link"| L["Lambda<br/>Function URL"]
-    L --> D[("DynamoDB<br/>1 RCU / 1 WCU, 30-day TTL")]
-    L --> C["CloudWatch<br/>logs + metrics"]
-    D --> S["Shareable verdict<br/>you forward back"]
-    A["Amplify Hosting"] -.serves.-> B
+```
+    Browser (Amplify Hosting)
+        |  POST /scan   { text }
+        v
+    Lambda Function URL  ──►  pakka-api  (Python 3.12)
+                                  |
+                      rules.py ───┤  verdict decided here, deterministically
+                                  |
+                                  v
+                            DynamoDB  pakka-scans
+                            id · text · verdict · expires_at (30d TTL)
+                                  |
+                                  v
+                            CloudWatch Logs
 ```
 
-The rules exist once, in Python. `tools/build_rules_js.py` generates the browser
-copy, and `tools/check_parity.py` runs both over the same messages and fails if
-they ever disagree — which is the only thing that makes a generated file safe to
-trust.
+Two routes, one function:
 
-## How AWS is used
-
-**Build It — open-source, local, no account**
-
-| Tool | What it does here |
+| | |
 |---|---|
-| **AWS SAM CLI** | `template.yaml` defines the whole stack — function, table, TTL, Function URL. `sam validate` checks it; the same file is what deploys. |
-| **Lambda programming model** | `api/handler.py` is a Lambda handler. `api/local_server.py` wraps that exact function in a stdlib HTTP server, so what runs on a laptop is the code that runs in production, not a sibling of it. |
+| `POST /scan` | message in, verdict out, saved so it can be linked to |
+| `GET /v/{id}` | that saved verdict, for the person you forwarded it to |
 
-```bash
-python3 api/local_server.py        # the API, no account, no credentials
-python3 -m http.server 5500 -d web # the front end
-python3 api/test_rules.py          # the rules
-python3 tools/check_parity.py      # python and javascript agree
+### Why these services
+
+**Lambda, not EC2.** This is a tool people open twice a month, when something
+looks wrong. Traffic is spiky and mostly zero. A server billed by the hour for a
+workload measured in seconds is the wrong shape, and for a free tool the idle
+cost is the whole problem.
+
+**A Lambda Function URL, not API Gateway.** One public HTTPS endpoint with CORS
+was all this needed. API Gateway would have added a second thing to configure and
+a second thing to pay for once the twelve-month window closes; Function URLs carry
+no additional charge at all.
+
+**DynamoDB at 1 read and 1 write unit.** Provisioned rather than on-demand, on
+purpose: on-demand is the better shape for spiky traffic but it bills from the
+first request, while 1/1 provisioned sits inside the always-free 25 of each.
+That is a free-tier decision, and at real traffic it should flip to on-demand.
+
+**A 30-day TTL on every row.** A scan is evidence for the person who nearly paid,
+not an archive. Rows delete themselves, storage stays near zero, and there is no
+growing pile of other people's messages to look after.
+
+**No build step.** The front end is HTML, CSS and JavaScript, so Amplify publishes
+`web/` as it stands. Build minutes stay at zero and there is no npm install that
+can fail at eleven at night.
+
+### What it costs
+
+Everything above sits inside the AWS Free Tier: 1M Lambda requests a month,
+25 DynamoDB capacity units, 15 GB served by Amplify, 5 GB of CloudWatch logs.
+
+At 1,000 scans a month — roughly one small college's worth — it stays inside the
+free tier on every axis. At 100,000 scans a month the Lambda invocations are still
+free, DynamoDB would move to on-demand at roughly $0.13 for the writes, and the
+bill is dominated by data transfer rather than compute.
+
+## Running it
+
+**Locally, with no AWS account** — the Build It path. Storage falls back to a JSON
+file when no table name is set, so nothing needs installing:
+
+```
+python3 api/local_server.py           # API on http://127.0.0.1:8787
+cd web && python3 -m http.server 5500 # open http://127.0.0.1:5500
 ```
 
-**Ship It — deployed**
+**On AWS** — the whole stack is one SAM template ([`template.yaml`](template.yaml)):
+a function, a table, a function URL, and the IAM policy between them.
 
-| Service | Why this one |
-|---|---|
-| **Lambda** | The work is one short burst per scan. 1M requests a month are free, and nothing runs between scans. |
-| **Lambda Function URL** | An HTTPS endpoint with CORS and no extra cost. API Gateway would add a hop and a bill we do not need for two routes. |
-| **DynamoDB** | Key-value by design: one shareable id, one record. Provisioned at 1 read and 1 write unit, inside the always-free 25. A 30-day TTL deletes rows without a cleanup job. |
-| **Amplify Hosting** | Git push to HTTPS. `amplify.yml` declares no build step, so build minutes stay near zero. |
-| **CloudWatch** | Logs and metrics for the function, which is the only moving part. |
+## Tools used
 
-### The cost reasoning
+Written with AI assistance (Claude) for code and copy, reviewed and tested by me.
+Smooth scrolling uses [Lenis](https://lenis.dev) (MIT). Type is Space Grotesk and
+Space Mono via Google Fonts (OFL). Everything else is stdlib Python and plain
+browser JavaScript.
 
-This is a free tool for people about to lose money, so it has to cost nothing
-when idle, and the architecture is chosen for that:
+## What it does not do
 
-- **Nothing runs between scans.** No container, no instance, no idle bill.
-- **The expensive part is free.** Rules run on the user's device. Scanning
-  costs us nothing at all — the cloud is only involved when someone shares.
-- **Provisioned, not on-demand.** DynamoDB on-demand is the better choice for
-  spiky real traffic, but it bills from the first request. 1/1 provisioned is
-  inside the always-free allowance.
-- **No build step.** Amplify's free tier includes 1,000 build minutes; a static
-  page uses roughly none of them.
-
-At 1,000 scans a day, only the shared ones touch AWS. Assuming one in ten is
-shared, that is ~3,000 writes and reads a month — comfortably inside the free
-allowances, so the bill stays at zero until this is considerably more popular
-than it deserves to be.
-
-## Tests
-
-```
-$ python3 api/test_rules.py
-  pass  fake internship                    score=7
-  pass  kyc phishing                       score=10
-  pass  fake pg listing                    score=6
-  pass  refund bait                        score=4
-  pass  ordinary message, must stay clean  score=0
-```
-
-The last case is the one that matters. A checker that flags everything gets
-ignored, and then it protects nobody.
-
-## What this does not do
-
-- It is **not a guarantee**. Thirteen rules catch thirteen shapes of scam. A
-  message that trips none of them has not been cleared, only not recognised —
-  and the interface says exactly that rather than showing a reassuring tick.
-- It reads **English and common Hinglish spellings** only.
-- It is **not legal or financial advice**.
-
-## Built with
-
-Written during First Commit (AWS × WeMakeDevs), 17–20 September 2026.
-
-Python 3.12 (stdlib only — no dependencies), vanilla JavaScript, AWS SAM,
-Lambda, DynamoDB, Amplify Hosting, CloudWatch. Smooth scrolling by
-[Lenis](https://lenis.dev). Type is Space Grotesk and Space Mono.
-
-**AI tools used:** Claude (Anthropic) was used as a coding assistant throughout —
-for drafting the rule patterns, the front-end code, and this README. Every rule,
-weight and explanation was reviewed and edited by hand; the test cases and the
-parity check exist because generated code needs something that checks it.
+It does not detect scams it has never seen — thirteen patterns are thirteen
+patterns, and a clean result says only that none of them fired. The page says so
+rather than implying safety. It reads English and Hinglish written in Latin
+script; Devanagari input is not handled yet. And it is not legal or financial
+advice: when it is unclear, the right move is still not to pay.
