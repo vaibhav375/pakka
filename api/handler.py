@@ -8,6 +8,7 @@ a laptop is the code that runs in production rather than a sibling of it.
 """
 from __future__ import annotations
 
+import decimal
 import json
 import sys
 import pathlib
@@ -25,11 +26,20 @@ CORS = {
 }
 
 
+def _plain(value):
+    """DynamoDB hands numbers back as Decimal, which json.dumps refuses. Every
+    number in a scan is a count, an offset or a score, so integers are the
+    honest representation."""
+    if isinstance(value, decimal.Decimal):
+        return int(value) if value == value.to_integral_value() else float(value)
+    raise TypeError(f"cannot serialise {type(value).__name__}")
+
+
 def _reply(status: int, body: dict) -> dict:
     return {
         "statusCode": status,
         "headers": {"content-type": "application/json", **CORS},
-        "body": json.dumps(body),
+        "body": json.dumps(body, default=_plain),
     }
 
 
