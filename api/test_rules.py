@@ -120,6 +120,26 @@ CASES = [
      "Can you share your bank account number? I need to transfer your share of the trip money.",
      set()),
 
+    ("spaced out to dodge a filter",
+     "Your K Y C has expired. Share the O T P received to complete verification.",
+     {"KYC_PANIC", "ASKS_FOR_SECRET"}),
+
+    ("a zero standing in for a letter",
+     "Send your 0TP immediately to verify your acc0unt",
+     {"ASKS_FOR_SECRET", "URGENCY"}),
+
+    ("an accent dropped on a vowel",
+     "shäre your otp to complete the transaction",
+     {"ASKS_FOR_SECRET"}),
+
+    ("hinglish kyc scare",
+     "Aapka KYC update nahi hua hai, account block ho jayega. Turant is link par click kare",
+     {"KYC_PANIC", "URGENCY"}),
+
+    ("an emoji does not shift the highlights",
+     "Congratulations 🎉 you have W-O-N a lucky draw prize of Rs 10,00,000",
+     {"LOTTERY_WIN"}),
+
     ("ordinary message, must stay clean",
      "Hi Vaibhav, this is Priya from the placement cell. Your Infosys interview is "
      "on Monday at 10am in Seminar Hall 2. Please carry two copies of your resume.",

@@ -14,7 +14,7 @@ window.PAKKA_RULES = [
     "name": "Asks for an OTP, PIN or password",
     "why": "Nobody legitimate will ever ask for your OTP, UPI PIN, CVV or password — not your bank, not a delivery agent, not HR.",
     "weight": 4,
-    "re": "(?:share|send|tell|give|provide|forward|confirm|read out)\\s+(?:me\\s+|us\\s+|the\\s+|your\\s+)*\\b(?:otp|cvv|pin|password|code)\\b|\\b(?:otp|cvv|pin)\\b.{0,25}(?:with (?:our|the|me|us)|to (?:our|the|me|us|verify))|what(?:'s| is) (?:your |the )?(?:otp|cvv|pin)\\b|\\bcvv\\b.{0,20}(?:number|digits)|\\bupi pin\\b|\\batm pin\\b|share (?:your )?password|\\bnet ?banking password\\b"
+    "re": "(?:share|send|tell|give|provide|forward|confirm|read out)\\s+(?:me\\s+|us\\s+|the\\s+|your\\s+)*\\b(?:otp|cvv|pin|password|code)\\b(?!\\s*(?:is\\s*)?\\d{4,8})|\\b(?:apna|apne) otp\\b|\\botp\\b .{0,15}(?:bhej|batao|bataiye|share kij)|\\b(?:otp|cvv|pin)\\b.{0,25}(?:with (?:our|the|me|us)|to (?:our|the|me|us|verify))|what(?:'s| is) (?:your |the )?(?:otp|cvv|pin)\\b|\\bcvv\\b.{0,20}(?:number|digits)|\\bupi pin\\b|\\batm pin\\b|share (?:your )?password|\\bnet ?banking password\\b"
   },
   {
     "id": "PAY_TO_RECEIVE",
@@ -28,14 +28,14 @@ window.PAKKA_RULES = [
     "name": "KYC or account-block scare",
     "why": "Banks do not block accounts over SMS links. This is the most common phishing script in India right now.",
     "weight": 3,
-    "re": "kyc .{0,25}(?:expire|update|pending|suspend)|account .{0,20}(?:will be )?(?:block|suspend|freeze|deactivat)|(?:update|complete) .{0,15}kyc"
+    "re": "kyc .{0,25}(?:expire|pending|suspend|incomplete|not (?:done|updated))|account .{0,30}(?:will be |has been )?(?:block|suspend|freeze|deactivat)|(?:update|complete|verify) .{0,20}kyc .{0,40}(?:\\bor\\b|else|otherwise|to avoid|immediately|now|today|link|http|block|suspend|frozen)|(?:account|khata|kyc).{0,30}(?:block|band) ho jayega|kyc update nahi"
   },
   {
     "id": "URGENCY",
     "name": "Manufactured urgency",
     "why": "Pressure to act within hours exists to stop you checking. Anything genuine will still be there tomorrow.",
     "weight": 1,
-    "re": "within \\d+ ?(?:hours?|hrs?|minutes?|mins?)|today only|last chance|(?:block|suspend|deactivat|expir|clos|disconnect|cancel|terminat)\\w*\\s+(?:with)?in\\s+\\d+\\s*(?:hours?|hrs?|days?|minutes?)|expires? (?:today|tonight|soon)|immediately|hurry|\\burgently\\b|limited (?:slots?|seats?|offer)|only \\d+ (?:slots?|seats?) left|before (?:you )?(?:lose|miss)|\\b(?:click|claim|act|apply) (?:it |this |here |the link )?now\\b"
+    "re": "within \\d+ ?(?:hours?|hrs?|minutes?|mins?)|today only|last chance|(?:block|suspend|deactivat|expir|clos|disconnect|cancel|terminat)\\w*\\s+(?:with)?in\\s+\\d+\\s*(?:hours?|hrs?|days?|minutes?)|expires? (?:today|tonight|soon)|immediately|hurry|\\burgently\\b|\\bturant\\b|\\bjaldi\\b|urgent hai|limited (?:slots?|seats?|offer)|only \\d+ (?:slots?|seats?) left|before (?:you )?(?:lose|miss)|\\b(?:click|claim|act|apply) (?:it |this |here |the link )?now\\b"
   },
   {
     "id": "NO_INTERVIEW",
@@ -49,7 +49,7 @@ window.PAKKA_RULES = [
     "name": "Pay that does not match the work",
     "why": "Earnings far above the going rate for a few hours a day are bait. The money is the hook, not the job.",
     "weight": 2,
-    "re": "(?:rs\\.?|₹)\\s?[1-9]\\d{3,}[^.]{0,30}(?:per day|/day|daily|per week)|earn (?:rs\\.?|₹)\\s?\\d[\\d,]*.{0,25}(?:from home|part[- ]?time|\\d ?(?:hours?|hrs?))|\\d ?(?:hours?|hrs?) (?:work )?daily.{0,25}(?:rs\\.?|₹)\\s?\\d"
+    "re": "(?:rs\\.?|₹)\\s?[1-9]\\d{3,}[^.]{0,30}(?:per day|/day|daily|per week)|earn (?:rs\\.?|₹)\\s?\\d[\\d,]*.{0,25}(?:from home|part[- ]?time|\\d ?(?:hours?|hrs?))|\\d ?(?:hours?|hrs?) (?:work )?daily.{0,25}(?:rs\\.?|₹)\\s?\\d|ghar baithe .{0,25}kama|(?:rupaye|rupay) (?:daily|roz|rozana)"
   },
   {
     "id": "PERSONAL_PAYMENT",
@@ -77,7 +77,7 @@ window.PAKKA_RULES = [
     "name": "Exists only on WhatsApp or Telegram",
     "why": "No office, no website, no landline — only a chat window. There is nothing to hold accountable afterwards.",
     "weight": 1,
-    "re": "(?:contact|message|ping|dm|reach) (?:me |us )?(?:only )?on (?:whats ?app|telegram)|join (?:our )?telegram|whats ?app (?:only|me at)"
+    "re": "(?:contact|message|ping|dm|reach) (?:me |us )?(?:only )?on (?:whats ?app|telegram)|join (?:our )?telegram|whats ?app (?:only|me at)|(?:whats ?app|telegram) par (?:contact|message|baat|kare)"
   },
   {
     "id": "THREAT",
@@ -91,7 +91,7 @@ window.PAKKA_RULES = [
     "name": "Asks for rent before you have seen the place",
     "why": "Paying a token or advance before visiting is how fake listings work. The photos are usually taken from a real listing elsewhere.",
     "weight": 3,
-    "re": "(?:token|advance|booking) (?:amount|money|fee).{0,40}(?:before|without) .{0,20}(?:visit|see)|(?:i am|i'm|currently) (?:abroad|out of (?:town|country)|in another city).{0,60}(?:send|transfer|pay)|book (?:it )?(?:now|today) .{0,20}without (?:a )?visit"
+    "re": "(?:token|advance|booking) (?:amount|money|fee).{0,40}(?:before|without) .{0,20}(?:visit|see)|(?:i am|i'm|currently) (?:abroad|out of (?:town|country|station)|in another city|not in the city).{0,60}(?:send|transfer|pay)|book (?:it )?(?:now|today) .{0,20}without (?:a )?visit|(?:advance|token|booking).{0,40}(?:to )?(?:block|hold|reserve) the (?:room|bed|flat|house|pg)|pay .{0,25}(?:booking|advance|token).{0,30}before visit"
   },
   {
     "id": "COURIER_CUSTOMS",
@@ -112,7 +112,7 @@ window.PAKKA_RULES = [
     "name": "A prize you never entered for",
     "why": "You cannot win a lottery you never entered. Every version of this ends with a fee to release the winnings.",
     "weight": 4,
-    "re": "(?:won|winner).{0,30}(?:lottery|lucky draw|prize|kbc)|\\bkbc\\b|lucky (?:winner|draw)|congratulations.{0,30}\\b(?:won|winning|winner)\\b|\\b(?:won|winning|win a)\\b.{0,40}(?:iphone|mac ?book|laptop|smartphone|scooter|\\bcar\\b|\\bbike\\b|gift (?:card|voucher|hamper)|voucher|cash prize|\\bgift\\b)|\\bfree\\b.{0,20}(?:iphone|mac ?book|laptop|smartphone|\\bcar\\b|scooter|\\bbike\\b)"
+    "re": "(?:won|winner).{0,30}(?:lottery|lucky draw|prize|kbc)|\\bkbc\\b|lucky (?:winner|draw)|congratulations.{0,30}\\b(?:won|winning|winner)\\b.{0,50}(?:\\brs\\.?\\s*\\d|₹|lakh|crore|lottery|lucky draw|prize|gift|iphone|mac ?book|laptop|\\bcar\\b|voucher|hamper)|lottery lag gay|\\bjeeta hai\\b|(?:lakh|crore) rupaye jeet|\\b(?:won|winning|win a)\\b.{0,40}(?:iphone|mac ?book|laptop|smartphone|scooter|\\bcar\\b|\\bbike\\b|gift (?:card|voucher|hamper)|voucher|cash prize|\\bgift\\b)|\\bfree\\b.{0,20}(?:iphone|mac ?book|laptop|smartphone|\\bcar\\b|scooter|\\bbike\\b)"
   },
   {
     "id": "QR_SCAN",
@@ -140,7 +140,7 @@ window.PAKKA_RULES = [
     "name": "A web address dressed up as a real company",
     "why": "The brand name is in the address but the domain is not theirs. Real organisations send you to their own domain, not a lookalike.",
     "weight": 3,
-    "re": "https?://[^\\s]*\\b(?:sbi|hdfc|icici|axis|kotak|paytm|phonepe|amazon|flipkart|netflix|irctc|epfo|uidai|income ?tax|indiapost)[-_][a-z0-9-]+\\.|https?://[^\\s]*\\b(?:sbi|hdfc|icici|axis|paytm|phonepe|amazon|flipkart|netflix|irctc|epfo|uidai)[^\\s]*\\.(?:xyz|info|top|online|site|club|icu|buzz|link|shop|tk|ml|ga|cf)\\b|https?://[^\\s]*(?:amaz0n|g00gle|paypa1|fl1pkart|1cici|hdfc-bank)"
+    "re": "https?://[^\\s]*\\b(?:sbi|hdfc|icici|axis|kotak|paytm|phonepe|amazon|flipkart|netflix|irctc|epfo|uidai|income ?tax|indiapost)[-_][a-z0-9-]+\\.|https?://[^\\s]*\\b(?:sbi|hdfc|icici|axis|paytm|phonepe|amazon|flipkart|netflix|irctc|epfo|uidai)[^\\s]*\\.(?:xyz|info|top|online|site|club|icu|buzz|link|shop|tk|ml|ga|cf)\\b|https?://[^\\s]*\\bhdfc-bank\\b"
   },
   {
     "id": "VERIFY_DETAILS",
@@ -175,7 +175,7 @@ window.PAKKA_RULES = [
     "name": "A stranger opening with money talk",
     "why": "The wrong number that turns into a friendship that turns into an investment app. It starts exactly like this, every time.",
     "weight": 2,
-    "re": "(?:got|found|received|saved) your (?:number|contact) from|(?:i am|i'm|this is) \\w+,? .{0,40}(?:trade|trading|crypto|forex|investment|profit|returns)"
+    "re": "(?:got|found|received|saved) your (?:number|contact) from|(?:sorry|sry|oops),? .{0,20}wrong number|wrong number.{0,90}(?:trade|trading|crypto|forex|invest|profit|teach you)|(?:i am|i'm|this is) \\w+,? .{0,40}(?:trade|trading|crypto|forex|investment|profit|returns)"
   },
   {
     "id": "ADVANCE_FEE",
@@ -203,7 +203,7 @@ window.PAKKA_RULES = [
     "name": "A new number that needs money",
     "why": "Someone claiming a new number and then asking for money is how a family member's identity gets borrowed. Call them on the number you already have.",
     "weight": 3,
-    "re": "(?:this is|it'?s) (?:my |me,? )?(?:new|changed) number.{0,120}(?:send|transfer|urgent|money|pay\\b|rs\\.?\\s?\\d|\\u20b9)|\\b(?:mom|mum|mummy|dad|papa|mama)\\b.{0,60}\\bnew number\\b.{0,120}(?:send|transfer|urgent|money|pay\\b|rs\\.?\\s?\\d)|(?:lost|broke|damaged|changed) my phone.{0,80}(?:send|transfer|money|rs\\.?\\s?\\d)"
+    "re": "(?:this is|it'?s) (?:my |me,? )?(?:new|changed) number.{0,120}(?:send|transfer|urgent|money|pay\\b|rs\\.?\\s?\\d|\\u20b9)|\\b(?:mom|mum|mummy|dad|papa|mama)\\b.{0,60}\\bnew number\\b.{0,120}(?:send|transfer|urgent|money|pay\\b|rs\\.?\\s?\\d)|(?:lost|broke|damaged|changed) my phone.{0,80}(?:send|transfer|money|rs\\.?\\s?\\d)|(?:mera|mere) naya number.{0,120}(?:bhej|rupaye|rupay|paise|transfer|urgent)|purana phone (?:kho gaya|kharab)"
   },
   {
     "id": "STRANDED_PLEA",
@@ -238,7 +238,7 @@ window.PAKKA_RULES = [
     "name": "Claims to be posted far away and cannot meet",
     "why": "The soldier-being-transferred story is the oldest marketplace scam in India. It exists to explain why you must pay before meeting.",
     "weight": 3,
-    "re": "(?:army|military|cisf|crpf|bsf|navy) (?:officer|jawan|personnel)|(?:posted|deployed) (?:in|at) .{0,30}(?:cannot|can't) (?:meet|come)|transfer(?:red)? .{0,25}urgent(?:ly)? .{0,25}sell"
+    "re": "(?:army|military|cisf|crpf|bsf|navy) (?:officer|jawan|personnel)|\\b(?:major|colonel|captain|subedar|havildar|brigadier) [a-z]\\w+|(?:posted|deployed) (?:in|at) .{0,40}(?:cannot|can't|unable to) (?:meet|come|visit|see)|transfer(?:red)? .{0,25}urgent(?:ly)? .{0,25}sell"
   }
 ];
 window.PAKKA_ADVICE = {
@@ -317,15 +317,66 @@ window.PAKKA_ADVICE = {
 };
 window.PAKKA_BANDS = [[8, "almost_certainly", "Almost certainly a scam"], [5, "likely", "Likely a scam"], [2, "careful", "Be careful"], [1, "one_flag", "One thing to check"], [0, "clear", "Nothing suspicious found"]];
 
+/* The same normalisation as normalise() in api/rules.py. Change one, change
+   both: tools/check_parity.py fails the build if they disagree. */
+const PAKKA_LEET = { '0': 'o', '1': 'i', '3': 'e', '4': 'a', '5': 's', '7': 't' };
+const pakkaAlpha = (c) => !!c && /^[A-Za-z]$/.test(c);
+const pakkaAlnum = (c) => !!c && /^[A-Za-z0-9]$/.test(c);
+
+window.pakkaNormalise = function (text) {
+  const chars = [], idx = [], ends = [];
+  let at = 0;
+  for (const ch of text) {                       /* by code point, as Python does */
+    for (const c of ch.normalize('NFD')) {
+      if (c >= '̀' && c <= 'ͯ') continue;   /* a combining accent */
+      /* an emoji is two code units here and one character in Python, so it
+         becomes one placeholder and every quantifier counts the same */
+      chars.push(c.length > 1 ? '�' : c);
+      idx.push(at); ends.push(at + ch.length);
+    }
+    at += ch.length;                              /* but index by code unit, for slice */
+  }
+  for (let j = 0; j < chars.length; j++) {
+    if (PAKKA_LEET[chars[j]] !== undefined) {
+      const prev = j ? chars[j - 1] : '', next = chars[j + 1] || '';
+      if (pakkaAlpha(prev) || pakkaAlpha(next)) chars[j] = PAKKA_LEET[chars[j]];
+    }
+  }
+  const n = chars.length;
+  const lone = (q) => pakkaAlpha(chars[q])
+    && (q === 0 || !pakkaAlnum(chars[q - 1]))
+    && (q + 1 >= n || !pakkaAlnum(chars[q + 1]));
+  let out = '', oidx = [], oend = [], i = 0;
+  while (i < n) {
+    if (lone(i)) {
+      const run = [i];
+      let j = i;
+      const sep = i + 1 < n ? chars[i + 1] : '';
+      while (j + 2 < n && chars[j + 1] === sep && ' .-'.indexOf(sep) !== -1 && lone(j + 2)) {
+        run.push(j + 2); j += 2;
+      }
+      if (run.length >= 3) {
+        for (const k of run) { out += chars[k]; oidx.push(idx[k]); oend.push(ends[k]); }
+        i = j + 1;
+        continue;
+      }
+    }
+    out += chars[i]; oidx.push(idx[i]); oend.push(ends[i]); i += 1;
+  }
+  return [out, oidx, oend];
+};
+
 window.pakkaEvaluate = function (text) {
+  const [norm, idx, ends] = window.pakkaNormalise(text);
   const findings = [];
   for (const r of window.PAKKA_RULES) {
     const re = new RegExp(r.re, 'gi');
     const spans = [];
     let m;
-    while ((m = re.exec(text)) !== null) {
+    while ((m = re.exec(norm)) !== null) {
       if (m[0] === '') { re.lastIndex++; continue; }
-      spans.push([m.index, m.index + m[0].length]);
+      const a = m.index, b = m.index + m[0].length;
+      if (idx.length) spans.push([idx[a], ends[Math.min(b, ends.length) - 1]]);
     }
     if (spans.length) findings.push({
       id: r.id, name: r.name, why: r.why, weight: r.weight,

@@ -139,6 +139,38 @@ free tier on every axis. At 100,000 scans a month the Lambda invocations are sti
 free, DynamoDB would move to on-demand at roughly $0.13 for the writes, and the
 bill is dominated by data transfer rather than compute.
 
+## How well does it actually work
+
+`tools/eval_set.py` holds 129 labelled messages: 76 fraud across 20 families and
+53 legitimate ones chosen to be hard — real bank OTP alerts, a real RBI KYC
+reminder, real delivery notifications with OTPs in them, recruiters, marketing
+with urgency words in it, and friends talking about money and account numbers.
+
+```
+python3 tools/eval.py          # the numbers below
+python3 tools/eval.py -v       # plus every miss and every false positive
+```
+
+| | |
+|---|---|
+| fraud caught | 76/76 |
+| caught clearly, score 2 or more | 73/76 |
+| false positives on legitimate messages | 0/53 |
+| legitimate messages raising a single low flag | 4/53 |
+
+The fraud set includes messages written to get past filters — `K Y C` spaced
+out, `0TP` with a zero, `shäre` with an accent, `C-l-i-c-k` — and Hinglish,
+which is how a large share of these actually arrive. Both are handled by
+normalising the text before matching and mapping the result back, so the
+highlighted words still line up with what was pasted.
+
+These numbers are honest about one thing: I wrote the test set. It is built from
+scam patterns that are well documented in India, and the legitimate half is
+deliberately adversarial, but a set written by the same person who wrote the
+rules will always flatter them. The useful claim is not the percentage, it is
+that the set exists, it is in the repository, and you can add a message to it
+and watch it fail.
+
 ## Running it
 
 **Locally, with no AWS account** — the Build It path. Storage falls back to a JSON

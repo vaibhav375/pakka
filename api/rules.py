@@ -11,7 +11,85 @@ a worried person can act on, why what it found is a problem.
 from __future__ import annotations
 
 import re
+import unicodedata
 from dataclasses import dataclass, field
+
+
+
+_LEET = {"0": "o", "1": "i", "3": "e", "4": "a", "5": "s", "7": "t"}
+def _alpha(c: str) -> bool:
+    return c.isascii() and c.isalpha()
+
+
+def _alnum(c: str) -> bool:
+    return c.isascii() and c.isalnum()
+
+
+def normalise(text: str) -> tuple[str, list[int]]:
+    """Return a normalised copy of the text and a map back to the original.
+
+    Scam messages are written to get past filters: K Y C spaced out, an O typed
+    as a zero, an umlaut dropped on a vowel. Matching against a normalised copy
+    keeps every rule simple, and the index map means the page can still
+    highlight the words in the message the person actually pasted.
+
+    tools/build_rules_js.py emits the same function in JavaScript and
+    tools/check_parity.py fails if the two ever disagree, so any change here
+    has to be made there too.
+    """
+    chars: list[str] = []
+    idx: list[int] = []
+    for i, ch in enumerate(text):
+        for c in unicodedata.normalize("NFD", ch):
+            if "\u0300" <= c <= "\u036f":      # a combining accent, dropped
+                continue
+            # anything outside the basic plane, an emoji say, becomes one
+            # placeholder, so that ".{0,30}" counts it the same in JavaScript,
+            # where it would otherwise be two characters
+            chars.append("\ufffd" if ord(c) > 0xFFFF else c)
+            idx.append(i)
+
+    # a digit standing in for a letter, but only where a letter sits beside it,
+    # so phone numbers and amounts are left alone
+    for j, c in enumerate(chars):
+        if c in _LEET:
+            prev = chars[j - 1] if j else ""
+            nxt = chars[j + 1] if j + 1 < len(chars) else ""
+            if _alpha(prev) or _alpha(nxt):
+                chars[j] = _LEET[c]
+
+    # letters spaced or hyphenated apart, pulled back together
+    out: list[str] = []
+    oidx: list[int] = []
+    n = len(chars)
+
+    def lone(q: int) -> bool:
+        """A letter standing by itself, like the K in "K Y C"."""
+        return (_alpha(chars[q])
+                and (q == 0 or not _alnum(chars[q - 1]))
+                and (q + 1 >= n or not _alnum(chars[q + 1])))
+
+    i = 0
+    while i < n:
+        if lone(i):
+            run = [i]
+            j = i
+            sep = chars[i + 1] if i + 1 < n else ""
+            # one separator throughout, so "W-O-N a prize" gives WON, not WONa
+            while (j + 2 < n and chars[j + 1] == sep and sep in " .-"
+                   and lone(j + 2)):
+                run.append(j + 2)
+                j += 2
+            if len(run) >= 3:
+                for k in run:
+                    out.append(chars[k])
+                    oidx.append(idx[k])
+                i = j + 1
+                continue
+        out.append(chars[i])
+        oidx.append(idx[i])
+        i += 1
+    return "".join(out), oidx
 
 
 @dataclass(frozen=True)
@@ -22,8 +100,17 @@ class Rule:
     weight: int
     pattern: re.Pattern
 
-    def spans(self, text: str) -> list[tuple[int, int]]:
-        return [m.span() for m in self.pattern.finditer(text)]
+    def spans(self, text: str, norm: str | None = None,
+              idx: list[int] | None = None) -> list[tuple[int, int]]:
+        """Match the normalised text, report positions in the original."""
+        if norm is None or idx is None:
+            norm, idx = normalise(text)
+        out = []
+        for m in self.pattern.finditer(norm):
+            a, b = m.span()
+            if b > a and idx:
+                out.append((idx[a], idx[min(b, len(idx)) - 1] + 1))
+        return out
 
 
 def _p(*alts: str) -> re.Pattern:
@@ -46,7 +133,8 @@ RULES: tuple[Rule, ...] = (
         "Nobody legitimate will ever ask for your OTP, UPI PIN, CVV or password "
         "— not your bank, not a delivery agent, not HR.",
         4,
-        _p(r"(?:share|send|tell|give|provide|forward|confirm|read out)\s+(?:me\s+|us\s+|the\s+|your\s+)*\b(?:otp|cvv|pin|password|code)\b",
+        _p(r"(?:share|send|tell|give|provide|forward|confirm|read out)\s+(?:me\s+|us\s+|the\s+|your\s+)*\b(?:otp|cvv|pin|password|code)\b(?!\s*(?:is\s*)?\d{4,8})",
+           r"\b(?:apna|apne) otp\b", r"\botp\b .{0,15}(?:bhej|batao|bataiye|share kij)",
            r"\b(?:otp|cvv|pin)\b.{0,25}(?:with (?:our|the|me|us)|to (?:our|the|me|us|verify))",
            r"what(?:'s| is) (?:your |the )?(?:otp|cvv|pin)\b",
            r"\bcvv\b.{0,20}(?:number|digits)", r"\bupi pin\b", r"\batm pin\b",
@@ -67,9 +155,11 @@ RULES: tuple[Rule, ...] = (
         "Banks do not block accounts over SMS links. This is the most common "
         "phishing script in India right now.",
         3,
-        _p(r"kyc .{0,25}(?:expire|update|pending|suspend)",
-           r"account .{0,20}(?:will be )?(?:block|suspend|freeze|deactivat)",
-           r"(?:update|complete) .{0,15}kyc"),
+        _p(r"kyc .{0,25}(?:expire|pending|suspend|incomplete|not (?:done|updated))",
+           r"account .{0,30}(?:will be |has been )?(?:block|suspend|freeze|deactivat)",
+           r"(?:update|complete|verify) .{0,20}kyc .{0,40}"
+           r"(?:\bor\b|else|otherwise|to avoid|immediately|now|today|link|http|block|suspend|frozen)",
+           r"(?:account|khata|kyc).{0,30}(?:block|band) ho jayega", r"kyc update nahi"),
     ),
     Rule(
         "URGENCY", "Manufactured urgency",
@@ -80,6 +170,7 @@ RULES: tuple[Rule, ...] = (
            r"(?:block|suspend|deactivat|expir|clos|disconnect|cancel|terminat)\w*\s+"
            r"(?:with)?in\s+\d+\s*(?:hours?|hrs?|days?|minutes?)",
            r"expires? (?:today|tonight|soon)", r"immediately", r"hurry", r"\burgently\b",
+           r"\bturant\b", r"\bjaldi\b", r"urgent hai",
            r"limited (?:slots?|seats?|offer)", r"only \d+ (?:slots?|seats?) left",
            r"before (?:you )?(?:lose|miss)", r"\b(?:click|claim|act|apply) (?:it |this |here |the link )?now\b"),
     ),
@@ -98,7 +189,8 @@ RULES: tuple[Rule, ...] = (
         2,
         _p(r"(?:rs\.?|₹)\s?[1-9]\d{3,}[^.]{0,30}(?:per day|/day|daily|per week)",
            r"earn (?:rs\.?|₹)\s?\d[\d,]*.{0,25}(?:from home|part[- ]?time|\d ?(?:hours?|hrs?))",
-           r"\d ?(?:hours?|hrs?) (?:work )?daily.{0,25}(?:rs\.?|₹)\s?\d"),
+           r"\d ?(?:hours?|hrs?) (?:work )?daily.{0,25}(?:rs\.?|₹)\s?\d",
+           r"ghar baithe .{0,25}kama", r"(?:rupaye|rupay) (?:daily|roz|rozana)"),
     ),
     Rule(
         "PERSONAL_PAYMENT", "Money goes to a personal account",
@@ -131,7 +223,8 @@ RULES: tuple[Rule, ...] = (
         "nothing to hold accountable afterwards.",
         1,
         _p(r"(?:contact|message|ping|dm|reach) (?:me |us )?(?:only )?on (?:whats ?app|telegram)",
-           r"join (?:our )?telegram", r"whats ?app (?:only|me at)"),
+           r"join (?:our )?telegram", r"whats ?app (?:only|me at)",
+           r"(?:whats ?app|telegram) par (?:contact|message|baat|kare)"),
     ),
     Rule(
         "THREAT", "Threatens legal or police action",
@@ -147,8 +240,10 @@ RULES: tuple[Rule, ...] = (
         "The photos are usually taken from a real listing elsewhere.",
         3,
         _p(r"(?:token|advance|booking) (?:amount|money|fee).{0,40}(?:before|without) .{0,20}(?:visit|see)",
-           r"(?:i am|i'm|currently) (?:abroad|out of (?:town|country)|in another city).{0,60}(?:send|transfer|pay)",
-           r"book (?:it )?(?:now|today) .{0,20}without (?:a )?visit"),
+           r"(?:i am|i'm|currently) (?:abroad|out of (?:town|country|station)|in another city|not in the city).{0,60}(?:send|transfer|pay)",
+           r"book (?:it )?(?:now|today) .{0,20}without (?:a )?visit",
+           r"(?:advance|token|booking).{0,40}(?:to )?(?:block|hold|reserve) the (?:room|bed|flat|house|pg)",
+           r"pay .{0,25}(?:booking|advance|token).{0,30}before visit"),
     ),
     Rule(
         "COURIER_CUSTOMS", "Parcel held, pay a fee to release it",
@@ -174,7 +269,9 @@ RULES: tuple[Rule, ...] = (
         4,
         _p(r"(?:won|winner).{0,30}(?:lottery|lucky draw|prize|kbc)",
            r"\bkbc\b", r"lucky (?:winner|draw)",
-           r"congratulations.{0,30}\b(?:won|winning|winner)\b",
+           r"congratulations.{0,30}\b(?:won|winning|winner)\b.{0,50}"
+           r"(?:\brs\.?\s*\d|₹|lakh|crore|lottery|lucky draw|prize|gift|iphone|mac ?book|laptop|\bcar\b|voucher|hamper)",
+           r"lottery lag gay", r"\bjeeta hai\b", r"(?:lakh|crore) rupaye jeet",
            r"\b(?:won|winning|win a)\b.{0,40}(?:iphone|mac ?book|laptop|smartphone|"
            r"scooter|\bcar\b|\bbike\b|gift (?:card|voucher|hamper)|voucher|cash prize|\bgift\b)",
            r"\bfree\b.{0,20}(?:iphone|mac ?book|laptop|smartphone|\bcar\b|scooter|\bbike\b)"),
@@ -216,7 +313,7 @@ RULES: tuple[Rule, ...] = (
            r"netflix|irctc|epfo|uidai|income ?tax|indiapost)[-_][a-z0-9-]+\.",
            r"https?://[^\s]*\b(?:sbi|hdfc|icici|axis|paytm|phonepe|amazon|flipkart|netflix|"
            r"irctc|epfo|uidai)[^\s]*\.(?:xyz|info|top|online|site|club|icu|buzz|link|shop|tk|ml|ga|cf)\b",
-           r"https?://[^\s]*(?:amaz0n|g00gle|paypa1|fl1pkart|1cici|hdfc-bank)"),
+           r"https?://[^\s]*\bhdfc-bank\b"),
     ),
     Rule(
         "VERIFY_DETAILS", "Wants your details to avoid something bad",
@@ -268,6 +365,8 @@ RULES: tuple[Rule, ...] = (
         "investment app. It starts exactly like this, every time.",
         2,
         _p(r"(?:got|found|received|saved) your (?:number|contact) from",
+           r"(?:sorry|sry|oops),? .{0,20}wrong number",
+           r"wrong number.{0,90}(?:trade|trading|crypto|forex|invest|profit|teach you)",
            r"(?:i am|i'm|this is) \w+,? .{0,40}(?:trade|trading|crypto|forex|"
            r"investment|profit|returns)"),
     ),
@@ -310,7 +409,9 @@ RULES: tuple[Rule, ...] = (
            r".{0,120}(?:send|transfer|urgent|money|pay\b|rs\.?\s?\d|\u20b9)",
            r"\b(?:mom|mum|mummy|dad|papa|mama)\b.{0,60}\bnew number\b"
            r".{0,120}(?:send|transfer|urgent|money|pay\b|rs\.?\s?\d)",
-           r"(?:lost|broke|damaged|changed) my phone.{0,80}(?:send|transfer|money|rs\.?\s?\d)"),
+           r"(?:lost|broke|damaged|changed) my phone.{0,80}(?:send|transfer|money|rs\.?\s?\d)",
+           r"(?:mera|mere) naya number.{0,120}(?:bhej|rupaye|rupay|paise|transfer|urgent)",
+           r"purana phone (?:kho gaya|kharab)"),
     ),
     Rule(
         "STRANDED_PLEA", "Stranded somewhere and needs money now",
@@ -354,7 +455,8 @@ RULES: tuple[Rule, ...] = (
         "India. It exists to explain why you must pay before meeting.",
         3,
         _p(r"(?:army|military|cisf|crpf|bsf|navy) (?:officer|jawan|personnel)",
-           r"(?:posted|deployed) (?:in|at) .{0,30}(?:cannot|can't) (?:meet|come)",
+           r"\b(?:major|colonel|captain|subedar|havildar|brigadier) [a-z]\w+",
+           r"(?:posted|deployed) (?:in|at) .{0,40}(?:cannot|can't|unable to) (?:meet|come|visit|see)",
            r"transfer(?:red)? .{0,25}urgent(?:ly)? .{0,25}sell"),
     )
 )
@@ -377,7 +479,8 @@ BANDS = (
 
 def evaluate(text: str) -> dict:
     """Score a message. Same input, same output, every time."""
-    findings = [Finding(r, s) for r in RULES if (s := r.spans(text))]
+    norm, idx = normalise(text)
+    findings = [Finding(r, s) for r in RULES if (s := r.spans(text, norm, idx))]
     score = sum(f.rule.weight for f in findings)
     key, label = next((k, l) for threshold, k, l in BANDS if score >= threshold)
     return {

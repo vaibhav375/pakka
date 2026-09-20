@@ -42,15 +42,66 @@ window.PAKKA_RULES = {json.dumps(rules, indent=2, ensure_ascii=False)};
 window.PAKKA_ADVICE = {json.dumps(advice, indent=2, ensure_ascii=False)};
 window.PAKKA_BANDS = {json.dumps(bands)};
 
+/* The same normalisation as normalise() in api/rules.py. Change one, change
+   both: tools/check_parity.py fails the build if they disagree. */
+const PAKKA_LEET = {{ '0': 'o', '1': 'i', '3': 'e', '4': 'a', '5': 's', '7': 't' }};
+const pakkaAlpha = (c) => !!c && /^[A-Za-z]$/.test(c);
+const pakkaAlnum = (c) => !!c && /^[A-Za-z0-9]$/.test(c);
+
+window.pakkaNormalise = function (text) {{
+  const chars = [], idx = [], ends = [];
+  let at = 0;
+  for (const ch of text) {{                       /* by code point, as Python does */
+    for (const c of ch.normalize('NFD')) {{
+      if (c >= '\u0300' && c <= '\u036f') continue;   /* a combining accent */
+      /* an emoji is two code units here and one character in Python, so it
+         becomes one placeholder and every quantifier counts the same */
+      chars.push(c.length > 1 ? '\ufffd' : c);
+      idx.push(at); ends.push(at + ch.length);
+    }}
+    at += ch.length;                              /* but index by code unit, for slice */
+  }}
+  for (let j = 0; j < chars.length; j++) {{
+    if (PAKKA_LEET[chars[j]] !== undefined) {{
+      const prev = j ? chars[j - 1] : '', next = chars[j + 1] || '';
+      if (pakkaAlpha(prev) || pakkaAlpha(next)) chars[j] = PAKKA_LEET[chars[j]];
+    }}
+  }}
+  const n = chars.length;
+  const lone = (q) => pakkaAlpha(chars[q])
+    && (q === 0 || !pakkaAlnum(chars[q - 1]))
+    && (q + 1 >= n || !pakkaAlnum(chars[q + 1]));
+  let out = '', oidx = [], oend = [], i = 0;
+  while (i < n) {{
+    if (lone(i)) {{
+      const run = [i];
+      let j = i;
+      const sep = i + 1 < n ? chars[i + 1] : '';
+      while (j + 2 < n && chars[j + 1] === sep && ' .-'.indexOf(sep) !== -1 && lone(j + 2)) {{
+        run.push(j + 2); j += 2;
+      }}
+      if (run.length >= 3) {{
+        for (const k of run) {{ out += chars[k]; oidx.push(idx[k]); oend.push(ends[k]); }}
+        i = j + 1;
+        continue;
+      }}
+    }}
+    out += chars[i]; oidx.push(idx[i]); oend.push(ends[i]); i += 1;
+  }}
+  return [out, oidx, oend];
+}};
+
 window.pakkaEvaluate = function (text) {{
+  const [norm, idx, ends] = window.pakkaNormalise(text);
   const findings = [];
   for (const r of window.PAKKA_RULES) {{
     const re = new RegExp(r.re, 'gi');
     const spans = [];
     let m;
-    while ((m = re.exec(text)) !== null) {{
+    while ((m = re.exec(norm)) !== null) {{
       if (m[0] === '') {{ re.lastIndex++; continue; }}
-      spans.push([m.index, m.index + m[0].length]);
+      const a = m.index, b = m.index + m[0].length;
+      if (idx.length) spans.push([idx[a], ends[Math.min(b, ends.length) - 1]]);
     }}
     if (spans.length) findings.push({{
       id: r.id, name: r.name, why: r.why, weight: r.weight,
