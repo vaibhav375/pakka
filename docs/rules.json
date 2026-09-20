@@ -1,0 +1,206 @@
+[
+ {
+  "id": "PAY_TO_GET_JOB",
+  "name": "Asks for money before a job",
+  "why": "A real employer never charges you to be hired. Registration, training and security fees are the oldest job scam there is.",
+  "weight": 3
+ },
+ {
+  "id": "ASKS_FOR_SECRET",
+  "name": "Asks for an OTP, PIN or password",
+  "why": "Nobody legitimate will ever ask for your OTP, UPI PIN, CVV or password \u2014 not your bank, not a delivery agent, not HR.",
+  "weight": 4
+ },
+ {
+  "id": "PAY_TO_RECEIVE",
+  "name": "Asks you to pay to receive money",
+  "why": "You are being asked to send money to unlock money. Refunds, prizes and lottery winnings never require a payment from you first.",
+  "weight": 4
+ },
+ {
+  "id": "KYC_PANIC",
+  "name": "KYC or account-block scare",
+  "why": "Banks do not block accounts over SMS links. This is the most common phishing script in India right now.",
+  "weight": 3
+ },
+ {
+  "id": "URGENCY",
+  "name": "Manufactured urgency",
+  "why": "Pressure to act within hours exists to stop you checking. Anything genuine will still be there tomorrow.",
+  "weight": 1
+ },
+ {
+  "id": "NO_INTERVIEW",
+  "name": "Selected without any interview",
+  "why": "An offer with no interview is not an offer. Real hiring involves someone actually speaking to you.",
+  "weight": 2
+ },
+ {
+  "id": "TOO_GOOD",
+  "name": "Pay that does not match the work",
+  "why": "Earnings far above the going rate for a few hours a day are bait. The money is the hook, not the job.",
+  "weight": 2
+ },
+ {
+  "id": "PERSONAL_PAYMENT",
+  "name": "Money goes to a personal account",
+  "why": "Payment to a personal UPI ID or a phone number leaves you no way to recover the money and no company to complain about.",
+  "weight": 3
+ },
+ {
+  "id": "FREE_EMAIL_AS_COMPANY",
+  "name": "Company mail sent from a free inbox",
+  "why": "A company with a careers page does not send offer letters from a personal Gmail address.",
+  "weight": 2
+ },
+ {
+  "id": "HIDDEN_LINK",
+  "name": "Shortened or disguised link",
+  "why": "Shortened links hide where they actually go. Legitimate organisations link to their own domain.",
+  "weight": 2
+ },
+ {
+  "id": "CHAT_ONLY",
+  "name": "Exists only on WhatsApp or Telegram",
+  "why": "No office, no website, no landline \u2014 only a chat window. There is nothing to hold accountable afterwards.",
+  "weight": 1
+ },
+ {
+  "id": "THREAT",
+  "name": "Threatens legal or police action",
+  "why": "Threats of FIRs, court cases or arrest over a message are a pressure tactic. Real legal process does not arrive by WhatsApp.",
+  "weight": 2
+ },
+ {
+  "id": "SIGHT_UNSEEN",
+  "name": "Asks for rent before you have seen the place",
+  "why": "Paying a token or advance before visiting is how fake listings work. The photos are usually taken from a real listing elsewhere.",
+  "weight": 3
+ },
+ {
+  "id": "COURIER_CUSTOMS",
+  "name": "Parcel held, pay a fee to release it",
+  "why": "Couriers do not hold parcels for a fee over SMS. Customs duty is paid to the government, never to a WhatsApp number.",
+  "weight": 3
+ },
+ {
+  "id": "ELECTRICITY_CUT",
+  "name": "Electricity disconnection threat",
+  "why": "Power utilities do not warn you by SMS from a personal number, and they never ask you to call one to avoid disconnection tonight.",
+  "weight": 3
+ },
+ {
+  "id": "LOTTERY_WIN",
+  "name": "A prize you never entered for",
+  "why": "You cannot win a lottery you never entered. Every version of this ends with a fee to release the winnings.",
+  "weight": 4
+ },
+ {
+  "id": "QR_SCAN",
+  "name": "A QR code to receive money",
+  "why": "Scanning a QR code can only send money out of your account. It can never bring money in. Anyone telling you to scan one to claim, collect or receive something is describing a thing that cannot happen.",
+  "weight": 3
+ },
+ {
+  "id": "REMOTE_ACCESS",
+  "name": "Wants to see or control your screen",
+  "why": "No bank, no support desk and no government office will ever ask you to install a screen sharing app. Someone watching your screen sees your banking app and your PIN as you type it.",
+  "weight": 4
+ },
+ {
+  "id": "APK_INSTALL",
+  "name": "Wants you to install an app from outside the store",
+  "why": "An app sent to you as a file has not been checked by anyone. This is how banking trojans get onto phones in India.",
+  "weight": 4
+ },
+ {
+  "id": "LOOKALIKE_DOMAIN",
+  "name": "A web address dressed up as a real company",
+  "why": "The brand name is in the address but the domain is not theirs. Real organisations send you to their own domain, not a lookalike.",
+  "weight": 3
+ },
+ {
+  "id": "VERIFY_DETAILS",
+  "name": "Wants your details to avoid something bad",
+  "why": "Being told to confirm your details to stop something bad happening is the oldest phishing shape there is. If it is real, it will still be there when you open the app yourself.",
+  "weight": 2
+ },
+ {
+  "id": "ID_DOCUMENTS",
+  "name": "Asks for your Aadhaar or PAN",
+  "why": "A photo of your Aadhaar or PAN is enough to open accounts and take loans in your name. Nobody legitimate collects it over a chat message.",
+  "weight": 3
+ },
+ {
+  "id": "CALLBACK_NUMBER",
+  "name": "A personal mobile posing as a helpline",
+  "why": "Real companies publish landlines or 1800 numbers you can look up. A ten digit mobile presented as customer care belongs to a person, not a bank.",
+  "weight": 2
+ },
+ {
+  "id": "COLLECT_REQUEST",
+  "name": "Asks you to approve something to receive money",
+  "why": "Entering your PIN or approving a request always sends money out. It can never bring money in. Anyone saying otherwise is taking, not giving.",
+  "weight": 4
+ },
+ {
+  "id": "STRANGER_OPENER",
+  "name": "A stranger opening with money talk",
+  "why": "The wrong number that turns into a friendship that turns into an investment app. It starts exactly like this, every time.",
+  "weight": 2
+ },
+ {
+  "id": "ADVANCE_FEE",
+  "name": "An inheritance or fortune from a stranger",
+  "why": "Nobody picks a stranger to receive a fortune. The money does not exist, and the fees you are asked for along the way are the entire point.",
+  "weight": 3
+ },
+ {
+  "id": "BANK_DETAILS",
+  "name": "Wants your account number to send you money",
+  "why": "Money already owed to you goes to the account it came from. Being asked for fresh bank details is how the account gets emptied, not filled.",
+  "weight": 3
+ },
+ {
+  "id": "SIM_BLOCK",
+  "name": "Threatens to block your SIM or connection",
+  "why": "Your operator does not disconnect you over a text with a link. The panic is the product.",
+  "weight": 3
+ },
+ {
+  "id": "NEW_NUMBER",
+  "name": "A new number that needs money",
+  "why": "Someone claiming a new number and then asking for money is how a family member's identity gets borrowed. Call them on the number you already have.",
+  "weight": 3
+ },
+ {
+  "id": "STRANDED_PLEA",
+  "name": "Stranded somewhere and needs money now",
+  "why": "A hijacked account of someone you know, or a stranger who knows the story works. Call the person on the number you already have.",
+  "weight": 2
+ },
+ {
+  "id": "LOAN_HARASSMENT",
+  "name": "Loan-app style pressure",
+  "why": "Threatening to contact your phonebook over a loan is illegal recovery practice, not a legitimate demand.",
+  "weight": 3
+ },
+ {
+  "id": "INVESTMENT_TIP",
+  "name": "Guaranteed returns or a tips group",
+  "why": "Guaranteed returns do not exist. Groups offering them exist to take deposits that cannot be withdrawn.",
+  "weight": 3
+ },
+ {
+  "id": "TASK_COMMISSION",
+  "name": "Prepaid task or commission work",
+  "why": "Task scams start with small payouts that work, then ask you to deposit for a bigger task. The deposit is the point.",
+  "weight": 3
+ },
+ {
+  "id": "ARMY_OFFICER",
+  "name": "Claims to be posted far away and cannot meet",
+  "why": "The soldier-being-transferred story is the oldest marketplace scam in India. It exists to explain why you must pay before meeting.",
+  "weight": 3
+ }
+]

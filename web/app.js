@@ -287,6 +287,33 @@ async function check() {
 }
 go.onclick = check;
 
+/* Arriving from another app's share sheet.
+
+   Installed on Android, Pakka registers as a share target, so a message in
+   WhatsApp can be long-pressed, shared to Pakka, and answered without anyone
+   copying or pasting anything. The share arrives as an ordinary query string,
+   which is then wiped from the address bar so a stranger's message is not left
+   sitting in the history. */
+(() => {
+  const q = new URLSearchParams(location.search);
+  const shared = [q.get('title'), q.get('text'), q.get('url')]
+    .filter(Boolean).join(' ').trim();
+  if (!shared) return;
+  history.replaceState(null, '', location.pathname + location.hash);
+  t.value = shared;
+  t.dispatchEvent(new Event('input', { bubbles: true }));
+  addEventListener('load', () => setTimeout(() => {
+    check();
+    document.getElementById('out')?.scrollIntoView({ behavior: 'smooth' });
+  }, 350));
+})();
+
+/* the service worker is what makes the app installable, and installing is what
+   puts it in the share sheet */
+if ('serviceWorker' in navigator) {
+  addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+}
+
 function render(d) {
   remember(d);
   /* the constellation lights from the same findings that draw the cards */

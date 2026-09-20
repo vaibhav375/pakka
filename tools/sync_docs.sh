@@ -4,5 +4,6 @@
 # identical files.
 set -e
 cd "$(dirname "$0")/.."
-cp web/index.html web/styles.css web/app.js web/config.js web/rules.generated.js docs/
+# everything, not a list that silently goes stale when a file is added
+cp web/* docs/
 echo "docs/ synced from web/"

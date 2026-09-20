@@ -155,6 +155,26 @@ POST /whatsapp    the same idea on WhatsApp, if you can get through Meta's setup
 Both channels share `api/chat.py`, which writes the reply. They differ only in
 how a message arrives and how one is sent.
 
+### Share straight from WhatsApp, with no Meta account at all
+
+Meta's own API needs a business account and an app review. The share sheet does
+not. Pakka ships a web app manifest that declares a
+[share target](https://developer.mozilla.org/docs/Web/Manifest/share_target), so
+once the site is installed to an Android home screen it appears in the share
+sheet of every app on the phone, WhatsApp included.
+
+Long-press the message, Share, Pakka. No copying, no pasting, no browser, and
+the verdict is on screen before you have finished reading the scam.
+
+The share arrives as an ordinary query string, so the page needs no new code
+path to read it, and the query is wiped from the address bar immediately so a
+stranger's message is not left sitting in browser history. A service worker
+makes the app installable and keeps it working with the network off, which it
+could already do, since the rules run on the device.
+
+This is Android and Chrome. iOS does not implement share targets, and the
+honest answer there is the Telegram bot below or the web page.
+
 ### Telegram, which takes about two minutes
 
 No business account, no app review, nothing to verify. Telegram also matters on
