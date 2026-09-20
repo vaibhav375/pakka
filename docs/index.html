@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pakka — check before you pay</title>
+<meta name="description" content="Paste a suspicious message and find out what is wrong with it, in words you can forward to whoever sent it.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="bar" id="bar"><div class="shell">
+  <div class="brand">पक्का <i>/</i> pakka</div>
+  <div class="mono">13 rules · runs on your device</div>
+</div></div>
+
+<header class="hero"><div class="shell">
+  <div class="kicker"><span></span><em class="mono" style="font-style:normal">Scam check for the messages you get sent</em></div>
+  <h1>Check<br>before<br>you&nbsp;<em>pay.</em></h1>
+  <p class="lede">Paste the message — a PG listing, an internship offer, a bank SMS. Pakka tells you
+    <b>what is wrong with it and why</b>, and gives you a link you can forward straight back to
+    whoever sent it to you.</p>
+
+  <div class="box">
+    <label for="t" class="mono" style="position:absolute;left:-9999px">Message to check</label>
+    <textarea id="t" spellcheck="false" placeholder="Paste the message here…"></textarea>
+    <footer>
+      <span class="count mono" id="count">0 / 4000</span>
+      <button class="go" id="go" disabled>Check it</button>
+    </footer>
+  </div>
+  <div class="chips" id="chips"></div>
+</div></header>
+
+<div class="shell" id="out"><div class="verdict" id="card">
+  <div class="vtop">
+    <div>
+      <div class="mono" style="margin-bottom:12px">The verdict</div>
+      <div class="vlabel" id="vlabel">—</div>
+    </div>
+    <div class="dial"><div class="mono" style="margin-bottom:8px">Risk score</div><b id="vscore">0</b></div>
+  </div>
+  <div class="msg" id="msg"></div>
+  <div class="flags" id="flags"></div>
+  <div class="share">
+    <span class="mono">Forward this verdict</span>
+    <input id="link" readonly value="—">
+    <button class="copy" id="copy">Copy link</button>
+  </div>
+</div></div>
+
+<section class="pad"><div class="shell">
+  <div class="mono rise">How it decides</div>
+  <h2 class="rise">A model never<br>gets the last word.</h2>
+  <p class="sub rise">A scam verdict has to be the same every time and has to survive being explained
+     to the person who nearly paid. So the decision is made by rules you can read.</p>
+  <div class="grid3">
+    <div class="cell rise"><div class="num">01</div><h3>Rules decide</h3>
+      <p>Thirteen checks, each one able to point at the exact words that set it off. Same message, same answer, every time.</p></div>
+    <div class="cell rise"><div class="num">02</div><h3>The model only phrases it</h3>
+      <p>Language models are good at wording and bad at being certain. It writes the summary sentence. It cannot change the verdict.</p></div>
+    <div class="cell rise"><div class="num">03</div><h3>It stays with you</h3>
+      <p>The rules run in the browser, so nothing is sent anywhere until you choose to share. Shared scans carry a 30-day TTL and delete themselves.</p></div>
+  </div>
+</div></section>
+
+<section class="pad"><div class="shell">
+  <div class="mono rise">Running on</div>
+  <h2 class="rise">Serverless, so it<br>costs nothing idle.</h2>
+  <p class="sub rise">One function, one table, one static front end. Nobody scanning means nothing running
+     and nothing billed — which is the whole reason a free tool like this can stay free.</p>
+  <div class="stack rise">
+    <div class="svc"><b>Lambda</b> · rules, verdict, 1M requests free</div>
+    <div class="svc"><b>Lambda Function URL</b> · public endpoint, no extra cost</div>
+    <div class="svc"><b>DynamoDB</b> · saved scans, 1 RCU/1 WCU, 30-day TTL</div>
+    <div class="svc"><b>Amplify Hosting</b> · this page</div>
+    <div class="svc"><b>CloudWatch</b> · logs and metrics</div>
+    <div class="svc"><b>SAM</b> · the stack as one template in the repo</div>
+  </div>
+</div></section>
+
+<footer class="end"><div class="shell" style="display:flex;justify-content:space-between;width:var(--shell);flex-wrap:wrap;gap:16px">
+  <span>Pakka — built at First Commit, September 2026.</span>
+  <span class="mono">Not legal or financial advice. When unsure, don't pay.</span>
+</div></footer>
+
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.14/dist/lenis.min.js"></script>
+<script src="rules.generated.js"></script>
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
