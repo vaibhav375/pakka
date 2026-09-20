@@ -98,28 +98,30 @@ const countUp = (el, to) => {
 };
 
 async function check() {
-  go.disabled = true;
-  const original = go.textContent;
-  go.textContent = 'Checking…';
+  const text = t.value;
+
+  /* decided here, on the device — instant, and the message has not gone
+     anywhere yet */
+  const local = window.pakkaEvaluate(text);
+  render(local);
+
+  /* the only reason to talk to the cloud is to mint a link worth forwarding */
+  if (!API || API.startsWith('http://127.0.0.1')) {
+    $('link').value = 'Sharing needs the deployed API';
+    return;
+  }
+  $('link').value = 'Creating link…';
   try {
     const res = await fetch(`${API.replace(/\/$/, '')}/scan`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ text: t.value }),
+      body: JSON.stringify({ text }),
     });
     const d = await res.json();
-    if (!res.ok) throw new Error(d.error || 'Something went wrong.');
-    render(d);
-  } catch (err) {
-    out.classList.add('show');
-    card.className = 'verdict band-careful';
-    $('vlabel').textContent = 'Could not check that';
-    $('vscore').textContent = '—';
-    $('msg').textContent = String(err.message || err);
-    $('flags').innerHTML = '';
-  } finally {
-    go.textContent = original;
-    sync();
+    if (!res.ok || !d.id) throw new Error(d.error || 'no id');
+    $('link').value = `${location.origin}${location.pathname}#${d.id}`;
+  } catch {
+    $('link').value = 'Could not create a link — the verdict above still stands';
   }
 }
 go.onclick = check;
@@ -144,9 +146,6 @@ function render(d) {
       <div><h4>None of the thirteen checks fired</h4>
       <p>That is not a guarantee — it means this message does not use any of the
          patterns Pakka knows about. If something still feels wrong, trust that.</p></div></div>`;
-
-  const link = d.id ? `${location.origin}${location.pathname}#${d.id}` : '—';
-  $('link').value = link;
 
   out.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
