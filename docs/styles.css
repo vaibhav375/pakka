@@ -29,7 +29,7 @@ a{color:inherit}
      backdrop-filter:blur(14px);background:rgba(10,10,11,.6);border-bottom:1px solid transparent;transition:border-color .3s}
 .bar.on{border-color:var(--line)}
 .bar .shell{display:flex;align-items:center;justify-content:space-between}
-.brand{font-weight:700;letter-spacing:-.02em;font-size:19px}
+.brand{font-weight:700;letter-spacing:-.02em;font-size:19px;white-space:nowrap}
 .brand i{color:var(--acid);font-style:normal}
 
 /* ---------- hero ---------- */
@@ -300,3 +300,8 @@ mark.peek{background:rgba(198,255,61,.22)!important;color:#eaffc0!important;
 #cur.big::after{opacity:1;transform:translate(-50%,-50%) scale(1)}
 #prog{position:fixed;top:0;left:0;height:2px;width:0;background:var(--acid);z-index:31;
       transition:width .12s linear}
+
+/* on a phone the bar has room for the name or the strapline, not both */
+@media (max-width:560px){
+  .bar .mono{font-size:10px;text-align:right;max-width:46%}
+}
