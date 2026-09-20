@@ -114,6 +114,37 @@
 </div></section>
 
 <section class="pad"><div class="shell">
+  <div class="mono rise">The pipeline, from above</div>
+  <h2 class="rise">Twenty patterns.<br>Yours lights the ones<br>it matched.</h2>
+  <p class="sub rise">Every rule is a node. Idle, they drift. Check a message and the ones that
+     fired ignite and wire back to the core — the same rules, the same verdict, drawn.</p>
+  <div class="sceneWrap rise">
+    <div id="scene"></div>
+    <div class="legend">
+      <span><i class="d"></i>waiting</span>
+      <span><i class="h"></i>fired on your message</span>
+      <span><i class="c"></i>verdict</span>
+    </div>
+  </div>
+</div></section>
+
+<section class="pad"><div class="shell">
+  <div class="mono rise">Everything it looks for</div>
+  <h2 class="rise">Twenty ways a<br>message gives itself away.</h2>
+  <p class="sub rise">Each one is a few lines of Python that can point at the words that set it off.
+     No training data, no drift, no retraining — if it fires, you can read why.</p>
+  <div class="gallery rise">
+    <div class="gcol" id="gcol"></div>
+    <div class="gnow">
+      <div class="mono">Now showing</div>
+      <div class="gnum" id="gnum">01</div>
+      <div class="gname" id="gname">—</div>
+      <div class="ghunt mono" id="ghunt">—</div>
+    </div>
+  </div>
+</div></section>
+
+<section class="pad"><div class="shell">
   <div class="mono rise">Running on</div>
   <h2 class="rise">Serverless, so it<br>costs nothing idle.</h2>
   <p class="sub rise">One function, one table, one static front end. Nobody scanning means nothing running
@@ -136,8 +167,11 @@
 <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.14/dist/lenis.min.js"></script>
 <script src="rules.generated.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="rules-meta.js"></script>
 <script src="config.js"></script>
 <script src="app.js"></script>
+<script src="scene.js"></script>
 <script src="scene.js"></script>
 </body>
 </html>

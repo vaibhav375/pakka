@@ -1,106 +1,114 @@
-/* Twenty rules as twenty points in space, and the verdict at the centre.
-   When a scan runs, the checks that fired ignite and wire themselves to the
-   middle. It is the rulebook seen from above rather than an ornament: the
-   number of lit points is exactly the number of flags in the card below. */
-(() => {
-  const canvas = document.getElementById('gl');
-  if (!canvas || !window.THREE || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+/* The rule constellation.
 
-  const N = 20, ACID = 0xc6ff3d, BAD = 0xff5d47, DIM = 0x2a2a33;
+   Twenty nodes, one per rule, sitting on a sphere. Idle, they drift dim. Run a
+   scan and the rules that fired ignite and wire themselves back to the core, so
+   the picture is the pipeline doing its job rather than an ornament bolted to
+   the page. */
+(() => {
+  const host = document.getElementById('scene');
+  if (!host || !window.THREE || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  const RULES = window.PAKKA_RULES || [];
+  const N = RULES.length || 20;
+  const DIM = new THREE.Color('#3a3a46');
+  const HOT = new THREE.Color('#ff5d47');
+  const CORE = new THREE.Color('#c6ff3d');
+
   const scene = new THREE.Scene();
-  const cam = new THREE.PerspectiveCamera(46, 2, 0.1, 100);
-  cam.position.z = 7.2;
-  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+  const camera = new THREE.PerspectiveCamera(46, 1, 0.1, 100);
+  camera.position.z = 5.2;
+  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
   renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+  host.appendChild(renderer.domElement);
 
   const group = new THREE.Group();
   scene.add(group);
 
-  /* fibonacci sphere: even spacing without clumping */
-  const nodes = [];
-  const golden = Math.PI * (3 - Math.sqrt(5));
+  /* evenly spread points — a fibonacci sphere, so nothing clumps */
+  const pos = [], base = [];
   for (let i = 0; i < N; i++) {
     const y = 1 - (i / (N - 1)) * 2;
-    const r = Math.sqrt(1 - y * y);
-    const th = golden * i;
-    const pos = new THREE.Vector3(Math.cos(th) * r, y, Math.sin(th) * r).multiplyScalar(2.6);
-    const mesh = new THREE.Mesh(
-      new THREE.SphereGeometry(0.062, 14, 14),
-      new THREE.MeshBasicMaterial({ color: DIM })
-    );
-    mesh.position.copy(pos);
-    group.add(mesh);
-    nodes.push({ mesh, pos, lit: false });
+    const r = Math.sqrt(Math.max(0, 1 - y * y));
+    const th = Math.PI * (3 - Math.sqrt(5)) * i;
+    const v = new THREE.Vector3(Math.cos(th) * r, y, Math.sin(th) * r).multiplyScalar(1.85);
+    base.push(v); pos.push(v.x, v.y, v.z);
   }
 
-  /* faint lattice between neighbours, so it reads as one structure */
-  const lattice = [];
-  for (let i = 0; i < N; i++)
-    for (let j = i + 1; j < N; j++)
-      if (nodes[i].pos.distanceTo(nodes[j].pos) < 2.15) lattice.push(nodes[i].pos, nodes[j].pos);
+  const nodeGeo = new THREE.BufferGeometry();
+  nodeGeo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  const colors = new Float32Array(N * 3);
+  for (let i = 0; i < N; i++) DIM.toArray(colors, i * 3);
+  nodeGeo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+  const nodes = new THREE.Points(nodeGeo, new THREE.PointsMaterial({
+    size: 0.16, vertexColors: true, transparent: true, opacity: 0.95,
+    sizeAttenuation: true, depthWrite: false,
+  }));
+  group.add(nodes);
+
+  /* faint shell so the sphere reads as a volume, not scattered dots */
   group.add(new THREE.LineSegments(
-    new THREE.BufferGeometry().setFromPoints(lattice),
-    new THREE.LineBasicMaterial({ color: DIM, transparent: true, opacity: 0.45 })
+    new THREE.EdgesGeometry(new THREE.IcosahedronGeometry(1.85, 1)),
+    new THREE.LineBasicMaterial({ color: '#1e1e26', transparent: true, opacity: 0.6 })
   ));
 
-  const core = new THREE.Mesh(
-    new THREE.SphereGeometry(0.17, 20, 20),
-    new THREE.MeshBasicMaterial({ color: ACID })
+  const core = new THREE.Points(
+    new THREE.BufferGeometry().setAttribute('position', new THREE.Float32BufferAttribute([0, 0, 0], 3)),
+    new THREE.PointsMaterial({ size: 0.34, color: CORE, transparent: true, opacity: 0.95, depthWrite: false })
   );
-  scene.add(core) && group.add(core);
+  group.add(core);
 
   let wires = null;
   const clearWires = () => { if (wires) { group.remove(wires); wires.geometry.dispose(); wires = null; } };
 
-  /* index of every rule id, so a fired rule always lights the same point */
-  let order = [];
-  fetch('rules.json').then((r) => r.json())
-    .then((rs) => (order = rs.map((r) => r.id))).catch(() => {});
-
-  window.pakkaScene = (firedIds, band) => {
-    const hot = band === 'clear' ? ACID : BAD;
-    nodes.forEach((n) => { n.lit = false; n.mesh.material.color.setHex(DIM); n.mesh.scale.setScalar(1); });
-    const pts = [];
-    firedIds.forEach((id) => {
-      const idx = order.indexOf(id);
-      const n = nodes[idx >= 0 ? idx : Math.abs(hash(id)) % N];
-      n.lit = true;
-      n.mesh.material.color.setHex(hot);
-      n.mesh.scale.setScalar(1.9);
-      pts.push(new THREE.Vector3(0, 0, 0), n.pos);
-    });
-    core.material.color.setHex(hot);
-    clearWires();
-    if (pts.length) {
-      wires = new THREE.LineSegments(
-        new THREE.BufferGeometry().setFromPoints(pts),
-        new THREE.LineBasicMaterial({ color: hot, transparent: true, opacity: 0.75 })
-      );
-      group.add(wires);
-    }
-    const label = document.getElementById('glcount');
-    if (label) label.textContent = firedIds.length;
+  /* light the rules that fired, and wire them home */
+  window.PakkaScene = {
+    light(firedIds = []) {
+      const fired = new Set(firedIds);
+      const pts = [];
+      for (let i = 0; i < N; i++) {
+        const on = RULES[i] && fired.has(RULES[i].id);
+        (on ? HOT : DIM).toArray(colors, i * 3);
+        if (on) pts.push(0, 0, 0, base[i].x, base[i].y, base[i].z);
+      }
+      nodeGeo.attributes.color.needsUpdate = true;
+      clearWires();
+      if (pts.length) {
+        const g = new THREE.BufferGeometry();
+        g.setAttribute('position', new THREE.Float32BufferAttribute(pts, 3));
+        wires = new THREE.LineSegments(g, new THREE.LineBasicMaterial({
+          color: HOT, transparent: true, opacity: 0.55,
+        }));
+        group.add(wires);
+      }
+      spin = 0.055;               /* a kick, which eases back to the idle drift */
+    },
   };
 
-  const hash = (s) => [...s].reduce((a, c) => (a * 31 + c.charCodeAt(0)) | 0, 7);
+  let mx = 0, my = 0, spin = 0.0022;
+  host.addEventListener('mousemove', (e) => {
+    const r = host.getBoundingClientRect();
+    mx = ((e.clientX - r.left) / r.width - 0.5) * 0.6;
+    my = ((e.clientY - r.top) / r.height - 0.5) * 0.6;
+  });
 
   const size = () => {
-    const r = canvas.getBoundingClientRect();
-    if (!r.width) return;
-    cam.aspect = r.width / r.height;
-    cam.updateProjectionMatrix();
-    renderer.setSize(r.width, r.height, false);
+    const w = host.clientWidth, h = host.clientHeight || 420;
+    camera.aspect = w / h; camera.updateProjectionMatrix(); renderer.setSize(w, h, false);
   };
-  addEventListener('resize', size);
   size();
+  addEventListener('resize', size, { passive: true });
 
-  let t = 0;
+  let visible = true;
+  new IntersectionObserver((es) => (visible = es[0].isIntersecting)).observe(host);
+
   (function loop() {
-    t += 0.0042;
-    group.rotation.y = t;
-    group.rotation.x = Math.sin(t * 0.6) * 0.22;
-    core.scale.setScalar(1 + Math.sin(t * 6) * 0.07);   /* a slow pulse, like a heartbeat */
-    renderer.render(scene, cam);
     requestAnimationFrame(loop);
+    if (!visible) return;
+    spin += (0.0022 - spin) * 0.04;
+    group.rotation.y += spin;
+    group.rotation.x += (my - group.rotation.x) * 0.04;
+    group.rotation.y += (mx - group.rotation.y) * 0.004;
+    core.material.size = 0.3 + Math.sin(performance.now() / 420) * 0.05;
+    renderer.render(scene, camera);
   })();
 })();

@@ -257,6 +257,8 @@ function render(d) {
      last, and its card slides in with it */
   if (window.pakkaScene) window.pakkaScene(d.findings.map((f) => f.id), d.band);
 
+  window.PakkaScene?.light(d.findings.map((f) => f.id));
+
   const msg = $('msg');
   msg.classList.remove('scanning');
   void msg.offsetWidth;            /* restart the sweep on a repeat check */
@@ -294,6 +296,37 @@ fetch('rules.json')
         <h4>${r.name}</h4><p>${r.why}</p></div>`).join('');
   })
   .catch(() => {});
+
+/* ---------- rules gallery: a column that walks itself ---------- */
+(() => {
+  const col = document.getElementById('gcol');
+  const R = window.PAKKA_RULES || [];
+  if (!col || !R.length) return;
+  col.innerHTML = '<ul>' + R.map((r, i) =>
+    `<li data-i="${i}"><b>${String(i + 1).padStart(2, '0')}</b>${r.name}</li>`).join('') + '</ul>';
+  const ul = col.querySelector('ul');
+  const items = [...col.querySelectorAll('li')];
+  const ROW = 44, VIEW = 8;
+  let i = 0, timer = null;
+
+  const show = (n) => {
+    i = (n + R.length) % R.length;
+    items.forEach((el, k) => el.classList.toggle('on', k === i));
+    /* keep the active row near the middle of the window */
+    const top = Math.max(0, Math.min(i - Math.floor(VIEW / 2), R.length - VIEW));
+    ul.style.transform = `translateY(${-top * ROW}px)`;
+    $('gnum').textContent = String(i + 1).padStart(2, '0') + ' / 20';
+    $('gname').textContent = R[i].name;
+    $('ghunt').textContent = '“' + R[i].hunts + '”';
+  };
+  const play = () => { clearInterval(timer); timer = setInterval(() => show(i + 1), 2300); };
+  items.forEach((el) => el.addEventListener('click', () => { show(+el.dataset.i); play(); }));
+  col.addEventListener('mouseenter', () => clearInterval(timer));
+  col.addEventListener('mouseleave', play);
+  show(0);
+  new IntersectionObserver((es) => (es[0].isIntersecting ? play() : clearInterval(timer)),
+    { threshold: 0.25 }).observe(col);
+})();
 
 $('copyfwd').onclick = async () => {
   const v = $('fwdtext').value;
