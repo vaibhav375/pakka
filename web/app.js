@@ -92,6 +92,13 @@ document.querySelectorAll('.rise').forEach((el, i) => {
   el.style.transitionDelay = `${(i % 4) * 70}ms`;
   io.observe(el);
 });
+/* stat odometers, once, when they first come into view */
+new IntersectionObserver((es, obs) => es.forEach((e) => {
+  if (!e.isIntersecting) return;
+  e.target.querySelectorAll('b[data-to]').forEach((el) => countUp(el, +el.dataset.to));
+  obs.unobserve(e.target);
+}), { threshold: 0.4 }).observe(document.querySelector('.stats'));
+
 addEventListener('scroll', () => $('bar').classList.toggle('on', scrollY > 30), { passive: true });
 
 /* examples — real shapes of the messages people actually get forwarded */
@@ -127,6 +134,18 @@ const EXAMPLES = {
   'Electricity cut':
     'Dear consumer, your electricity will be disconnected tonight at 9:30 pm because ' +
     'your previous bill was not updated. Immediately contact our officer on 9812345678.',
+  'Parcel at customs':
+    'Your international parcel is held at customs. Pay Rs 850 clearance charge ' +
+    'within 2 hours to release the shipment, otherwise it will be returned to sender.',
+  'Prize message':
+    'Congratulations! Your number has won KBC lucky draw of Rs 25,00,000. To claim ' +
+    'your prize pay Rs 6,500 processing charge and share your bank details.',
+  'Work from home':
+    'Complete 5 simple tasks daily like rating hotels and earn Rs 3,000. Start with ' +
+    'a prepaid task of Rs 1,000, fully refundable with commission. Join our telegram.',
+  'Marketplace seller':
+    'I am an army officer posted in Leh so I cannot meet you. Pay the token amount ' +
+    'to 9845012345 on google pay and the bike will be delivered by CSD courier.',
   'A normal message':
     'Hi Vaibhav, this is Priya from the placement cell. Your Infosys interview is on ' +
     'Monday at 10am in Seminar Hall 2. Please carry two copies of your resume.',
@@ -236,10 +255,13 @@ function render(d) {
 
   /* the signature moment: phrases ignite in sequence, each one a beat after the
      last, and its card slides in with it */
+  if (window.pakkaScene) window.pakkaScene(d.findings.map((f) => f.id), d.band);
+
   const msg = $('msg');
   msg.classList.remove('scanning');
   void msg.offsetWidth;            /* restart the sweep on a repeat check */
   msg.classList.add('scanning');
+  setTimeout(() => msg.classList.remove('scanning'), 1120);  /* clear it, don't park it */
 
   const marks = [...msg.querySelectorAll('mark')];
   const cards = [...$('flags').querySelectorAll('.flag')];

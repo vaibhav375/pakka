@@ -50,7 +50,11 @@
 <div class="shell">
 </div></header>
 
-<div class="shell" id="out"><div class="verdict" id="card">
+<div class="shell" id="out">
+<div class="scene"><canvas id="gl"></canvas>
+  <div class="scenelab mono"><span id="glcount">0</span> of 20 checks fired</div>
+</div>
+<div class="verdict" id="card">
   <div class="vtop">
     <div>
       <div class="mono" style="margin-bottom:12px">The verdict</div>
@@ -81,7 +85,13 @@
 </div></div>
 
 <section class="pad"><div class="shell">
-  <div class="mono rise">How it decides</div>
+  <div class="stats rise">
+    <div><b data-to="20">0</b><span class="mono">patterns checked</span></div>
+    <div><b data-to="4">0</b><span class="mono">verdict bands</span></div>
+    <div><b data-to="30">0</b><span class="mono">day expiry</span></div>
+    <div><b data-to="0">0</b><span class="mono">accounts needed</span></div>
+  </div>
+  <div class="mono rise" style="margin-top:80px">How it decides</div>
   <h2 class="rise">A model never<br>gets the last word.</h2>
   <p class="sub rise">A scam verdict has to be the same every time and has to survive being explained
      to the person who nearly paid. So the decision is made by rules you can read.</p>
@@ -125,7 +135,9 @@
 
 <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.14/dist/lenis.min.js"></script>
 <script src="rules.generated.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
 <script src="config.js"></script>
 <script src="app.js"></script>
+<script src="scene.js"></script>
 </body>
 </html>
