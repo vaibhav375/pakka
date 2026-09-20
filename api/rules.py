@@ -142,6 +142,67 @@ RULES: tuple[Rule, ...] = (
            r"(?:i am|i'm|currently) (?:abroad|out of (?:town|country)|in another city).{0,60}(?:send|transfer|pay)",
            r"book (?:it )?(?:now|today) .{0,20}without (?:a )?visit"),
     ),
+    Rule(
+        "COURIER_CUSTOMS", "Parcel held, pay a fee to release it",
+        "Couriers do not hold parcels for a fee over SMS. Customs duty is paid "
+        "to the government, never to a WhatsApp number.",
+        3,
+        _p(r"(?:parcel|package|courier|shipment|consignment).{0,40}(?:held|stuck|seized|customs|clearance)",
+           r"customs (?:duty|clearance|charge).{0,30}(?:pay|transfer)",
+           r"(?:fedex|dhl|bluedart|india post).{0,40}(?:pay|fee|charge)"),
+    ),
+    Rule(
+        "ELECTRICITY_CUT", "Electricity disconnection threat",
+        "Power utilities do not warn you by SMS from a personal number, and "
+        "they never ask you to call one to avoid disconnection tonight.",
+        3,
+        _p(r"electricity .{0,30}(?:disconnect|cut off|discontinue)",
+           r"power .{0,20}(?:will be )?disconnect", r"bill .{0,20}not updated.{0,30}disconnect"),
+    ),
+    Rule(
+        "LOTTERY_WIN", "A prize you never entered for",
+        "You cannot win a lottery you never entered. Every version of this ends "
+        "with a fee to release the winnings.",
+        4,
+        _p(r"(?:won|winner).{0,30}(?:lottery|lucky draw|prize|kbc)",
+           r"\bkbc\b", r"lucky (?:winner|draw)", r"congratulations.{0,30}\bwon\b"),
+    ),
+    Rule(
+        "LOAN_HARASSMENT", "Loan-app style pressure",
+        "Threatening to contact your phonebook over a loan is illegal recovery "
+        "practice, not a legitimate demand.",
+        3,
+        _p(r"(?:inform|contact|call).{0,25}(?:your )?(?:contacts|family|friends|relatives).{0,30}(?:loan|due|payment)",
+           r"loan .{0,25}(?:overdue|default).{0,30}(?:legal|action|contacts)",
+           r"defaulter.{0,30}(?:list|notice)"),
+    ),
+    Rule(
+        "INVESTMENT_TIP", "Guaranteed returns or a tips group",
+        "Guaranteed returns do not exist. Groups offering them exist to take "
+        "deposits that cannot be withdrawn.",
+        3,
+        _p(r"guaranteed (?:returns?|profit|income)", r"(?:double|triple) your money",
+           r"(?:stock|trading|crypto|forex) (?:tips?|group|signals?)",
+           r"\b\d{2,3}% (?:returns?|profit)"),
+    ),
+    Rule(
+        "TASK_COMMISSION", "Prepaid task or commission work",
+        "Task scams start with small payouts that work, then ask you to deposit "
+        "for a bigger task. The deposit is the point.",
+        3,
+        _p(r"(?:complete|do) .{0,20}tasks?.{0,30}(?:earn|commission|payout)",
+           r"(?:like|subscribe|rate).{0,25}(?:videos?|hotels?|products?).{0,30}(?:earn|paid|commission)",
+           r"prepaid task", r"recharge .{0,20}to (?:unlock|continue).{0,20}task"),
+    ),
+    Rule(
+        "ARMY_OFFICER", "Claims to be posted far away and cannot meet",
+        "The soldier-being-transferred story is the oldest marketplace scam in "
+        "India. It exists to explain why you must pay before meeting.",
+        3,
+        _p(r"(?:army|military|cisf|crpf|bsf|navy) (?:officer|jawan|personnel)",
+           r"(?:posted|deployed) (?:in|at) .{0,30}(?:cannot|can't) (?:meet|come)",
+           r"transfer(?:red)? .{0,25}urgent(?:ly)? .{0,25}sell"),
+    )
 )
 
 

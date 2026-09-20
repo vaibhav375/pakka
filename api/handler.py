@@ -17,6 +17,7 @@ import pathlib
 sys.path.insert(0, str(pathlib.Path(__file__).parent))
 
 import store
+from advice import build as build_advice
 from rules import evaluate
 
 MAX_CHARS = 4000
@@ -52,8 +53,8 @@ def scan(text: str) -> dict:
         return _reply(413, {"error": f"That is longer than {MAX_CHARS} characters."})
 
     verdict = evaluate(text)
+    record = {"text": text, **verdict, "advice": build_advice(verdict)}
     scan_id = store.new_id()
-    record = {"text": text, **verdict}
     try:
         store.put(scan_id, record)
     except Exception:
