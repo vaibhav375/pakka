@@ -30,16 +30,31 @@ def _local_load() -> dict:
 # Storage is allowed to fail, but it is not allowed to take the answer down
 # with it: short timeouts and a single attempt, so a slow or unreachable table
 # costs a second and the user still gets their verdict.
-_BOTO_CFG = dict(connect_timeout=2, read_timeout=2, retries={"max_attempts": 1})
-_table = None
+_BOTO_CFG = dict(connect_timeout=3, read_timeout=3, retries={"max_attempts": 2})
+
+
+def _build_table():
+    if not TABLE:
+        return None
+    try:
+        import boto3  # only present in the Lambda runtime
+        from botocore.config import Config
+        return boto3.resource("dynamodb", config=Config(**_BOTO_CFG)).Table(TABLE)
+    except Exception:
+        return None
+
+
+# Built once when the container starts rather than inside a request. Lambda
+# gives the init phase more CPU and does not bill it, so the first real scan
+# no longer pays for importing boto3 and opening a connection -- which was
+# enough on a cold start to blow the timeout and silently cost the link.
+_table = _build_table()
 
 
 def _get_table():
     global _table
     if _table is None:
-        import boto3  # only present in the Lambda runtime
-        from botocore.config import Config
-        _table = boto3.resource("dynamodb", config=Config(**_BOTO_CFG)).Table(TABLE)
+        _table = _build_table()
     return _table
 
 
