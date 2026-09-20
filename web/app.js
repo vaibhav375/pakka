@@ -2,7 +2,9 @@
    one animation that matters — the flagged phrases lighting up one at a time,
    so you watch the message incriminate itself instead of reading a score. */
 
-const API = window.PAKKA_API || localStorage.getItem('pakka_api') || 'http://127.0.0.1:8787';
+const API = (window.PAKKA_API && window.PAKKA_API.trim())
+  || localStorage.getItem('pakka_api')
+  || 'http://127.0.0.1:8787';
 
 const $ = (id) => document.getElementById(id);
 const t = $('t'), go = $('go'), out = $('out'), card = $('card');
