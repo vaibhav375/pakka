@@ -24,7 +24,9 @@ Resources:
         AuthType: NONE
         Cors:
           AllowOrigins: ['*']
-          AllowMethods: [GET, POST, OPTIONS]
+          # OPTIONS is rejected here even though CORS preflight uses it —
+          # Function URLs answer preflight themselves.
+          AllowMethods: [GET, POST]
           AllowHeaders: [content-type]
 
   ScansTable:
