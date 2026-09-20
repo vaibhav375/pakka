@@ -5,7 +5,7 @@ the signature check gets as much attention here as the reply formatting.
 """
 import sys, pathlib, json, hmac, hashlib
 sys.path.insert(0, str(pathlib.Path(__file__).parent))
-import whatsapp
+import whatsapp, chat
 from rules import evaluate
 from advice import build as build_advice
 
@@ -71,7 +71,7 @@ def main() -> int:
     text = ("Dear customer your KYC has expired. Click http://sbi-verify-kyc.xyz "
             "and share OTP with our executive to reactivate within 2 hours.")
     v = evaluate(text)
-    reply = whatsapp.reply_for(v, build_advice(v), "https://pakka.example/v/abc")
+    reply = chat.reply_for(v, build_advice(v), "https://pakka.example/v/abc")
     bad += check("the verdict leads", reply.splitlines()[0].startswith("Almost certainly a scam"), True)
     bad += check("it names a rule", "Asks for an OTP" in reply, True)
     bad += check("it quotes the words", '"share OTP"' in reply, True)
@@ -80,12 +80,12 @@ def main() -> int:
     bad += check("it fits in one WhatsApp message", len(reply) <= 4096, True)
 
     clean = evaluate("Your OTP is 452891. Do not share it with anyone. -SBI")
-    creply = whatsapp.reply_for(clean, build_advice(clean), None)
+    creply = chat.reply_for(clean, build_advice(clean), None)
     bad += check("a clean message gets a calm answer",
                  creply.splitlines()[0].startswith("Nothing suspicious"), True)
     bad += check("and is not told to report anything", "1930" not in creply, True)
 
-    empty = whatsapp.reply_for(None, None, None, kind="image")
+    empty = chat.reply_for(None, None, None, kind="image")
     bad += check("a photo gets an explanation, not silence",
                  "text" in empty.lower(), True)
 

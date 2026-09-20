@@ -22,6 +22,8 @@ import os
 import urllib.error
 import urllib.request
 
+from chat import reply_for  # noqa: F401  - re-exported, this is its front door
+
 GRAPH = "https://graph.facebook.com/v21.0"
 TIMEOUT = 5
 
@@ -74,51 +76,6 @@ def incoming(payload: dict) -> list[dict]:
                     "phone_number_id": (value.get("metadata") or {}).get("phone_number_id", ""),
                 })
     return out
-
-
-def _bullets(verdict: dict, limit: int = 4) -> str:
-    lines = []
-    for f in verdict["findings"][:limit]:
-        quote = f["quotes"][0] if f["quotes"] else ""
-        lines.append(f'• {f["name"]}' + (f' — "{quote}"' if quote else ""))
-    extra = len(verdict["findings"]) - limit
-    if extra > 0:
-        lines.append(f"• and {extra} more")
-    return "\n".join(lines)
-
-
-def reply_for(verdict: dict | None, advice: dict | None, link: str | None,
-              kind: str = "text") -> str:
-    """The whole answer as one WhatsApp message.
-
-    No markdown beyond what WhatsApp renders, no links except the one that is
-    useful, and the verdict on the first line, because on a phone the first
-    line is often all that is read.
-    """
-    if kind != "text" or verdict is None:
-        return ("I can only read text. Forward the message itself, or copy the "
-                "words and send them to me, and I will tell you what is wrong "
-                "with it and why.")
-
-    parts = [verdict["label"]]
-    if verdict["findings"]:
-        parts[0] += f"  ({verdict['score']} of {verdict['rules_checked']} checks fired)"
-        parts.append("\nWhat is wrong with it:\n" + _bullets(verdict))
-        if advice and advice.get("actions"):
-            steps = "\n".join(f"{i}. {a}" for i, a in enumerate(advice["actions"], 1))
-            parts.append("\nWhat to do now:\n" + steps)
-        if advice and advice.get("forward"):
-            parts.append("\nYou can send this back to whoever forwarded it:\n"
-                         + advice["forward"])
-    else:
-        parts.append("\nNone of the checks fired. That is not a guarantee, it "
-                     "means this message does not use any of the patterns I "
-                     "know about. If something still feels wrong, trust that.")
-    if link:
-        parts.append(f"\nThe full breakdown: {link}")
-
-    out = "\n".join(parts)
-    return out[:4000] + "…" if len(out) > 4096 else out
 
 
 def send(to: str, text: str, phone_number_id: str = "", token: str = "") -> bool:

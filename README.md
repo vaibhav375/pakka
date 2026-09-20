@@ -139,6 +139,50 @@ free tier on every axis. At 100,000 scans a month the Lambda invocations are sti
 free, DynamoDB would move to on-demand at roughly $0.13 for the writes, and the
 bill is dominated by data transfer rather than compute.
 
+## Answering where the message actually arrives
+
+A scam arrives in a chat. Asking someone to copy it, open a browser, paste it
+and read a page is asking them to do four things while they are being rushed,
+which is the moment they are least able to. So the verdict comes back in the
+thread the message was already in.
+
+```
+POST /telegram    an update from a Telegram bot, answered in the same chat
+GET  /whatsapp    Meta's one-time webhook verification handshake
+POST /whatsapp    the same idea on WhatsApp, if you can get through Meta's setup
+```
+
+Both channels share `api/chat.py`, which writes the reply. They differ only in
+how a message arrives and how one is sent.
+
+### Telegram, which takes about two minutes
+
+No business account, no app review, nothing to verify. Telegram also matters on
+its own here: a good share of the scams these rules describe are run out of
+Telegram groups.
+
+1. Message **@BotFather** on Telegram, send `/newbot`, pick a name. It gives
+   you a token.
+2. Put it in **Lambda → Configuration → Environment variables** as
+   `TELEGRAM_TOKEN`, with `TELEGRAM_SECRET` set to any string you invent.
+3. Register the webhook, using the same secret:
+
+```
+curl "https://api.telegram.org/bot<TOKEN>/setWebhook?url=<FUNCTION_URL>/telegram&secret_token=<SECRET>"
+```
+
+4. Message your bot.
+
+Telegram has no request signature. Instead it sends the secret you registered
+back in a header on every call, which is the same guarantee by a simpler route,
+and the webhook refuses anything without it.
+
+Locally, with no bot at all:
+
+```
+python3 api/test_telegram.py     # the webhook end to end, network stubbed out
+```
+
 ## The WhatsApp front door
 
 The scam arrives on WhatsApp. Asking someone to copy it, open a browser, paste
@@ -156,7 +200,10 @@ it reads anything, refuses verification when no token is configured rather than
 accepting whoever asks, and always answers 200 once the signature passes,
 because Meta retries anything else and a retry would send the answer twice.
 
-Four environment variables switch it on, and with none of them set nothing else
+Meta requires a business account and an app review, and the dashboard is
+frequently unreachable depending on where you are, which is why Telegram is the
+path of least resistance above. The code is here and tested either way. Four
+environment variables switch it on, and with none of them set nothing else
 about the project changes:
 
 | | |

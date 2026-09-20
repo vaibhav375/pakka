@@ -1,10 +1,12 @@
-"""One Lambda, four routes.
+"""One Lambda, a few routes.
 
 POST /scan        a message in, a verdict out, saved so it can be linked to
 GET  /v/{id}      that saved verdict, for the person you forwarded it to
 GET  /whatsapp    Meta's one-time webhook verification handshake
 POST /whatsapp    a message forwarded to the WhatsApp number, answered in the
                   same thread, which is where the scam arrived in the first place
+POST /telegram    the same thing for a Telegram bot, which needs no business
+                  account to stand up
 
 The same function object serves the local development server, so what runs on
 a laptop is the code that runs in production rather than a sibling of it.
@@ -21,7 +23,9 @@ import pathlib
 sys.path.insert(0, str(pathlib.Path(__file__).parent))
 
 import store
+import telegram
 import whatsapp
+from chat import reply_for
 from advice import build as build_advice
 from rules import evaluate
 
@@ -113,13 +117,43 @@ def whatsapp_webhook(event, send=whatsapp.send) -> dict:
         try:
             text = (msg["text"] or "").strip()[:MAX_CHARS]
             if msg["type"] != "text" or not text:
-                send(msg["from"], whatsapp.reply_for(None, None, None, kind=msg["type"]),
+                send(msg["from"], reply_for(None, None, None, kind=msg["type"]),
                      msg["phone_number_id"])
                 continue
             verdict, advice, link = _verdict_for(text)
-            send(msg["from"], whatsapp.reply_for(verdict, advice, link),
+            send(msg["from"], reply_for(verdict, advice, link),
                  msg["phone_number_id"])
         except Exception:               # one bad message must not drop the rest
+            traceback.print_exc()
+    return {"statusCode": 200, "body": "ok"}
+
+
+def telegram_webhook(event, send=telegram.send) -> dict:
+    """Answer an update, then return 200 whatever happened, because Telegram
+    redelivers anything it does not get acknowledged and a redelivery would
+    answer the same message twice."""
+    body = event.get("body") or ""
+    if not telegram.secret_ok(event.get("headers") or {},
+                              os.environ.get("TELEGRAM_SECRET", "")):
+        print("telegram: rejected a request with a missing or wrong secret header")
+        return {"statusCode": 403, "body": "bad secret"}
+    try:
+        payload = json.loads(body or "{}")
+    except json.JSONDecodeError:
+        return {"statusCode": 200, "body": "ignored"}
+
+    for msg in telegram.incoming(payload):
+        try:
+            text = (msg["text"] or "").strip()[:MAX_CHARS]
+            if telegram.is_start(text):
+                send(msg["chat_id"], telegram.WELCOME)
+                continue
+            if msg["type"] != "text" or not text:
+                send(msg["chat_id"], reply_for(None, None, None, kind=msg["type"]))
+                continue
+            verdict, advice, link = _verdict_for(text)
+            send(msg["chat_id"], reply_for(verdict, advice, link))
+        except Exception:               # one bad update must not drop the rest
             traceback.print_exc()
     return {"statusCode": 200, "body": "ok"}
 
@@ -143,6 +177,9 @@ def _route(event):
 
     if method == "OPTIONS":
         return {"statusCode": 204, "headers": CORS, "body": ""}
+
+    if method == "POST" and path.rstrip("/").endswith("/telegram"):
+        return telegram_webhook(event)
 
     if path.rstrip("/").endswith("/whatsapp"):
         if method == "GET":
