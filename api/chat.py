@@ -21,7 +21,7 @@ def _bullets(verdict: dict, limit: int = 4) -> str:
 
 
 def reply_for(verdict: dict | None, advice: dict | None, link: str | None,
-              kind: str = "text") -> str:
+              kind: str = "text", hunch: dict | None = None) -> str:
     """The whole answer as one WhatsApp message.
 
     No markdown beyond what WhatsApp renders, no links except the one that is
@@ -33,7 +33,14 @@ def reply_for(verdict: dict | None, advice: dict | None, link: str | None,
                 "words and send them to me, and I will tell you what is wrong "
                 "with it and why.")
 
-    parts = [verdict["label"]]
+    # The model may raise concern and may never clear it. A headline of
+    # "Nothing suspicious found" over a 90-out-of-100 reading is the one
+    # failure that actually costs someone money, because the first line is all
+    # many people read.
+    head = verdict["label"]
+    if not verdict["findings"] and hunch and hunch["p"] >= 0.8:
+        head = "Nothing matched, but be careful"
+    parts = [head]
     if verdict["findings"]:
         parts[0] += f"  ({verdict['score']} of {verdict['rules_checked']} checks fired)"
         parts.append("\nWhat is wrong with it:\n" + _bullets(verdict))
@@ -47,6 +54,19 @@ def reply_for(verdict: dict | None, advice: dict | None, link: str | None,
         parts.append("\nNone of the checks fired. That is not a guarantee, it "
                      "means this message does not use any of the patterns I "
                      "know about. If something still feels wrong, trust that.")
+
+    # The rules decide. This is shown underneath and never instead, because it
+    # is the part that can be wrong. It earns its place when no rule fires and
+    # the message still reads like fraud, which is where rules are blind.
+    if hunch is not None:
+        pct = round(hunch["p"] * 100)
+        if not verdict["findings"] and hunch["p"] >= 0.6:
+            parts.append(f"\nNo rule fired, but this still reads like a scam to the "
+                         f"model, at {pct} out of 100. Treat that as a reason to be "
+                         f"careful rather than proof.")
+        elif verdict["findings"] and hunch["p"] >= 0.6:
+            parts.append(f"\nThe model agrees with the rules independently, at "
+                         f"{pct} out of 100.")
     if link:
         parts.append(f"\nThe full breakdown: {link}")
 

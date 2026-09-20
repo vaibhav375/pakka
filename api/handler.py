@@ -22,6 +22,7 @@ import pathlib
 
 sys.path.insert(0, str(pathlib.Path(__file__).parent))
 
+import model as linear_model
 import store
 import telegram
 import whatsapp
@@ -71,6 +72,10 @@ def scan(text: str) -> dict:
 
     verdict = evaluate(text)
     record = {"text": text, **verdict, "advice": build_advice(verdict)}
+    try:
+        record["model"] = linear_model.score(text)
+    except Exception:
+        traceback.print_exc()
     scan_id = store.new_id()
     try:
         store.put(scan_id, record)
@@ -80,10 +85,17 @@ def scan(text: str) -> dict:
     return _reply(200, {**record, "id": scan_id})
 
 
-def _verdict_for(text: str) -> tuple[dict, dict, str | None]:
-    """The scan, the advice, and a link to it, shared by every front door."""
+def _verdict_for(text: str) -> tuple[dict, dict, str | None, dict | None]:
+    """The scan, the advice, the model's reading and a link, shared by every
+    front door. The model is optional everywhere: without the weights file the
+    whole thing degrades to exactly what shipped before it existed."""
     verdict = evaluate(text)
     advice = build_advice(verdict)
+    try:
+        hunch = linear_model.score(text)
+    except Exception:
+        traceback.print_exc()
+        hunch = None
     link = None
     try:
         scan_id = store.new_id()
@@ -91,7 +103,7 @@ def _verdict_for(text: str) -> tuple[dict, dict, str | None]:
         link = f"{PUBLIC_URL}/v/{scan_id}" if PUBLIC_URL else None
     except Exception:
         traceback.print_exc()          # a storage failure must not cost the answer
-    return verdict, advice, link
+    return verdict, advice, link, hunch
 
 
 def whatsapp_webhook(event, send=whatsapp.send) -> dict:
@@ -120,8 +132,8 @@ def whatsapp_webhook(event, send=whatsapp.send) -> dict:
                 send(msg["from"], reply_for(None, None, None, kind=msg["type"]),
                      msg["phone_number_id"])
                 continue
-            verdict, advice, link = _verdict_for(text)
-            send(msg["from"], reply_for(verdict, advice, link),
+            verdict, advice, link, hunch = _verdict_for(text)
+            send(msg["from"], reply_for(verdict, advice, link, hunch=hunch),
                  msg["phone_number_id"])
         except Exception:               # one bad message must not drop the rest
             traceback.print_exc()
@@ -151,8 +163,8 @@ def telegram_webhook(event, send=telegram.send) -> dict:
             if msg["type"] != "text" or not text:
                 send(msg["chat_id"], reply_for(None, None, None, kind=msg["type"]))
                 continue
-            verdict, advice, link = _verdict_for(text)
-            send(msg["chat_id"], reply_for(verdict, advice, link))
+            verdict, advice, link, hunch = _verdict_for(text)
+            send(msg["chat_id"], reply_for(verdict, advice, link, hunch=hunch))
         except Exception:               # one bad update must not drop the rest
             traceback.print_exc()
     return {"statusCode": 200, "body": "ok"}

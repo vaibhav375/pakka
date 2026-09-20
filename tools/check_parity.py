@@ -16,6 +16,7 @@ import sys
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "api"))
 from rules import evaluate, normalise  # noqa: E402
+import model as pymodel  # noqa: E402
 sys.path.insert(0, str(ROOT / "api"))
 from test_rules import CASES  # noqa: E402
 sys.path.insert(0, str(ROOT / "tools"))
@@ -79,6 +80,41 @@ for text, j in zip(corpus, json.loads(proc.stdout)):
             break
 print(f"  corpus: {len(corpus) - drift}/{len(corpus)} identical, "
       f"including normalised text and every quote")
+
+# --- and the model, which is a second generated artifact with the same risk
+if (ROOT / "web" / "model.generated.js").exists():
+    js = f"""
+globalThis.window = globalThis;
+{(ROOT / 'web' / 'rules.generated.js').read_text()}
+{(ROOT / 'web' / 'model.generated.js').read_text()}
+{(ROOT / 'web' / 'model.js').read_text()}
+const out = {json.dumps(corpus, ensure_ascii=False)}.map((t) => {{
+  const r = window.pakkaModel(t);
+  /* the phrases, not the offsets: Python counts code points and JavaScript
+     counts code units, so after an emoji the two legitimately differ by one
+     while pointing at the same characters */
+  return {{ p: Math.round(r.p * 1e6) / 1e6,
+           says: window.pakkaModelSpans(t, r.heat).map(([a, b]) => t.slice(a, b)) }};
+}});
+console.log(JSON.stringify(out));
+"""
+    proc = subprocess.run(["node", "-e", js], capture_output=True, text=True)
+    if proc.returncode:
+        print(proc.stderr.strip()); raise SystemExit(1)
+    mdrift = 0
+    for text, j in zip(corpus, json.loads(proc.stdout)):
+        mine = pymodel.score(text)
+        if abs(mine["p"] - j["p"]) > 1e-6:
+            mdrift += 1
+            print(f"  DIFFER p: {text[:44]}  python {mine['p']:.6f}  node {j['p']:.6f}")
+        elif [text[a:b] for a, b in mine["spans"]] != j["says"]:
+            mdrift += 1
+            print(f"  DIFFER phrases: {text[:44]}"
+                  f"\n        python: {[text[a:b] for a, b in mine['spans']]}"
+                  f"\n        node:   {j['says']}")
+    print(f"  model:  {len(corpus) - mdrift}/{len(corpus)} identical probabilities "
+          f"and highlighted phrases")
+    bad += mdrift
 
 bad += drift
 print(f"\n  {'python and javascript agree on every case' if not bad else f'{bad} case(s) disagree'}")

@@ -78,6 +78,10 @@
   <div class="weights" id="weights"></div>
   <div class="msg" id="msg"></div>
   <div class="flags" id="flags"></div>
+  <div class="hunch" id="hunch" hidden>
+    <span class="mono">The model's reading</span>
+    <p id="hunchtext"></p>
+  </div>
   <div class="advice" id="advice" hidden>
     <span class="mono">What to do now</span>
     <ol id="actions"></ol>
@@ -137,14 +141,15 @@
   <div class="mono rise" style="margin-top:80px">How it decides</div>
   <h2 class="rise">A model never<br>gets the last word.</h2>
   <p class="sub rise">A scam verdict has to be the same every time and has to survive being explained
-     to the person who nearly paid. So the decision is made by rules you can read.</p>
+     to the person who nearly paid. So rules decide, and everything else is evidence
+     shown beside them.</p>
   <div class="grid3">
     <div class="cell rise"><div class="num">01</div><h3>Rules decide</h3>
-      <p>Thirty-four checks, each one able to point at the exact words that set it off. Same message, same answer, every time.</p></div>
-    <div class="cell rise"><div class="num">02</div><h3>The model only phrases it</h3>
-      <p>Language models are good at wording and bad at being certain. It writes the summary sentence. It cannot change the verdict.</p></div>
+      <p>Thirty-four checks, each able to point at the exact words that set it off. Same message, same answer, every time. Nothing overrules them.</p></div>
+    <div class="cell rise"><div class="num">02</div><h3>A model widens the net</h3>
+      <p>Rules are blind to phrasings nobody wrote down. A linear model trained on 5,700 labelled messages catches those, and because it is linear it can show which characters it reacted to. It can raise a warning. It cannot clear a message the rules flagged.</p></div>
     <div class="cell rise"><div class="num">03</div><h3>It stays with you</h3>
-      <p>The rules run in the browser, so nothing is sent anywhere until you choose to share. Shared scans carry a 30-day TTL and delete themselves.</p></div>
+      <p>Rules and model are both 11 KB of arithmetic running in the browser, so nothing is sent anywhere until you choose to share. Shared scans carry a 30-day TTL and delete themselves.</p></div>
   </div>
 </div></section>
 
@@ -211,6 +216,8 @@
 <script src="rules.generated.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="config.js"></script>
+<script src="model.generated.js"></script>
+<script src="model.js"></script>
 <script src="app.js"></script>
 <script src="scene.js"></script>
 </body>

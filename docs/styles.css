@@ -320,3 +320,14 @@ mark.peek{background:rgba(198,255,61,.22)!important;color:#eaffc0!important;
           text-decoration:none;display:inline-block}
 .door .note{color:var(--dim);font-size:11px;line-height:1.5}
 @media (max-width:760px){.doors{grid-template-columns:1fr}}
+
+/* what the model thinks, kept visually subordinate to the rules, because it
+   is the thing that can be wrong */
+.hunch{padding:20px 26px;border-top:1px solid var(--line);display:flex;
+       flex-direction:column;gap:8px}
+.hunch p{margin:0;color:var(--soft);font-size:15px;line-height:1.55}
+.hunch.high{background:rgba(255,93,71,.05)}
+.hunch b{color:var(--ink);font-weight:600}
+mark.hunch-mark{background:rgba(198,255,61,.14);color:#e8ffc4;
+                box-shadow:inset 0 -1px 0 rgba(198,255,61,.4)}
+.vlabel.warn{color:#ffc46b}

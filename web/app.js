@@ -265,6 +265,7 @@ async function check() {
      anywhere yet */
   const local = window.pakkaEvaluate(text);
   render(local);
+  hunch(text, local);
 
   /* the only reason to talk to the cloud is to mint a link worth forwarding */
   if (!API || API.startsWith('http://127.0.0.1')) {
@@ -569,3 +570,60 @@ if (location.hash.length > 1) {
       : 'Not installed. You can add it later from the browser menu.';
   };
 })();
+
+/* ---------- what the model makes of it ----------
+
+   The rules decide. This is shown underneath them and never instead of them,
+   because it is the part that can be wrong. It earns its place in one
+   situation in particular: when no rule fires at all and the message still
+   reads like every scam the model was trained on. Rules are blind to
+   phrasings nobody wrote down, and out of domain they catch about one in
+   twenty-five. The model catches most of the rest. */
+function hunch(text, verdict) {
+  const box = document.getElementById('hunch');
+  const out = document.getElementById('hunchtext');
+  if (!box || !out || !window.pakkaModel) return;
+  const r = window.pakkaModel(text);
+  const pct = Math.round(r.p * 100);
+  const fired = (verdict.findings || []).length;
+  box.classList.toggle('high', r.p >= 0.6);
+
+  /* the model may raise concern and may never clear it: a headline of
+     "Nothing suspicious found" over a 90-out-of-100 reading is the one failure
+     that actually costs someone money */
+  const label = document.getElementById('vlabel');
+  if (!fired && r.p >= 0.8 && label) {
+    label.textContent = 'Nothing matched, but be careful';
+    label.classList.add('warn');
+  } else if (label) {
+    label.classList.remove('warn');
+  }
+
+  let line;
+  if (!fired && r.p >= 0.6) {
+    line = `<b>No rule fired, but this still reads like a scam.</b> The model puts it at
+            ${pct} out of 100, which is where about ${pct > 80 ? 'nine' : 'seven'} in ten
+            messages turn out to be fraud. That is a reason to be careful, not proof, and
+            it is also how new rules get found.`;
+  } else if (fired && r.p >= 0.6) {
+    line = `The model agrees with the rules independently, putting this at ${pct} out of 100.`;
+  } else if (fired) {
+    line = `The model is less sure, at ${pct} out of 100. The rules above quote the exact
+            words, so they are the ones to read.`;
+  } else {
+    line = `The model puts this at ${pct} out of 100, which is where most messages sit.
+            Nothing here looks like the fraud it was trained on.`;
+  }
+
+  const safe = (x) => x.replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+  const spans = window.pakkaModelSpans(text, r.heat || []);
+  if (spans.length && r.p >= 0.5) {
+    const bits = spans.map(([a, b]) => safe(text.slice(a, b).trim())).filter(Boolean);
+    if (bits.length) {
+      line += ` It reacted most to <mark class="hunch-mark">`
+            + bits.join('</mark>, <mark class="hunch-mark">') + '</mark>.';
+    }
+  }
+  out.innerHTML = line;
+  box.hidden = false;
+}

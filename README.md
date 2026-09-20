@@ -254,6 +254,73 @@ curl "localhost:8787/whatsapp?hub.mode=subscribe&hub.verify_token=test&hub.chall
 python3 api/test_whatsapp.py     # the webhook, end to end, network stubbed out
 ```
 
+## The model that sits beside the rules
+
+Rules have perfect precision on what they describe and no opinion at all about
+anything else. That is their strength and it is also the ceiling: a scam phrased
+in words nobody wrote down scores zero.
+
+So there is a linear model too, trained on the
+[UCI SMS Spam Collection](https://archive.ics.uci.edu/dataset/228/sms+spam+collection)
+(5,574 labelled messages) plus this project's own corpus. It runs on the device
+like the rules do, as a dot product over hashed character n-grams of the same
+normalised text, which means `0TP` and `O T P` reach it as `otp` too.
+
+```
+python3 tools/train_model.py     # train, cross validate, calibrate, export
+```
+
+**Why linear and not something bigger.** A linear model's output *is* the sum
+of its per-feature contributions. Lay each weight back on the characters its
+n-gram came from and the model can point at the phrases it reacted to, the same
+way a rule quotes the words that matched. Nothing has to be taken on trust. It
+is also 727 numbers, 11 KB, which is small enough to ship to a phone and run
+with the network off.
+
+**Does it earn its place?** The Indian corpus cannot answer that, because the
+rules were written against it and score 100% on it. The UCI set can, honestly,
+because no rule here has ever seen a 2012 British SMS. On 1,115 held-out UCI
+messages:
+
+| | precision | recall |
+|---|---|---|
+| rules alone | 0.75 | 0.04 |
+| model alone | 0.89 | 0.93 |
+| both together | 0.89 | 0.93 |
+
+The rules are nearly blind out of domain. The model catches **129 spam messages
+that no rule fires on**. That is the entire argument for it.
+
+**And on the domain that matters**, five-fold cross validation on the Indian
+corpus with UCI always in the training half: AUC 0.78, precision 0.74, recall
+0.79. Worse than the rules score there, which is the honest way round: the rules
+were built for exactly these messages.
+
+**Calibration.** The probability is Platt-scaled on out-of-fold predictions
+only, so 0.8 means roughly eight in ten rather than just "high":
+
+| predicted | actually fraud |
+|---|---|
+| 0.0 – 0.2 | 0.25 |
+| 0.2 – 0.4 | 0.29 |
+| 0.4 – 0.6 | 0.54 |
+| 0.6 – 0.8 | 0.67 |
+| 0.8 – 1.0 | 0.90 |
+
+**The boundary.** Rules decide. The model is shown underneath them, never
+instead of them. It may raise concern and it may never clear it: a headline of
+"Nothing suspicious found" over a 90-out-of-100 reading is the one failure that
+actually costs somebody money. When no rule fires and the model is confident,
+the page says so plainly, and that bucket is also where the next rule comes
+from.
+
+**What it is trained on, and the limits of that.** UCI is British SMS spam from
+2012. It teaches the model "free", "win", "claim" and "txt" and teaches it
+nothing about KYC, UPI, APK sideloading or AnyDesk. The Indian corpus supplies
+those and is upweighted twelvefold in training to stop 2% of the rows being
+drowned out, but 129 messages is 129 messages. Real forwards would help more
+than any change to the model.
+
 ## How well does it actually work
 
 `tools/eval_set.py` holds 129 labelled messages: 76 fraud across 20 families and
