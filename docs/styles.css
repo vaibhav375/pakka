@@ -305,3 +305,18 @@ mark.peek{background:rgba(198,255,61,.22)!important;color:#eaffc0!important;
 @media (max-width:560px){
   .bar .mono{font-size:10px;text-align:right;max-width:46%}
 }
+
+/* an explicit display rule beats the browser's [hidden], which is how a
+   button for a bot that is not configured ends up on screen anyway */
+[hidden]{display:none!important}
+
+/* the two front doors */
+.doors{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:34px}
+.door{border:1px solid var(--line);border-radius:var(--r);padding:26px 24px;
+      background:var(--surface);display:flex;flex-direction:column;gap:12px}
+.door h3{font-size:22px;letter-spacing:-.02em;margin:6px 0 0}
+.door p{color:var(--soft);margin:0;flex:1}
+.go.small{align-self:flex-start;padding:11px 18px;font-size:14px;
+          text-decoration:none;display:inline-block}
+.door .note{color:var(--dim);font-size:11px;line-height:1.5}
+@media (max-width:760px){.doors{grid-template-columns:1fr}}

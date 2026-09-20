@@ -525,3 +525,47 @@ if (location.hash.length > 1) {
     .then((d) => { if (d) { t.value = d.text; sync(); render(d); } })
     .catch(() => {});
 }
+
+/* ---------- the two front doors ---------- */
+(() => {
+  const bot = (window.PAKKA_TELEGRAM || '').replace(/^@/, '').trim();
+  const link = document.getElementById('tg');
+  const note = document.getElementById('tgnote');
+  if (bot && link) {
+    link.href = `https://t.me/${bot}`;
+    link.hidden = false;
+    link.target = '_blank';
+    link.rel = 'noopener';
+    if (note) note.textContent = `@${bot} · works on every phone and on desktop`;
+  }
+
+  /* Chrome fires this when the app is installable. Until then the button would
+     do nothing, so it says what to do by hand instead of lying. */
+  const btn = document.getElementById('install');
+  const inote = document.getElementById('installnote');
+  if (!btn) return;
+  let prompt = null;
+  addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    prompt = e;
+    btn.disabled = false;
+  });
+  const standalone = matchMedia('(display-mode: standalone)').matches;
+  if (standalone) {
+    btn.disabled = true;
+    btn.textContent = 'Already installed';
+    if (inote) inote.textContent = 'Share a message to Pakka from any app on this phone.';
+  } else {
+    btn.disabled = true;                 /* until the browser says it is installable */
+  }
+  btn.onclick = async () => {
+    if (!prompt) return;
+    btn.disabled = true;
+    prompt.prompt();
+    const { outcome } = await prompt.userChoice;
+    prompt = null;
+    if (inote) inote.textContent = outcome === 'accepted'
+      ? 'Installed. Long-press a message in WhatsApp, Share, then Pakka.'
+      : 'Not installed. You can add it later from the browser menu.';
+  };
+})();
