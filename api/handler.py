@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import decimal
 import json
+import os
 import sys
 import traceback
 import pathlib
@@ -21,7 +22,14 @@ from advice import build as build_advice
 from rules import evaluate
 
 MAX_CHARS = 4000
-CORS = {
+
+# A Lambda Function URL with CORS configured adds these itself. Sending them
+# from here as well produces "Access-Control-Allow-Origin: *, *", which every
+# browser rejects outright -- the API works from curl and fails in the page.
+# So the code only supplies them when it is not running inside Lambda, which
+# is exactly the local Build It path.
+IN_LAMBDA = bool(os.environ.get("AWS_LAMBDA_FUNCTION_NAME"))
+CORS = {} if IN_LAMBDA else {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Headers": "content-type",
     "Access-Control-Allow-Methods": "GET,POST,OPTIONS",

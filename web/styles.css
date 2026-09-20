@@ -123,3 +123,73 @@ footer.end{padding:54px 0 70px;border-top:1px solid var(--line);color:var(--dim)
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}
   .rise,.flag{opacity:1;transform:none}}
 @media (max-width:640px){.hero{padding:130px 0 70px}.vtop,.msg,.flag,.share{padding-inline:20px}}
+
+/* ============================================================
+   Second pass: the things that make it feel built rather than
+   assembled — an opening sequence, a cursor that responds, type
+   that arrives, and a scan that looks like inspection.
+   ============================================================ */
+
+/* ---------- preloader ---------- */
+#pre{position:fixed;inset:0;z-index:20;background:var(--ground);display:flex;
+     align-items:flex-end;justify-content:space-between;padding:42px 5vw;
+     transition:transform 1s cubic-bezier(.76,0,.24,1)}
+#pre.done{transform:translateY(-101%)}
+#pre .big{font-size:clamp(64px,16vw,200px);line-height:.82;letter-spacing:-.05em;font-weight:700}
+#pre .pct{font-family:"Space Mono",monospace;font-size:clamp(40px,8vw,96px);color:var(--acid);line-height:.9}
+#pre .barwrap{position:absolute;left:5vw;right:5vw;bottom:0;height:2px;background:var(--line)}
+#pre .bar{height:100%;width:0;background:var(--acid);transition:width .25s linear}
+html.loading{overflow:hidden}
+
+/* ---------- cursor ---------- */
+#cur{position:fixed;top:0;left:0;width:11px;height:11px;border-radius:50%;background:var(--acid);
+     pointer-events:none;z-index:30;mix-blend-mode:difference;
+     transition:width .25s,height .25s,opacity .25s;will-change:transform}
+#cur.big{width:54px;height:54px;margin:-21px 0 0 -21px}
+@media (hover:none){#cur{display:none}}
+
+/* ---------- type that arrives ---------- */
+.line{display:block;overflow:hidden}
+.line > span{display:block;transform:translateY(102%);transition:transform 1s cubic-bezier(.2,.8,.2,1)}
+.ready .line > span{transform:none}
+.line:nth-child(2) > span{transition-delay:.09s}
+.line:nth-child(3) > span{transition-delay:.18s}
+.fade{opacity:0;transform:translateY(14px);transition:opacity .9s .4s,transform .9s .4s}
+.ready .fade{opacity:1;transform:none}
+
+/* ---------- marquee of real scam lines ---------- */
+.marq{border-block:1px solid var(--line);overflow:hidden;white-space:nowrap;padding:15px 0;
+      margin-top:78px;-webkit-mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);
+      mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent)}
+.marq div{display:inline-block;animation:slide 44s linear infinite}
+.marq:hover div{animation-play-state:paused}
+.marq b{font-family:"Space Mono",monospace;font-size:13px;color:var(--muted);font-weight:400;
+        padding:0 30px;text-transform:uppercase;letter-spacing:.1em}
+.marq b i{color:var(--bad);font-style:normal;padding-right:10px}
+@keyframes slide{to{transform:translateX(-50%)}}
+
+/* ---------- the scanline ---------- */
+.msg{position:relative}
+.msg.scanning::after{content:"";position:absolute;left:0;right:0;height:64px;top:-64px;
+  background:linear-gradient(180deg,transparent,rgba(198,255,61,.13),rgba(198,255,61,.5),transparent);
+  animation:sweep 1.05s cubic-bezier(.45,0,.55,1) 1 forwards;pointer-events:none}
+@keyframes sweep{to{top:100%}}
+
+/* ---------- advice ---------- */
+.advice{padding:26px 30px;border-top:1px solid var(--line);background:#0d0d10}
+.advice ol{margin:14px 0 0;padding-left:0;list-style:none;counter-reset:a}
+.advice li{counter-increment:a;padding-left:34px;position:relative;margin-bottom:11px;
+           color:#cfcfc8;font-size:15px;max-width:74ch}
+.advice li::before{content:counter(a,decimal-leading-zero);position:absolute;left:0;top:1px;
+                   font-family:"Space Mono",monospace;font-size:11px;color:var(--acid)}
+.fwd{padding:24px 30px;border-top:1px solid var(--line)}
+.fwd textarea{width:100%;min-height:96px;margin-top:12px;background:var(--ground);
+              border:1px solid var(--line);border-radius:10px;padding:15px;color:#cfcfc8;
+              font:inherit;font-size:15px;line-height:1.55;resize:vertical}
+.fwdrow{display:flex;gap:12px;align-items:center;justify-content:space-between;margin-top:12px;flex-wrap:wrap}
+
+/* ---------- magnetic button ---------- */
+.go{will-change:transform}
+@media (prefers-reduced-motion:reduce){
+  #pre{display:none}.line > span{transform:none}.fade{opacity:1;transform:none}
+  .marq div{animation:none}.msg.scanning::after{display:none}}

@@ -1,3 +1,70 @@
+/* ---------- opening sequence ---------- */
+document.documentElement.classList.add('loading');
+(() => {
+  const pre = document.getElementById('pre');
+  const pct = document.getElementById('pct');
+  const bar = document.getElementById('prebar');
+  if (!pre) return;
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let n = 0;
+  const finish = () => {
+    pre.classList.add('done');
+    document.documentElement.classList.remove('loading');
+    document.body.classList.add('ready');
+  };
+  if (reduce) return finish();
+  const tick = () => {
+    /* uneven steps: a real load does not advance smoothly */
+    n = Math.min(100, n + Math.random() * 14 + 4);
+    pct.textContent = String(Math.floor(n)).padStart(2, '0');
+    bar.style.width = n + '%';
+    if (n < 100) return setTimeout(tick, 70 + Math.random() * 90);
+    setTimeout(finish, 320);
+  };
+  setTimeout(tick, 220);
+})();
+
+/* ---------- cursor ---------- */
+(() => {
+  const cur = document.getElementById('cur');
+  if (!cur || matchMedia('(hover:none)').matches) return;
+  let x = innerWidth / 2, y = innerHeight / 2, tx = x, ty = y;
+  addEventListener('mousemove', (e) => { tx = e.clientX; ty = e.clientY; }, { passive: true });
+  const loop = () => {
+    x += (tx - x) * 0.18; y += (ty - y) * 0.18;      /* trails slightly, so it feels weighted */
+    cur.style.transform = `translate(${x - 5}px, ${y - 5}px)`;
+    requestAnimationFrame(loop);
+  };
+  loop();
+  const grow = 'button, a, textarea, input, .chip';
+  addEventListener('mouseover', (e) => e.target.closest(grow) && cur.classList.add('big'));
+  addEventListener('mouseout', (e) => e.target.closest(grow) && cur.classList.remove('big'));
+})();
+
+/* ---------- marquee: the actual phrases the rules look for ---------- */
+(() => {
+  const el = document.getElementById('marq');
+  if (!el) return;
+  const lines = ['registration fee', 'share the OTP', 'KYC has expired', 'within 2 hours',
+    'selected without interview', 'pay to release your refund', 'token amount', 'guaranteed returns',
+    'parcel held at customs', 'prepaid task', 'you have won', 'account will be blocked',
+    'contact only on WhatsApp', 'I am posted abroad'];
+  const once = lines.map((l) => `<b><i>&times;</i>${l}</b>`).join('');
+  el.innerHTML = once + once;   /* doubled so the loop is seamless */
+})();
+
+/* ---------- the button leans toward the pointer ---------- */
+(() => {
+  const btn = document.getElementById('go');
+  if (!btn || matchMedia('(hover:none)').matches) return;
+  btn.addEventListener('mousemove', (e) => {
+    const r = btn.getBoundingClientRect();
+    btn.style.transform =
+      `translate(${(e.clientX - r.left - r.width / 2) * 0.22}px, ${(e.clientY - r.top - r.height / 2) * 0.34}px)`;
+  });
+  btn.addEventListener('mouseleave', () => (btn.style.transform = ''));
+})();
+
 /* Pakka front end. No framework, no build step: one page, one fetch, and the
    one animation that matters — the flagged phrases lighting up one at a time,
    so you watch the message incriminate itself instead of reading a score. */
@@ -151,11 +218,25 @@ function render(d) {
 
   /* the signature moment: phrases ignite in sequence, each one a beat after the
      last, and its card slides in with it */
-  const marks = [...$('msg').querySelectorAll('mark')];
+  const msg = $('msg');
+  msg.classList.remove('scanning');
+  void msg.offsetWidth;            /* restart the sweep on a repeat check */
+  msg.classList.add('scanning');
+
+  const marks = [...msg.querySelectorAll('mark')];
   const cards = [...$('flags').querySelectorAll('.flag')];
-  marks.forEach((m, i) => setTimeout(() => m.classList.add('lit'), 380 + i * 170));
-  cards.forEach((c, i) => setTimeout(() => c.classList.add('in'), 520 + i * 170));
+  /* the sweep passes first, then each phrase lights as it is "found" */
+  marks.forEach((m, i) => setTimeout(() => m.classList.add('lit'), 900 + i * 170));
+  cards.forEach((c, i) => setTimeout(() => c.classList.add('in'), 1040 + i * 170));
 }
+
+$('copyfwd').onclick = async () => {
+  const v = $('fwdtext').value;
+  if (!v) return;
+  try { await navigator.clipboard.writeText(v); } catch {}
+  $('copyfwd').textContent = 'Copied';
+  setTimeout(() => ($('copyfwd').textContent = 'Copy message'), 1600);
+};
 
 $('copy').onclick = async () => {
   const v = $('link').value;
