@@ -45,7 +45,10 @@ RULES: tuple[Rule, ...] = (
         "Nobody legitimate will ever ask for your OTP, UPI PIN, CVV or password "
         "— not your bank, not a delivery agent, not HR.",
         4,
-        _p(r"\botp\b", r"\bcvv\b", r"\bupi pin\b", r"\batm pin\b", r"\bpin number\b",
+        _p(r"(?:share|send|tell|give|provide|forward|confirm|read out)\s+(?:me\s+|us\s+|the\s+|your\s+)*\b(?:otp|cvv|pin|password|code)\b",
+           r"\b(?:otp|cvv|pin)\b.{0,25}(?:with (?:our|the|me|us)|to (?:our|the|me|us|verify))",
+           r"what(?:'s| is) (?:your |the )?(?:otp|cvv|pin)\b",
+           r"\bcvv\b.{0,20}(?:number|digits)", r"\bupi pin\b", r"\batm pin\b",
            r"share (?:your )?password", r"\bnet ?banking password\b"),
     ),
     Rule(
@@ -55,7 +58,8 @@ RULES: tuple[Rule, ...] = (
         4,
         _p(r"pay .{0,30}to (?:claim|release|receive|unlock)",
            r"(?:claim|release|receive) .{0,30}after (?:payment|paying)",
-           r"processing charge .{0,20}refund", r"to receive your (?:prize|refund|winnings)"),
+           r"processing charge .{0,20}refund", r"to receive your (?:prize|refund|winnings)",
+           r"pay .{0,25}(?:delivery|shipping|handling|courier) charge"),
     ),
     Rule(
         "KYC_PANIC", "KYC or account-block scare",
@@ -72,6 +76,8 @@ RULES: tuple[Rule, ...] = (
         "genuine will still be there tomorrow.",
         1,
         _p(r"within \d+ ?(?:hours?|hrs?|minutes?|mins?)", r"today only", r"last chance",
+           r"(?:block|suspend|deactivat|expir|clos|disconnect|cancel|terminat)\w*\s+"
+           r"(?:with)?in\s+\d+\s*(?:hours?|hrs?|days?|minutes?)",
            r"expires? (?:today|tonight|soon)", r"immediately", r"hurry",
            r"limited (?:slots?|seats?|offer)", r"only \d+ (?:slots?|seats?) left",
            r"before (?:you )?(?:lose|miss)", r"\b(?:click|claim|act|apply) (?:it |this |here |the link )?now\b"),
@@ -169,7 +175,7 @@ RULES: tuple[Rule, ...] = (
            r"\bkbc\b", r"lucky (?:winner|draw)",
            r"congratulations.{0,30}\b(?:won|winning|winner)\b",
            r"\b(?:won|winning|win a)\b.{0,40}(?:iphone|mac ?book|laptop|smartphone|"
-           r"scooter|\bcar\b|\bbike\b|gift (?:card|voucher|hamper)|voucher|cash prize)"),
+           r"scooter|\bcar\b|\bbike\b|gift (?:card|voucher|hamper)|voucher|cash prize|\bgift\b)"),
     ),
     Rule(
         "QR_SCAN", "A QR code to receive money",
@@ -181,6 +187,124 @@ RULES: tuple[Rule, ...] = (
            r"prize|reward|cashback|winnings|the offer)",
            r"\bqr code\b.{0,30}(?:to )?(?:claim|collect|receive your|get your)",
            r"(?:claim|collect|receive) .{0,30}(?:by |through |via )?scanning"),
+    ),
+    Rule(
+        "REMOTE_ACCESS", "Wants to see or control your screen",
+        "No bank, no support desk and no government office will ever ask you to "
+        "install a screen sharing app. Someone watching your screen sees your "
+        "banking app and your PIN as you type it.",
+        4,
+        _p(r"\b(?:any ?desk|team ?viewer|quick ?support|rust ?desk|ammyy|air ?droid)\b",
+           r"screen[- ]?shar(?:e|ing)", r"share your screen", r"mirror your (?:screen|phone)"),
+    ),
+    Rule(
+        "APK_INSTALL", "Wants you to install an app from outside the store",
+        "An app sent to you as a file has not been checked by anyone. This is how "
+        "banking trojans get onto phones in India.",
+        4,
+        _p(r"\bapk\b", r"(?:install|download|sideload) .{0,30}(?:from|via|through) (?:this |the )?link",
+           r"enable (?:unknown sources|installation from unknown)"),
+    ),
+    Rule(
+        "LOOKALIKE_DOMAIN", "A web address dressed up as a real company",
+        "The brand name is in the address but the domain is not theirs. Real "
+        "organisations send you to their own domain, not a lookalike.",
+        3,
+        _p(r"https?://[^\s]*\b(?:sbi|hdfc|icici|axis|kotak|paytm|phonepe|amazon|flipkart|"
+           r"netflix|irctc|epfo|uidai|income ?tax|indiapost)[-_][a-z0-9-]+\.",
+           r"https?://[^\s]*\b(?:sbi|hdfc|icici|axis|paytm|phonepe|amazon|flipkart|netflix|"
+           r"irctc|epfo|uidai)[^\s]*\.(?:xyz|info|top|online|site|club|icu|buzz|link|shop|tk|ml|ga|cf)\b",
+           r"https?://[^\s]*(?:amaz0n|g00gle|paypa1|fl1pkart|1cici|hdfc-bank)"),
+    ),
+    Rule(
+        "VERIFY_DETAILS", "Wants your details to avoid something bad",
+        "Being told to confirm your details to stop something bad happening is the "
+        "oldest phishing shape there is. If it is real, it will still be there "
+        "when you open the app yourself.",
+        2,
+        _p(r"(?:click|tap|open|visit) .{0,30}(?:link|here|below|url).{0,40}"
+           r"(?:verify|update|confirm|activate|re-?activate|avoid|prevent|suspend)",
+           r"(?:verify|update|confirm) (?:your )?(?:\w+ )?(?:account|details|kyc|card details|"
+           r"bank details|information).{0,30}(?:here|link|below|now|immediately|https?://)"),
+    ),
+    Rule(
+        "ID_DOCUMENTS", "Asks for your Aadhaar or PAN",
+        "A photo of your Aadhaar or PAN is enough to open accounts and take loans "
+        "in your name. Nobody legitimate collects it over a chat message.",
+        2,
+        _p(r"(?:photo|copy|scan|pic|image|soft copy) .{0,25}(?:of )?(?:your )?"
+           r"(?:aadhaar|aadhar|pan card|passport|voter id|driving licen[cs]e)",
+           r"(?:send|share|whatsapp|forward) .{0,25}\b(?:aadhaar|aadhar|pan card)\b"),
+    ),
+    Rule(
+        "CALLBACK_NUMBER", "A personal mobile posing as a helpline",
+        "Real companies publish landlines or 1800 numbers you can look up. A "
+        "ten digit mobile presented as customer care belongs to a person, not a bank.",
+        2,
+        _p(r"(?:customer care|help ?line|support number|official number|toll ?free)"
+           r"[^\d]{0,25}\b[6-9]\d{9}\b",
+           r"\b[6-9]\d{9}\b[^\d]{0,25}(?:customer care|help ?line)",
+           r"call (?:this|our|the above) number.{0,25}(?:to |and )?"
+           r"(?:cancel|stop|block|verify|reverse|claim|confirm)"),
+    ),
+    Rule(
+        "COLLECT_REQUEST", "Asks you to approve something to receive money",
+        "Entering your PIN or approving a request always sends money out. It can "
+        "never bring money in. Anyone saying otherwise is taking, not giving.",
+        4,
+        _p(r"(?:accept|approve) .{0,25}request.{0,30}(?:receive|get|credit)",
+           r"(?:enter|put|type) (?:your )?(?:upi )?pin.{0,30}(?:receive|get|credit|refund)",
+           r"credited .{0,40}(?:click|withdraw|claim)",
+           r"(?:click|tap) .{0,20}(?:here|link).{0,25}(?:to )?(?:withdraw|claim) "
+           r".{0,20}(?:amount|money|cashback|reward)"),
+    ),
+    Rule(
+        "STRANGER_OPENER", "A stranger opening with money talk",
+        "The wrong number that turns into a friendship that turns into an "
+        "investment app. It starts exactly like this, every time.",
+        2,
+        _p(r"(?:got|found|received|saved) your (?:number|contact) from",
+           r"(?:i am|i'm|this is) \w+,? .{0,40}(?:trade|trading|crypto|forex|"
+           r"investment|profit|returns)"),
+    ),
+    Rule(
+        "ADVANCE_FEE", "An inheritance or fortune from a stranger",
+        "Nobody picks a stranger to receive a fortune. The money does not exist, "
+        "and the fees you are asked for along the way are the entire point.",
+        3,
+        _p(r"\b(?:widow|late husband|late father|inheritance|next of kin|beneficiary)\b"
+           r".{0,60}(?:million|billion|fund|money|donate|\$)",
+           r"(?:transfer|donate|share) .{0,30}(?:\$\s?\d|usd|million dollars|billion)",
+           r"trustworthy person", r"\bnext of kin\b"),
+    ),
+    Rule(
+        "BANK_DETAILS", "Wants your account number to send you money",
+        "Money already owed to you goes to the account it came from. Being asked "
+        "for fresh bank details is how the account gets emptied, not filled.",
+        3,
+        _p(r"(?:refund|amount|salary|payment|prize|claim).{0,60}"
+           r"(?:submit|share|send|provide|enter|fill) .{0,25}"
+           r"(?:bank account|account number|account details|ifsc)",
+           r"(?:submit|share|send|provide) .{0,25}(?:bank account|account number|ifsc)"
+           r".{0,40}(?:receive|refund|credit|transfer)"),
+    ),
+    Rule(
+        "SIM_BLOCK", "Threatens to block your SIM or connection",
+        "Your operator does not disconnect you over a text with a link. The panic "
+        "is the product.",
+        3,
+        _p(r"(?:sim(?: card)?|mobile number|connection|outgoing)"
+           r".{0,30}(?:will be |going to be |about to be )?"
+           r"(?:block|deactivat|disconnect|barred|suspend)"),
+    ),
+    Rule(
+        "STRANDED_PLEA", "Stranded somewhere and needs money now",
+        "A hijacked account of someone you know, or a stranger who knows the "
+        "story works. Call the person on the number you already have.",
+        2,
+        _p(r"(?:stuck|stranded|trapped) (?:in|at) \w+.{0,60}"
+           r"(?:send|transfer|need) .{0,15}money",
+           r"lost my (?:wallet|phone|passport|bag).{0,60}(?:send|transfer|need) .{0,20}money"),
     ),
     Rule(
         "LOAN_HARASSMENT", "Loan-app style pressure",

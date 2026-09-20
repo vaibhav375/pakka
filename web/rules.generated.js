@@ -14,14 +14,14 @@ window.PAKKA_RULES = [
     "name": "Asks for an OTP, PIN or password",
     "why": "Nobody legitimate will ever ask for your OTP, UPI PIN, CVV or password — not your bank, not a delivery agent, not HR.",
     "weight": 4,
-    "re": "\\botp\\b|\\bcvv\\b|\\bupi pin\\b|\\batm pin\\b|\\bpin number\\b|share (?:your )?password|\\bnet ?banking password\\b"
+    "re": "(?:share|send|tell|give|provide|forward|confirm|read out)\\s+(?:me\\s+|us\\s+|the\\s+|your\\s+)*\\b(?:otp|cvv|pin|password|code)\\b|\\b(?:otp|cvv|pin)\\b.{0,25}(?:with (?:our|the|me|us)|to (?:our|the|me|us|verify))|what(?:'s| is) (?:your |the )?(?:otp|cvv|pin)\\b|\\bcvv\\b.{0,20}(?:number|digits)|\\bupi pin\\b|\\batm pin\\b|share (?:your )?password|\\bnet ?banking password\\b"
   },
   {
     "id": "PAY_TO_RECEIVE",
     "name": "Asks you to pay to receive money",
     "why": "You are being asked to send money to unlock money. Refunds, prizes and lottery winnings never require a payment from you first.",
     "weight": 4,
-    "re": "pay .{0,30}to (?:claim|release|receive|unlock)|(?:claim|release|receive) .{0,30}after (?:payment|paying)|processing charge .{0,20}refund|to receive your (?:prize|refund|winnings)"
+    "re": "pay .{0,30}to (?:claim|release|receive|unlock)|(?:claim|release|receive) .{0,30}after (?:payment|paying)|processing charge .{0,20}refund|to receive your (?:prize|refund|winnings)|pay .{0,25}(?:delivery|shipping|handling|courier) charge"
   },
   {
     "id": "KYC_PANIC",
@@ -35,7 +35,7 @@ window.PAKKA_RULES = [
     "name": "Manufactured urgency",
     "why": "Pressure to act within hours exists to stop you checking. Anything genuine will still be there tomorrow.",
     "weight": 1,
-    "re": "within \\d+ ?(?:hours?|hrs?|minutes?|mins?)|today only|last chance|expires? (?:today|tonight|soon)|immediately|hurry|limited (?:slots?|seats?|offer)|only \\d+ (?:slots?|seats?) left|before (?:you )?(?:lose|miss)|\\b(?:click|claim|act|apply) (?:it |this |here |the link )?now\\b"
+    "re": "within \\d+ ?(?:hours?|hrs?|minutes?|mins?)|today only|last chance|(?:block|suspend|deactivat|expir|clos|disconnect|cancel|terminat)\\w*\\s+(?:with)?in\\s+\\d+\\s*(?:hours?|hrs?|days?|minutes?)|expires? (?:today|tonight|soon)|immediately|hurry|limited (?:slots?|seats?|offer)|only \\d+ (?:slots?|seats?) left|before (?:you )?(?:lose|miss)|\\b(?:click|claim|act|apply) (?:it |this |here |the link )?now\\b"
   },
   {
     "id": "NO_INTERVIEW",
@@ -112,7 +112,7 @@ window.PAKKA_RULES = [
     "name": "A prize you never entered for",
     "why": "You cannot win a lottery you never entered. Every version of this ends with a fee to release the winnings.",
     "weight": 4,
-    "re": "(?:won|winner).{0,30}(?:lottery|lucky draw|prize|kbc)|\\bkbc\\b|lucky (?:winner|draw)|congratulations.{0,30}\\b(?:won|winning|winner)\\b|\\b(?:won|winning|win a)\\b.{0,40}(?:iphone|mac ?book|laptop|smartphone|scooter|\\bcar\\b|\\bbike\\b|gift (?:card|voucher|hamper)|voucher|cash prize)"
+    "re": "(?:won|winner).{0,30}(?:lottery|lucky draw|prize|kbc)|\\bkbc\\b|lucky (?:winner|draw)|congratulations.{0,30}\\b(?:won|winning|winner)\\b|\\b(?:won|winning|win a)\\b.{0,40}(?:iphone|mac ?book|laptop|smartphone|scooter|\\bcar\\b|\\bbike\\b|gift (?:card|voucher|hamper)|voucher|cash prize|\\bgift\\b)"
   },
   {
     "id": "QR_SCAN",
@@ -120,6 +120,90 @@ window.PAKKA_RULES = [
     "why": "Scanning a QR code can only send money out of your account. It can never bring money in. Anyone telling you to scan one to claim, collect or receive something is describing a thing that cannot happen.",
     "weight": 3,
     "re": "scan .{0,25}\\bqr\\b.{0,40}(?:claim|collect|receive your|get your|refund|prize|reward|cashback|winnings|the offer)|\\bqr code\\b.{0,30}(?:to )?(?:claim|collect|receive your|get your)|(?:claim|collect|receive) .{0,30}(?:by |through |via )?scanning"
+  },
+  {
+    "id": "REMOTE_ACCESS",
+    "name": "Wants to see or control your screen",
+    "why": "No bank, no support desk and no government office will ever ask you to install a screen sharing app. Someone watching your screen sees your banking app and your PIN as you type it.",
+    "weight": 4,
+    "re": "\\b(?:any ?desk|team ?viewer|quick ?support|rust ?desk|ammyy|air ?droid)\\b|screen[- ]?shar(?:e|ing)|share your screen|mirror your (?:screen|phone)"
+  },
+  {
+    "id": "APK_INSTALL",
+    "name": "Wants you to install an app from outside the store",
+    "why": "An app sent to you as a file has not been checked by anyone. This is how banking trojans get onto phones in India.",
+    "weight": 4,
+    "re": "\\bapk\\b|(?:install|download|sideload) .{0,30}(?:from|via|through) (?:this |the )?link|enable (?:unknown sources|installation from unknown)"
+  },
+  {
+    "id": "LOOKALIKE_DOMAIN",
+    "name": "A web address dressed up as a real company",
+    "why": "The brand name is in the address but the domain is not theirs. Real organisations send you to their own domain, not a lookalike.",
+    "weight": 3,
+    "re": "https?://[^\\s]*\\b(?:sbi|hdfc|icici|axis|kotak|paytm|phonepe|amazon|flipkart|netflix|irctc|epfo|uidai|income ?tax|indiapost)[-_][a-z0-9-]+\\.|https?://[^\\s]*\\b(?:sbi|hdfc|icici|axis|paytm|phonepe|amazon|flipkart|netflix|irctc|epfo|uidai)[^\\s]*\\.(?:xyz|info|top|online|site|club|icu|buzz|link|shop|tk|ml|ga|cf)\\b|https?://[^\\s]*(?:amaz0n|g00gle|paypa1|fl1pkart|1cici|hdfc-bank)"
+  },
+  {
+    "id": "VERIFY_DETAILS",
+    "name": "Wants your details to avoid something bad",
+    "why": "Being told to confirm your details to stop something bad happening is the oldest phishing shape there is. If it is real, it will still be there when you open the app yourself.",
+    "weight": 2,
+    "re": "(?:click|tap|open|visit) .{0,30}(?:link|here|below|url).{0,40}(?:verify|update|confirm|activate|re-?activate|avoid|prevent|suspend)|(?:verify|update|confirm) (?:your )?(?:\\w+ )?(?:account|details|kyc|card details|bank details|information).{0,30}(?:here|link|below|now|immediately|https?://)"
+  },
+  {
+    "id": "ID_DOCUMENTS",
+    "name": "Asks for your Aadhaar or PAN",
+    "why": "A photo of your Aadhaar or PAN is enough to open accounts and take loans in your name. Nobody legitimate collects it over a chat message.",
+    "weight": 2,
+    "re": "(?:photo|copy|scan|pic|image|soft copy) .{0,25}(?:of )?(?:your )?(?:aadhaar|aadhar|pan card|passport|voter id|driving licen[cs]e)|(?:send|share|whatsapp|forward) .{0,25}\\b(?:aadhaar|aadhar|pan card)\\b"
+  },
+  {
+    "id": "CALLBACK_NUMBER",
+    "name": "A personal mobile posing as a helpline",
+    "why": "Real companies publish landlines or 1800 numbers you can look up. A ten digit mobile presented as customer care belongs to a person, not a bank.",
+    "weight": 2,
+    "re": "(?:customer care|help ?line|support number|official number|toll ?free)[^\\d]{0,25}\\b[6-9]\\d{9}\\b|\\b[6-9]\\d{9}\\b[^\\d]{0,25}(?:customer care|help ?line)|call (?:this|our|the above) number.{0,25}(?:to |and )?(?:cancel|stop|block|verify|reverse|claim|confirm)"
+  },
+  {
+    "id": "COLLECT_REQUEST",
+    "name": "Asks you to approve something to receive money",
+    "why": "Entering your PIN or approving a request always sends money out. It can never bring money in. Anyone saying otherwise is taking, not giving.",
+    "weight": 4,
+    "re": "(?:accept|approve) .{0,25}request.{0,30}(?:receive|get|credit)|(?:enter|put|type) (?:your )?(?:upi )?pin.{0,30}(?:receive|get|credit|refund)|credited .{0,40}(?:click|withdraw|claim)|(?:click|tap) .{0,20}(?:here|link).{0,25}(?:to )?(?:withdraw|claim) .{0,20}(?:amount|money|cashback|reward)"
+  },
+  {
+    "id": "STRANGER_OPENER",
+    "name": "A stranger opening with money talk",
+    "why": "The wrong number that turns into a friendship that turns into an investment app. It starts exactly like this, every time.",
+    "weight": 2,
+    "re": "(?:got|found|received|saved) your (?:number|contact) from|(?:i am|i'm|this is) \\w+,? .{0,40}(?:trade|trading|crypto|forex|investment|profit|returns)"
+  },
+  {
+    "id": "ADVANCE_FEE",
+    "name": "An inheritance or fortune from a stranger",
+    "why": "Nobody picks a stranger to receive a fortune. The money does not exist, and the fees you are asked for along the way are the entire point.",
+    "weight": 3,
+    "re": "\\b(?:widow|late husband|late father|inheritance|next of kin|beneficiary)\\b.{0,60}(?:million|billion|fund|money|donate|\\$)|(?:transfer|donate|share) .{0,30}(?:\\$\\s?\\d|usd|million dollars|billion)|trustworthy person|\\bnext of kin\\b"
+  },
+  {
+    "id": "BANK_DETAILS",
+    "name": "Wants your account number to send you money",
+    "why": "Money already owed to you goes to the account it came from. Being asked for fresh bank details is how the account gets emptied, not filled.",
+    "weight": 3,
+    "re": "(?:refund|amount|salary|payment|prize|claim).{0,60}(?:submit|share|send|provide|enter|fill) .{0,25}(?:bank account|account number|account details|ifsc)|(?:submit|share|send|provide) .{0,25}(?:bank account|account number|ifsc).{0,40}(?:receive|refund|credit|transfer)"
+  },
+  {
+    "id": "SIM_BLOCK",
+    "name": "Threatens to block your SIM or connection",
+    "why": "Your operator does not disconnect you over a text with a link. The panic is the product.",
+    "weight": 3,
+    "re": "(?:sim(?: card)?|mobile number|connection|outgoing).{0,30}(?:will be |going to be |about to be )?(?:block|deactivat|disconnect|barred|suspend)"
+  },
+  {
+    "id": "STRANDED_PLEA",
+    "name": "Stranded somewhere and needs money now",
+    "why": "A hijacked account of someone you know, or a stranger who knows the story works. Call the person on the number you already have.",
+    "weight": 2,
+    "re": "(?:stuck|stranded|trapped) (?:in|at) \\w+.{0,60}(?:send|transfer|need) .{0,15}money|lost my (?:wallet|phone|passport|bag).{0,60}(?:send|transfer|need) .{0,20}money"
   },
   {
     "id": "LOAN_HARASSMENT",
@@ -168,6 +252,18 @@ window.PAKKA_ADVICE = {
     "COURIER_CUSTOMS": "it wants a fee to release a parcel",
     "ELECTRICITY_CUT": "it threatens to cut your electricity",
     "LOTTERY_WIN": "it claims a prize you never entered for",
+    "REMOTE_ACCESS": "it wants to see or control your screen, which no real support desk ever asks for",
+    "APK_INSTALL": "it wants you to install an app sent as a file, which nobody has checked",
+    "LOOKALIKE_DOMAIN": "the web address only looks like the real company",
+    "VERIFY_DETAILS": "it wants your details to stop something bad happening, which is what phishing is",
+    "ID_DOCUMENTS": "it asks for your Aadhaar or PAN, which is enough to take a loan in your name",
+    "CALLBACK_NUMBER": "the helpline number is a personal mobile, not a company line",
+    "COLLECT_REQUEST": "approving a request or entering your PIN sends money out, it cannot bring money in",
+    "STRANGER_OPENER": "it is a stranger opening with money talk, which is how these always start",
+    "ADVANCE_FEE": "it offers a fortune from a stranger, which does not happen",
+    "BANK_DETAILS": "it wants fresh bank details in order to send you money, which is backwards",
+    "SIM_BLOCK": "it threatens to block your SIM, which your operator does not do over text",
+    "STRANDED_PLEA": "it is the stranded friend story, so call them on the number you already have",
     "QR_SCAN": "it tells you to scan a QR code to receive something, which is not a thing QR codes do",
     "LOAN_HARASSMENT": "it threatens to contact the people in your phone",
     "INVESTMENT_TIP": "it promises guaranteed returns",
@@ -175,6 +271,9 @@ window.PAKKA_ADVICE = {
     "ARMY_OFFICER": "it uses the posted-far-away story to avoid meeting"
   },
   "money": [
+    "ADVANCE_FEE",
+    "BANK_DETAILS",
+    "COLLECT_REQUEST",
     "COURIER_CUSTOMS",
     "INVESTMENT_TIP",
     "LOTTERY_WIN",
@@ -191,11 +290,17 @@ window.PAKKA_ADVICE = {
     "TOO_GOOD"
   ],
   "impersonation": [
+    "APK_INSTALL",
+    "CALLBACK_NUMBER",
     "COURIER_CUSTOMS",
     "ELECTRICITY_CUT",
     "KYC_PANIC",
     "LOAN_HARASSMENT",
-    "THREAT"
+    "LOOKALIKE_DOMAIN",
+    "REMOTE_ACCESS",
+    "SIM_BLOCK",
+    "THREAT",
+    "VERIFY_DETAILS"
   ],
   "property": [
     "ARMY_OFFICER",

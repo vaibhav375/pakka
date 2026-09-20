@@ -27,7 +27,7 @@ So Pakka answers in sentences, points at the exact words, and gives you a link.
 
 ## How it decides
 
-**Twenty-one rules, in plain Python. No model gets a vote.**
+**Thirty-three rules, in plain Python. No model gets a vote.**
 
 A scam verdict has to be identical every time and has to survive being explained
 to the person who nearly paid. A language model can do neither reliably, so the
@@ -53,10 +53,22 @@ in the message and say in one sentence why what it found is a problem.
 | 15 | Electricity disconnection threat | 3 |
 | 16 | A prize you never entered for | 4 |
 | 17 | A QR code to receive money | 3 |
-| 18 | Loan-app style pressure | 3 |
-| 19 | Guaranteed returns or a tips group | 3 |
-| 20 | Prepaid task or commission work | 3 |
-| 21 | Claims to be posted far away and cannot meet | 3 |
+| 18 | Wants to see or control your screen | 4 |
+| 19 | Wants you to install an app from outside the store | 4 |
+| 20 | A web address dressed up as a real company | 3 |
+| 21 | Wants your details to avoid something bad | 2 |
+| 22 | Asks for your Aadhaar or PAN | 2 |
+| 23 | A personal mobile posing as a helpline | 2 |
+| 24 | Asks you to approve something to receive money | 4 |
+| 25 | A stranger opening with money talk | 2 |
+| 26 | An inheritance or fortune from a stranger | 3 |
+| 27 | Wants your account number to send you money | 3 |
+| 28 | Threatens to block your SIM or connection | 3 |
+| 29 | Stranded somewhere and needs money now | 2 |
+| 30 | Loan-app style pressure | 3 |
+| 31 | Guaranteed returns or a tips group | 3 |
+| 32 | Prepaid task or commission work | 3 |
+| 33 | Claims to be posted far away and cannot meet | 3 |
 
 Weights add up to a score, the score picks a band. Ordinary messages have to come
 back clean — a checker that flags everything gets ignored, so a real placement-cell
@@ -148,7 +160,7 @@ browser JavaScript.
 
 ## What it does not do
 
-It does not detect scams it has never seen — twenty-one patterns are twenty-one
+It does not detect scams it has never seen — thirty-three patterns are thirty-three
 patterns, and a clean result says only that none of them fired. The page says so
 rather than implying safety. It reads English and Hinglish written in Latin
 script; Devanagari input is not handled yet. And it is not legal or financial

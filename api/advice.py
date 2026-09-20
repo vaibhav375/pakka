@@ -25,6 +25,18 @@ CLAUSE = {
     "COURIER_CUSTOMS": "it wants a fee to release a parcel",
     "ELECTRICITY_CUT": "it threatens to cut your electricity",
     "LOTTERY_WIN": "it claims a prize you never entered for",
+    "REMOTE_ACCESS": "it wants to see or control your screen, which no real support desk ever asks for",
+    "APK_INSTALL": "it wants you to install an app sent as a file, which nobody has checked",
+    "LOOKALIKE_DOMAIN": "the web address only looks like the real company",
+    "VERIFY_DETAILS": "it wants your details to stop something bad happening, which is what phishing is",
+    "ID_DOCUMENTS": "it asks for your Aadhaar or PAN, which is enough to take a loan in your name",
+    "CALLBACK_NUMBER": "the helpline number is a personal mobile, not a company line",
+    "COLLECT_REQUEST": "approving a request or entering your PIN sends money out, it cannot bring money in",
+    "STRANGER_OPENER": "it is a stranger opening with money talk, which is how these always start",
+    "ADVANCE_FEE": "it offers a fortune from a stranger, which does not happen",
+    "BANK_DETAILS": "it wants fresh bank details in order to send you money, which is backwards",
+    "SIM_BLOCK": "it threatens to block your SIM, which your operator does not do over text",
+    "STRANDED_PLEA": "it is the stranded friend story, so call them on the number you already have",
     "QR_SCAN": "it tells you to scan a QR code to receive something, which is not a thing QR codes do",
     "LOAN_HARASSMENT": "it threatens to contact the people in your phone",
     "INVESTMENT_TIP": "it promises guaranteed returns",
@@ -33,9 +45,10 @@ CLAUSE = {
 }
 
 MONEY = {"PAY_TO_GET_JOB", "PAY_TO_RECEIVE", "PERSONAL_PAYMENT", "COURIER_CUSTOMS",
-         "TASK_COMMISSION", "LOTTERY_WIN", "INVESTMENT_TIP", "QR_SCAN"}
+         "TASK_COMMISSION", "LOTTERY_WIN", "INVESTMENT_TIP", "QR_SCAN", "COLLECT_REQUEST", "ADVANCE_FEE", "BANK_DETAILS"}
 JOB = {"PAY_TO_GET_JOB", "NO_INTERVIEW", "TOO_GOOD", "TASK_COMMISSION"}
-IMPERSONATION = {"KYC_PANIC", "ELECTRICITY_CUT", "LOAN_HARASSMENT", "THREAT", "COURIER_CUSTOMS"}
+IMPERSONATION = {"KYC_PANIC", "ELECTRICITY_CUT", "LOAN_HARASSMENT", "THREAT", "COURIER_CUSTOMS", "SIM_BLOCK", "LOOKALIKE_DOMAIN",
+                 "VERIFY_DETAILS", "CALLBACK_NUMBER", "REMOTE_ACCESS", "APK_INSTALL"}
 PROPERTY = {"SIGHT_UNSEEN", "ARMY_OFFICER"}
 
 

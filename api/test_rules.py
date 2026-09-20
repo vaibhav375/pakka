@@ -40,6 +40,70 @@ CASES = [
      "you received it, or pay the delivery agent by scanning his QR.",
      set()),
 
+    ("remote access tool",
+     "Please install AnyDesk and share the 9 digit code so I can help you with the refund.",
+     {"REMOTE_ACCESS"}),
+
+    ("apk sideload",
+     "Dear customer, download and install this APK to complete your bank verification.",
+     {"APK_INSTALL"}),
+
+    ("lookalike domain",
+     "Your SBI account will be deactivated. Verify your PAN details at http://sbi-verify-kyc.xyz/login",
+     {"KYC_PANIC", "LOOKALIKE_DOMAIN", "VERIFY_DETAILS"}),
+
+    ("id document harvesting",
+     "Send a photo of your Aadhaar card and PAN card for verification.",
+     {"ID_DOCUMENTS"}),
+
+    ("mobile number as official helpline",
+     "For any complaint call our customer care 9876543210. We are the official helpline.",
+     {"CALLBACK_NUMBER"}),
+
+    ("money in, which is not how it works",
+     "Rs 5000 has been credited to your wallet. Click here to withdraw the amount.",
+     {"COLLECT_REQUEST"}),
+
+    ("upi collect request",
+     "Your friend sent you money. Accept the request on your UPI app to receive Rs 2000.",
+     {"COLLECT_REQUEST"}),
+
+    ("pig butchering opener",
+     "Hi, I got your number from a mutual friend. I am Sophia, I trade crypto and make good profit daily.",
+     {"STRANGER_OPENER"}),
+
+    ("advance fee",
+     "Hello dear, I am Mrs Grace, a widow with 10 million dollars to donate to a trustworthy person.",
+     {"ADVANCE_FEE"}),
+
+    ("bank details to receive a refund",
+     "Your income tax refund of Rs 15,490 is approved. Submit your bank account number to receive it.",
+     {"BANK_DETAILS"}),
+
+    ("sim block scare",
+     "Your SIM card will be blocked in 24 hours. Update your details now.",
+     {"SIM_BLOCK", "URGENCY", "VERIFY_DETAILS"}),
+
+    ("stranded plea",
+     "I need your help, I am stuck in Dubai and lost my wallet. Please send money.",
+     {"STRANDED_PLEA"}),
+
+    ("a real OTP message, must stay clean",
+     "Your OTP is 452891. Do not share it with anyone. -SBI",
+     set()),
+
+    ("a real tracking link, must stay clean",
+     "Hi, your Amazon order has shipped. Track it at https://www.amazon.in/orders",
+     set()),
+
+    ("a friend sharing a number, must stay clean",
+     "Call me on 9876543210 when you reach the gate, I will come down.",
+     set()),
+
+    ("asking for notes, must stay clean",
+     "Can you send me a photo of your notes from today's class?",
+     set()),
+
     ("ordinary message, must stay clean",
      "Hi Vaibhav, this is Priya from the placement cell. Your Infosys interview is "
      "on Monday at 10am in Seminar Hall 2. Please carry two copies of your resume.",

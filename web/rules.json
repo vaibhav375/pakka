@@ -102,6 +102,78 @@
   "weight": 3
  },
  {
+  "id": "REMOTE_ACCESS",
+  "name": "Wants to see or control your screen",
+  "why": "No bank, no support desk and no government office will ever ask you to install a screen sharing app. Someone watching your screen sees your banking app and your PIN as you type it.",
+  "weight": 4
+ },
+ {
+  "id": "APK_INSTALL",
+  "name": "Wants you to install an app from outside the store",
+  "why": "An app sent to you as a file has not been checked by anyone. This is how banking trojans get onto phones in India.",
+  "weight": 4
+ },
+ {
+  "id": "LOOKALIKE_DOMAIN",
+  "name": "A web address dressed up as a real company",
+  "why": "The brand name is in the address but the domain is not theirs. Real organisations send you to their own domain, not a lookalike.",
+  "weight": 3
+ },
+ {
+  "id": "VERIFY_DETAILS",
+  "name": "Wants your details to avoid something bad",
+  "why": "Being told to confirm your details to stop something bad happening is the oldest phishing shape there is. If it is real, it will still be there when you open the app yourself.",
+  "weight": 2
+ },
+ {
+  "id": "ID_DOCUMENTS",
+  "name": "Asks for your Aadhaar or PAN",
+  "why": "A photo of your Aadhaar or PAN is enough to open accounts and take loans in your name. Nobody legitimate collects it over a chat message.",
+  "weight": 2
+ },
+ {
+  "id": "CALLBACK_NUMBER",
+  "name": "A personal mobile posing as a helpline",
+  "why": "Real companies publish landlines or 1800 numbers you can look up. A ten digit mobile presented as customer care belongs to a person, not a bank.",
+  "weight": 2
+ },
+ {
+  "id": "COLLECT_REQUEST",
+  "name": "Asks you to approve something to receive money",
+  "why": "Entering your PIN or approving a request always sends money out. It can never bring money in. Anyone saying otherwise is taking, not giving.",
+  "weight": 4
+ },
+ {
+  "id": "STRANGER_OPENER",
+  "name": "A stranger opening with money talk",
+  "why": "The wrong number that turns into a friendship that turns into an investment app. It starts exactly like this, every time.",
+  "weight": 2
+ },
+ {
+  "id": "ADVANCE_FEE",
+  "name": "An inheritance or fortune from a stranger",
+  "why": "Nobody picks a stranger to receive a fortune. The money does not exist, and the fees you are asked for along the way are the entire point.",
+  "weight": 3
+ },
+ {
+  "id": "BANK_DETAILS",
+  "name": "Wants your account number to send you money",
+  "why": "Money already owed to you goes to the account it came from. Being asked for fresh bank details is how the account gets emptied, not filled.",
+  "weight": 3
+ },
+ {
+  "id": "SIM_BLOCK",
+  "name": "Threatens to block your SIM or connection",
+  "why": "Your operator does not disconnect you over a text with a link. The panic is the product.",
+  "weight": 3
+ },
+ {
+  "id": "STRANDED_PLEA",
+  "name": "Stranded somewhere and needs money now",
+  "why": "A hijacked account of someone you know, or a stranger who knows the story works. Call the person on the number you already have.",
+  "weight": 2
+ },
+ {
   "id": "LOAN_HARASSMENT",
   "name": "Loan-app style pressure",
   "why": "Threatening to contact your phonebook over a loan is illegal recovery practice, not a legitimate demand.",
