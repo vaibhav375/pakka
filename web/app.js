@@ -228,7 +228,7 @@ function adviceFor(findings) {
     return {
       actions: [
         'Nothing matched, but that is not proof it is safe — it means this message ' +
-        'does not use any of the twenty patterns Pakka knows.',
+        'does not use any of the twenty-one patterns Pakka knows.',
         'If it still feels wrong, verify on a number you already had, not one from the message.',
       ],
       forward: '',
@@ -319,7 +319,7 @@ function render(d) {
       </div>
     </div>`).join('') || `
     <div class="flag in"><div class="w" style="color:var(--acid)">\u2713</div>
-      <div><h4>None of the twenty checks fired</h4>
+      <div><h4>None of the twenty-one checks fired</h4>
       <p>That is not a guarantee \u2014 it means this message does not use any of the
          patterns Pakka knows about. If something still feels wrong, trust that.</p></div></div>`;
 

@@ -12,19 +12,31 @@
 </head>
 <body>
 
+<div id="pre">
+  <div class="big">पक्का</div>
+  <div class="pct" id="pct">00</div>
+  <div class="barwrap"><div class="bar" id="prebar"></div></div>
+</div>
+<div id="cur"></div>
+<div id="prog"></div>
+
 <div class="bar" id="bar"><div class="shell">
   <div class="brand">पक्का <i>/</i> pakka</div>
-  <div class="mono">13 rules · runs on your device</div>
+  <div class="mono"><span id="rulecount">20</span> rules · runs on your device</div>
 </div></div>
 
 <header class="hero"><div class="shell">
   <div class="kicker"><span></span><em class="mono" style="font-style:normal">Scam check for the messages you get sent</em></div>
-  <h1>Check<br>before<br>you&nbsp;<em>pay.</em></h1>
-  <p class="lede">Paste the message — a PG listing, an internship offer, a bank SMS. Pakka tells you
+  <h1>
+    <span class="line"><span>Check</span></span>
+    <span class="line"><span>before</span></span>
+    <span class="line"><span>you&nbsp;<em>pay.</em></span></span>
+  </h1>
+  <p class="lede fade">Paste the message — a PG listing, an internship offer, a bank SMS. Pakka tells you
     <b>what is wrong with it and why</b>, and gives you a link you can forward straight back to
     whoever sent it to you.</p>
 
-  <div class="box">
+  <div class="box fade">
     <label for="t" class="mono" style="position:absolute;left:-9999px">Message to check</label>
     <textarea id="t" spellcheck="false" placeholder="Paste the message here…"></textarea>
     <footer>
@@ -32,19 +44,50 @@
       <button class="go" id="go" disabled>Check it</button>
     </footer>
   </div>
-  <div class="chips" id="chips"></div>
+  <div class="chips fade" id="chips"></div>
+  <div class="hist" id="hist"></div>
+</div>
+
+<div class="marq"><div id="marq"></div></div>
+<div class="shell">
 </div></header>
 
-<div class="shell" id="out"><div class="verdict" id="card">
+<div class="shell" id="out">
+<div class="scene"><canvas id="gl"></canvas>
+  <div class="scenelab mono"><span id="glcount">0</span> of 20 checks fired</div>
+</div>
+<div class="verdict" id="card">
   <div class="vtop">
     <div>
       <div class="mono" style="margin-bottom:12px">The verdict</div>
       <div class="vlabel" id="vlabel">—</div>
     </div>
-    <div class="dial"><div class="mono" style="margin-bottom:8px">Risk score</div><b id="vscore">0</b></div>
+    <div class="dial">
+      <div class="mono" style="margin-bottom:10px">Risk score</div>
+      <div class="gauge">
+        <svg viewBox="0 0 100 100" aria-hidden="true">
+          <circle class="track" cx="50" cy="50" r="42" stroke-dasharray="198 264"></circle>
+          <circle class="fill" id="gfill" cx="50" cy="50" r="42" stroke-dasharray="198 264" stroke-dashoffset="198"></circle>
+        </svg>
+        <b id="vscore">0</b>
+      </div>
+    </div>
   </div>
+  <div class="weights" id="weights"></div>
   <div class="msg" id="msg"></div>
   <div class="flags" id="flags"></div>
+  <div class="advice" id="advice" hidden>
+    <span class="mono">What to do now</span>
+    <ol id="actions"></ol>
+  </div>
+  <div class="fwd" id="fwd" hidden>
+    <span class="mono">Send this back to whoever forwarded it</span>
+    <textarea id="fwdtext" readonly></textarea>
+    <div class="fwdrow">
+      <span class="mono" style="color:var(--dim)">Written from the rules that fired, so it cannot overstate the verdict</span>
+      <button class="copy" id="copyfwd">Copy message</button>
+    </div>
+  </div>
   <div class="share">
     <span class="mono">Forward this verdict</span>
     <input id="link" readonly value="—">
@@ -53,17 +96,62 @@
 </div></div>
 
 <section class="pad"><div class="shell">
-  <div class="mono rise">How it decides</div>
+  <div class="stats rise">
+    <div><b data-to="20">0</b><span class="mono">patterns checked</span></div>
+    <div><b data-to="4">0</b><span class="mono">verdict bands</span></div>
+    <div><b data-to="30">0</b><span class="mono">day expiry</span></div>
+    <div><b data-to="0">0</b><span class="mono">accounts needed</span></div>
+  </div>
+  <div class="mono rise" style="margin-top:80px">How it decides</div>
   <h2 class="rise">A model never<br>gets the last word.</h2>
   <p class="sub rise">A scam verdict has to be the same every time and has to survive being explained
      to the person who nearly paid. So the decision is made by rules you can read.</p>
   <div class="grid3">
     <div class="cell rise"><div class="num">01</div><h3>Rules decide</h3>
-      <p>Thirteen checks, each one able to point at the exact words that set it off. Same message, same answer, every time.</p></div>
+      <p>Twenty-one checks, each one able to point at the exact words that set it off. Same message, same answer, every time.</p></div>
     <div class="cell rise"><div class="num">02</div><h3>The model only phrases it</h3>
       <p>Language models are good at wording and bad at being certain. It writes the summary sentence. It cannot change the verdict.</p></div>
     <div class="cell rise"><div class="num">03</div><h3>It stays with you</h3>
       <p>The rules run in the browser, so nothing is sent anywhere until you choose to share. Shared scans carry a 30-day TTL and delete themselves.</p></div>
+  </div>
+</div></section>
+
+<section class="pad"><div class="shell">
+  <div class="mono rise">The whole rulebook</div>
+  <h2 class="rise">Twenty-one checks,<br>all of them readable.</h2>
+  <p class="sub rise">Nothing here is a black box. Every check that can fire is listed, with the
+     weight it carries and the reason it exists. Hover one to see what it looks for.</p>
+  <div class="rulegrid rise" id="rulegrid"></div>
+</div></section>
+
+<section class="pad"><div class="shell">
+  <div class="mono rise">The pipeline, from above</div>
+  <h2 class="rise">Twenty-one patterns.<br>Yours lights the ones<br>it matched.</h2>
+  <p class="sub rise">Every rule is a node. Idle, they drift. Check a message and the ones that
+     fired ignite and wire back to the core — the same rules, the same verdict, drawn.</p>
+  <div class="sceneWrap rise">
+    <div id="scene"></div>
+    <div class="legend">
+      <span><i class="d"></i>waiting</span>
+      <span><i class="h"></i>fired on your message</span>
+      <span><i class="c"></i>verdict</span>
+    </div>
+  </div>
+</div></section>
+
+<section class="pad"><div class="shell">
+  <div class="mono rise">Everything it looks for</div>
+  <h2 class="rise">Twenty-one ways a<br>message gives itself away.</h2>
+  <p class="sub rise">Each one is a few lines of Python that can point at the words that set it off.
+     No training data, no drift, no retraining — if it fires, you can read why.</p>
+  <div class="gallery rise">
+    <div class="gcol" id="gcol"></div>
+    <div class="gnow">
+      <div class="mono">Now showing</div>
+      <div class="gnum" id="gnum">01</div>
+      <div class="gname" id="gname">—</div>
+      <div class="ghunt mono" id="ghunt">—</div>
+    </div>
   </div>
 </div></section>
 
@@ -89,7 +177,9 @@
 
 <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.14/dist/lenis.min.js"></script>
 <script src="rules.generated.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="config.js"></script>
 <script src="app.js"></script>
+<script src="scene.js"></script>
 </body>
 </html>

@@ -29,6 +29,17 @@ CASES = [
      "Your order was cancelled. Pay Rs 99 processing charge to claim your refund of Rs 4,999.",
      {"PAY_TO_RECEIVE"}),
 
+    ("prize bait with a QR code",
+     "Dear customer, congratulations on winning a new mac book air. Share your "
+     "phone number and scan the given QR code to claim the offer. Click it now "
+     "before you lose the offer.",
+     {"LOTTERY_WIN", "QR_SCAN", "URGENCY"}),
+
+    ("a legitimate QR, must stay clean",
+     "Your order is out for delivery today. Scan the QR on the package to confirm "
+     "you received it, or pay the delivery agent by scanning his QR.",
+     set()),
+
     ("ordinary message, must stay clean",
      "Hi Vaibhav, this is Priya from the placement cell. Your Infosys interview is "
      "on Monday at 10am in Seminar Hall 2. Please carry two copies of your resume.",

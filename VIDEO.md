@@ -20,7 +20,7 @@ Scroll slowly through the hero while you say it. Don't touch anything yet.
 
 Click the **KYC expired** example chip. Hit **Check it**.
 
-> Twenty rules, plain Python. It names what fired, quotes the exact words, and
+> Twenty-one rules, plain Python. It names what fired, quotes the exact words, and
 > scores it. Nothing here is a model guessing — the same message always gives
 > the same verdict, and every line of it can be explained.
 
@@ -67,7 +67,7 @@ Switch to the AWS tabs, one at a time, roughly ten seconds each:
 
 Back to the site, on the constellation.
 
-> Twenty rules, one Lambda, one table. It works with the network off, it
+> Twenty-one rules, one Lambda, one table. It works with the network off, it
 > explains itself, and it gives you the words to say no.
 
 ---

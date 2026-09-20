@@ -25,6 +25,7 @@ CLAUSE = {
     "COURIER_CUSTOMS": "it wants a fee to release a parcel",
     "ELECTRICITY_CUT": "it threatens to cut your electricity",
     "LOTTERY_WIN": "it claims a prize you never entered for",
+    "QR_SCAN": "it tells you to scan a QR code to receive something, which is not a thing QR codes do",
     "LOAN_HARASSMENT": "it threatens to contact the people in your phone",
     "INVESTMENT_TIP": "it promises guaranteed returns",
     "TASK_COMMISSION": "it is a prepaid-task scheme",
@@ -32,7 +33,7 @@ CLAUSE = {
 }
 
 MONEY = {"PAY_TO_GET_JOB", "PAY_TO_RECEIVE", "PERSONAL_PAYMENT", "COURIER_CUSTOMS",
-         "TASK_COMMISSION", "LOTTERY_WIN", "INVESTMENT_TIP"}
+         "TASK_COMMISSION", "LOTTERY_WIN", "INVESTMENT_TIP", "QR_SCAN"}
 JOB = {"PAY_TO_GET_JOB", "NO_INTERVIEW", "TOO_GOOD", "TASK_COMMISSION"}
 IMPERSONATION = {"KYC_PANIC", "ELECTRICITY_CUT", "LOAN_HARASSMENT", "THREAT", "COURIER_CUSTOMS"}
 PROPERTY = {"SIGHT_UNSEEN", "ARMY_OFFICER"}

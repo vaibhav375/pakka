@@ -96,6 +96,12 @@
   "weight": 4
  },
  {
+  "id": "QR_SCAN",
+  "name": "A QR code to receive money",
+  "why": "Scanning a QR code can only send money out of your account. It can never bring money in. Anyone telling you to scan one to claim, collect or receive something is describing a thing that cannot happen.",
+  "weight": 3
+ },
+ {
   "id": "LOAN_HARASSMENT",
   "name": "Loan-app style pressure",
   "why": "Threatening to contact your phonebook over a loan is illegal recovery practice, not a legitimate demand.",

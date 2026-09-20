@@ -35,7 +35,7 @@ window.PAKKA_RULES = [
     "name": "Manufactured urgency",
     "why": "Pressure to act within hours exists to stop you checking. Anything genuine will still be there tomorrow.",
     "weight": 1,
-    "re": "within \\d+ ?(?:hours?|hrs?|minutes?|mins?)|today only|last chance|expires? (?:today|tonight|soon)|immediately|hurry|limited (?:slots?|seats?|offer)|only \\d+ (?:slots?|seats?) left"
+    "re": "within \\d+ ?(?:hours?|hrs?|minutes?|mins?)|today only|last chance|expires? (?:today|tonight|soon)|immediately|hurry|limited (?:slots?|seats?|offer)|only \\d+ (?:slots?|seats?) left|before (?:you )?(?:lose|miss)|\\b(?:click|claim|act|apply) (?:it |this |here |the link )?now\\b"
   },
   {
     "id": "NO_INTERVIEW",
@@ -92,8 +92,116 @@ window.PAKKA_RULES = [
     "why": "Paying a token or advance before visiting is how fake listings work. The photos are usually taken from a real listing elsewhere.",
     "weight": 3,
     "re": "(?:token|advance|booking) (?:amount|money|fee).{0,40}(?:before|without) .{0,20}(?:visit|see)|(?:i am|i'm|currently) (?:abroad|out of (?:town|country)|in another city).{0,60}(?:send|transfer|pay)|book (?:it )?(?:now|today) .{0,20}without (?:a )?visit"
+  },
+  {
+    "id": "COURIER_CUSTOMS",
+    "name": "Parcel held, pay a fee to release it",
+    "why": "Couriers do not hold parcels for a fee over SMS. Customs duty is paid to the government, never to a WhatsApp number.",
+    "weight": 3,
+    "re": "(?:parcel|package|courier|shipment|consignment).{0,40}(?:held|stuck|seized|customs|clearance)|customs (?:duty|clearance|charge).{0,30}(?:pay|transfer)|(?:fedex|dhl|bluedart|india post).{0,40}(?:pay|fee|charge)"
+  },
+  {
+    "id": "ELECTRICITY_CUT",
+    "name": "Electricity disconnection threat",
+    "why": "Power utilities do not warn you by SMS from a personal number, and they never ask you to call one to avoid disconnection tonight.",
+    "weight": 3,
+    "re": "electricity .{0,30}(?:disconnect|cut off|discontinue)|power .{0,20}(?:will be )?disconnect|bill .{0,20}not updated.{0,30}disconnect"
+  },
+  {
+    "id": "LOTTERY_WIN",
+    "name": "A prize you never entered for",
+    "why": "You cannot win a lottery you never entered. Every version of this ends with a fee to release the winnings.",
+    "weight": 4,
+    "re": "(?:won|winner).{0,30}(?:lottery|lucky draw|prize|kbc)|\\bkbc\\b|lucky (?:winner|draw)|congratulations.{0,30}\\b(?:won|winning|winner)\\b|\\b(?:won|winning|win a)\\b.{0,40}(?:iphone|mac ?book|laptop|smartphone|scooter|\\bcar\\b|\\bbike\\b|gift (?:card|voucher|hamper)|voucher|cash prize)"
+  },
+  {
+    "id": "QR_SCAN",
+    "name": "A QR code to receive money",
+    "why": "Scanning a QR code can only send money out of your account. It can never bring money in. Anyone telling you to scan one to claim, collect or receive something is describing a thing that cannot happen.",
+    "weight": 3,
+    "re": "scan .{0,25}\\bqr\\b.{0,40}(?:claim|collect|receive your|get your|refund|prize|reward|cashback|winnings|the offer)|\\bqr code\\b.{0,30}(?:to )?(?:claim|collect|receive your|get your)|(?:claim|collect|receive) .{0,30}(?:by |through |via )?scanning"
+  },
+  {
+    "id": "LOAN_HARASSMENT",
+    "name": "Loan-app style pressure",
+    "why": "Threatening to contact your phonebook over a loan is illegal recovery practice, not a legitimate demand.",
+    "weight": 3,
+    "re": "(?:inform|contact|call).{0,25}(?:your )?(?:contacts|family|friends|relatives).{0,30}(?:loan|due|payment)|loan .{0,25}(?:overdue|default).{0,30}(?:legal|action|contacts)|defaulter.{0,30}(?:list|notice)"
+  },
+  {
+    "id": "INVESTMENT_TIP",
+    "name": "Guaranteed returns or a tips group",
+    "why": "Guaranteed returns do not exist. Groups offering them exist to take deposits that cannot be withdrawn.",
+    "weight": 3,
+    "re": "guaranteed (?:returns?|profit|income)|(?:double|triple) your money|(?:stock|trading|crypto|forex) (?:tips?|group|signals?)|\\b\\d{2,3}% (?:returns?|profit)"
+  },
+  {
+    "id": "TASK_COMMISSION",
+    "name": "Prepaid task or commission work",
+    "why": "Task scams start with small payouts that work, then ask you to deposit for a bigger task. The deposit is the point.",
+    "weight": 3,
+    "re": "(?:complete|do) .{0,20}tasks?.{0,30}(?:earn|commission|payout)|(?:like|subscribe|rate).{0,25}(?:videos?|hotels?|products?).{0,30}(?:earn|paid|commission)|prepaid task|recharge .{0,20}to (?:unlock|continue).{0,20}task"
+  },
+  {
+    "id": "ARMY_OFFICER",
+    "name": "Claims to be posted far away and cannot meet",
+    "why": "The soldier-being-transferred story is the oldest marketplace scam in India. It exists to explain why you must pay before meeting.",
+    "weight": 3,
+    "re": "(?:army|military|cisf|crpf|bsf|navy) (?:officer|jawan|personnel)|(?:posted|deployed) (?:in|at) .{0,30}(?:cannot|can't) (?:meet|come)|transfer(?:red)? .{0,25}urgent(?:ly)? .{0,25}sell"
   }
 ];
+window.PAKKA_ADVICE = {
+  "clause": {
+    "PAY_TO_GET_JOB": "it asks for money before a job",
+    "ASKS_FOR_SECRET": "it asks for an OTP or PIN",
+    "PAY_TO_RECEIVE": "it wants a payment before releasing money to you",
+    "KYC_PANIC": "it uses a KYC or account-block scare",
+    "URGENCY": "it pushes you to act within hours",
+    "NO_INTERVIEW": "it offers a job with no interview",
+    "TOO_GOOD": "the pay does not match the work",
+    "PERSONAL_PAYMENT": "the money goes to a personal account",
+    "FREE_EMAIL_AS_COMPANY": "a company is writing from a free Gmail address",
+    "HIDDEN_LINK": "the link is shortened so you cannot see where it goes",
+    "CHAT_ONLY": "it exists only on WhatsApp or Telegram",
+    "THREAT": "it threatens legal or police action",
+    "SIGHT_UNSEEN": "it wants rent before you have seen the place",
+    "COURIER_CUSTOMS": "it wants a fee to release a parcel",
+    "ELECTRICITY_CUT": "it threatens to cut your electricity",
+    "LOTTERY_WIN": "it claims a prize you never entered for",
+    "QR_SCAN": "it tells you to scan a QR code to receive something, which is not a thing QR codes do",
+    "LOAN_HARASSMENT": "it threatens to contact the people in your phone",
+    "INVESTMENT_TIP": "it promises guaranteed returns",
+    "TASK_COMMISSION": "it is a prepaid-task scheme",
+    "ARMY_OFFICER": "it uses the posted-far-away story to avoid meeting"
+  },
+  "money": [
+    "COURIER_CUSTOMS",
+    "INVESTMENT_TIP",
+    "LOTTERY_WIN",
+    "PAY_TO_GET_JOB",
+    "PAY_TO_RECEIVE",
+    "PERSONAL_PAYMENT",
+    "QR_SCAN",
+    "TASK_COMMISSION"
+  ],
+  "job": [
+    "NO_INTERVIEW",
+    "PAY_TO_GET_JOB",
+    "TASK_COMMISSION",
+    "TOO_GOOD"
+  ],
+  "impersonation": [
+    "COURIER_CUSTOMS",
+    "ELECTRICITY_CUT",
+    "KYC_PANIC",
+    "LOAN_HARASSMENT",
+    "THREAT"
+  ],
+  "property": [
+    "ARMY_OFFICER",
+    "SIGHT_UNSEEN"
+  ]
+};
 window.PAKKA_BANDS = [[8, "almost_certainly", "Almost certainly a scam"], [5, "likely", "Likely a scam"], [2, "careful", "Be careful"], [1, "one_flag", "One thing to check"], [0, "clear", "Nothing suspicious found"]];
 
 window.pakkaEvaluate = function (text) {

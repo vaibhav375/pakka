@@ -27,7 +27,7 @@ So Pakka answers in sentences, points at the exact words, and gives you a link.
 
 ## How it decides
 
-**Twenty rules, in plain Python. No model gets a vote.**
+**Twenty-one rules, in plain Python. No model gets a vote.**
 
 A scam verdict has to be identical every time and has to survive being explained
 to the person who nearly paid. A language model can do neither reliably, so the
@@ -52,10 +52,11 @@ in the message and say in one sentence why what it found is a problem.
 | 14 | Parcel held, pay a fee to release it | 3 |
 | 15 | Electricity disconnection threat | 3 |
 | 16 | A prize you never entered for | 4 |
-| 17 | Loan-app style pressure | 3 |
-| 18 | Guaranteed returns or a tips group | 3 |
-| 19 | Prepaid task or commission work | 3 |
-| 20 | Claims to be posted far away and cannot meet | 3 |
+| 17 | A QR code to receive money | 3 |
+| 18 | Loan-app style pressure | 3 |
+| 19 | Guaranteed returns or a tips group | 3 |
+| 20 | Prepaid task or commission work | 3 |
+| 21 | Claims to be posted far away and cannot meet | 3 |
 
 Weights add up to a score, the score picks a band. Ordinary messages have to come
 back clean — a checker that flags everything gets ignored, so a real placement-cell
@@ -147,7 +148,7 @@ browser JavaScript.
 
 ## What it does not do
 
-It does not detect scams it has never seen — twenty patterns are twenty
+It does not detect scams it has never seen — twenty-one patterns are twenty-one
 patterns, and a clean result says only that none of them fired. The page says so
 rather than implying safety. It reads English and Hinglish written in Latin
 script; Devanagari input is not handled yet. And it is not legal or financial

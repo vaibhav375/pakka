@@ -35,7 +35,7 @@ window.PAKKA_RULES = [
     "name": "Manufactured urgency",
     "why": "Pressure to act within hours exists to stop you checking. Anything genuine will still be there tomorrow.",
     "weight": 1,
-    "re": "within \\d+ ?(?:hours?|hrs?|minutes?|mins?)|today only|last chance|expires? (?:today|tonight|soon)|immediately|hurry|limited (?:slots?|seats?|offer)|only \\d+ (?:slots?|seats?) left"
+    "re": "within \\d+ ?(?:hours?|hrs?|minutes?|mins?)|today only|last chance|expires? (?:today|tonight|soon)|immediately|hurry|limited (?:slots?|seats?|offer)|only \\d+ (?:slots?|seats?) left|before (?:you )?(?:lose|miss)|\\b(?:click|claim|act|apply) (?:it |this |here |the link )?now\\b"
   },
   {
     "id": "NO_INTERVIEW",
@@ -112,7 +112,14 @@ window.PAKKA_RULES = [
     "name": "A prize you never entered for",
     "why": "You cannot win a lottery you never entered. Every version of this ends with a fee to release the winnings.",
     "weight": 4,
-    "re": "(?:won|winner).{0,30}(?:lottery|lucky draw|prize|kbc)|\\bkbc\\b|lucky (?:winner|draw)|congratulations.{0,30}\\bwon\\b"
+    "re": "(?:won|winner).{0,30}(?:lottery|lucky draw|prize|kbc)|\\bkbc\\b|lucky (?:winner|draw)|congratulations.{0,30}\\b(?:won|winning|winner)\\b|\\b(?:won|winning|win a)\\b.{0,40}(?:iphone|mac ?book|laptop|smartphone|scooter|\\bcar\\b|\\bbike\\b|gift (?:card|voucher|hamper)|voucher|cash prize)"
+  },
+  {
+    "id": "QR_SCAN",
+    "name": "A QR code to receive money",
+    "why": "Scanning a QR code can only send money out of your account. It can never bring money in. Anyone telling you to scan one to claim, collect or receive something is describing a thing that cannot happen.",
+    "weight": 3,
+    "re": "scan .{0,25}\\bqr\\b.{0,40}(?:claim|collect|receive your|get your|refund|prize|reward|cashback|winnings|the offer)|\\bqr code\\b.{0,30}(?:to )?(?:claim|collect|receive your|get your)|(?:claim|collect|receive) .{0,30}(?:by |through |via )?scanning"
   },
   {
     "id": "LOAN_HARASSMENT",
@@ -161,6 +168,7 @@ window.PAKKA_ADVICE = {
     "COURIER_CUSTOMS": "it wants a fee to release a parcel",
     "ELECTRICITY_CUT": "it threatens to cut your electricity",
     "LOTTERY_WIN": "it claims a prize you never entered for",
+    "QR_SCAN": "it tells you to scan a QR code to receive something, which is not a thing QR codes do",
     "LOAN_HARASSMENT": "it threatens to contact the people in your phone",
     "INVESTMENT_TIP": "it promises guaranteed returns",
     "TASK_COMMISSION": "it is a prepaid-task scheme",
@@ -173,6 +181,7 @@ window.PAKKA_ADVICE = {
     "PAY_TO_GET_JOB",
     "PAY_TO_RECEIVE",
     "PERSONAL_PAYMENT",
+    "QR_SCAN",
     "TASK_COMMISSION"
   ],
   "job": [

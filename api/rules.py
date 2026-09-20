@@ -73,7 +73,8 @@ RULES: tuple[Rule, ...] = (
         1,
         _p(r"within \d+ ?(?:hours?|hrs?|minutes?|mins?)", r"today only", r"last chance",
            r"expires? (?:today|tonight|soon)", r"immediately", r"hurry",
-           r"limited (?:slots?|seats?|offer)", r"only \d+ (?:slots?|seats?) left"),
+           r"limited (?:slots?|seats?|offer)", r"only \d+ (?:slots?|seats?) left",
+           r"before (?:you )?(?:lose|miss)", r"\b(?:click|claim|act|apply) (?:it |this |here |the link )?now\b"),
     ),
     Rule(
         "NO_INTERVIEW", "Selected without any interview",
@@ -165,7 +166,21 @@ RULES: tuple[Rule, ...] = (
         "with a fee to release the winnings.",
         4,
         _p(r"(?:won|winner).{0,30}(?:lottery|lucky draw|prize|kbc)",
-           r"\bkbc\b", r"lucky (?:winner|draw)", r"congratulations.{0,30}\bwon\b"),
+           r"\bkbc\b", r"lucky (?:winner|draw)",
+           r"congratulations.{0,30}\b(?:won|winning|winner)\b",
+           r"\b(?:won|winning|win a)\b.{0,40}(?:iphone|mac ?book|laptop|smartphone|"
+           r"scooter|\bcar\b|\bbike\b|gift (?:card|voucher|hamper)|voucher|cash prize)"),
+    ),
+    Rule(
+        "QR_SCAN", "A QR code to receive money",
+        "Scanning a QR code can only send money out of your account. It can never "
+        "bring money in. Anyone telling you to scan one to claim, collect or "
+        "receive something is describing a thing that cannot happen.",
+        3,
+        _p(r"scan .{0,25}\bqr\b.{0,40}(?:claim|collect|receive your|get your|refund|"
+           r"prize|reward|cashback|winnings|the offer)",
+           r"\bqr code\b.{0,30}(?:to )?(?:claim|collect|receive your|get your)",
+           r"(?:claim|collect|receive) .{0,30}(?:by |through |via )?scanning"),
     ),
     Rule(
         "LOAN_HARASSMENT", "Loan-app style pressure",
