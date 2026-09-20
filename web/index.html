@@ -58,6 +58,7 @@
     </div>
     <div class="dial"><div class="mono" style="margin-bottom:8px">Risk score</div><b id="vscore">0</b></div>
   </div>
+  <div class="weights" id="weights"></div>
   <div class="msg" id="msg"></div>
   <div class="flags" id="flags"></div>
   <div class="advice" id="advice" hidden>
@@ -92,6 +93,14 @@
     <div class="cell rise"><div class="num">03</div><h3>It stays with you</h3>
       <p>The rules run in the browser, so nothing is sent anywhere until you choose to share. Shared scans carry a 30-day TTL and delete themselves.</p></div>
   </div>
+</div></section>
+
+<section class="pad"><div class="shell">
+  <div class="mono rise">The whole rulebook</div>
+  <h2 class="rise">Twenty checks,<br>all of them readable.</h2>
+  <p class="sub rise">Nothing here is a black box. Every check that can fire is listed, with the
+     weight it carries and the reason it exists. Hover one to see what it looks for.</p>
+  <div class="rulegrid rise" id="rulegrid"></div>
 </div></section>
 
 <section class="pad"><div class="shell">

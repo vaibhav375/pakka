@@ -1,0 +1,122 @@
+[
+ {
+  "id": "PAY_TO_GET_JOB",
+  "name": "Asks for money before a job",
+  "why": "A real employer never charges you to be hired. Registration, training and security fees are the oldest job scam there is.",
+  "weight": 3
+ },
+ {
+  "id": "ASKS_FOR_SECRET",
+  "name": "Asks for an OTP, PIN or password",
+  "why": "Nobody legitimate will ever ask for your OTP, UPI PIN, CVV or password \u2014 not your bank, not a delivery agent, not HR.",
+  "weight": 4
+ },
+ {
+  "id": "PAY_TO_RECEIVE",
+  "name": "Asks you to pay to receive money",
+  "why": "You are being asked to send money to unlock money. Refunds, prizes and lottery winnings never require a payment from you first.",
+  "weight": 4
+ },
+ {
+  "id": "KYC_PANIC",
+  "name": "KYC or account-block scare",
+  "why": "Banks do not block accounts over SMS links. This is the most common phishing script in India right now.",
+  "weight": 3
+ },
+ {
+  "id": "URGENCY",
+  "name": "Manufactured urgency",
+  "why": "Pressure to act within hours exists to stop you checking. Anything genuine will still be there tomorrow.",
+  "weight": 1
+ },
+ {
+  "id": "NO_INTERVIEW",
+  "name": "Selected without any interview",
+  "why": "An offer with no interview is not an offer. Real hiring involves someone actually speaking to you.",
+  "weight": 2
+ },
+ {
+  "id": "TOO_GOOD",
+  "name": "Pay that does not match the work",
+  "why": "Earnings far above the going rate for a few hours a day are bait. The money is the hook, not the job.",
+  "weight": 2
+ },
+ {
+  "id": "PERSONAL_PAYMENT",
+  "name": "Money goes to a personal account",
+  "why": "Payment to a personal UPI ID or a phone number leaves you no way to recover the money and no company to complain about.",
+  "weight": 3
+ },
+ {
+  "id": "FREE_EMAIL_AS_COMPANY",
+  "name": "Company mail sent from a free inbox",
+  "why": "A company with a careers page does not send offer letters from a personal Gmail address.",
+  "weight": 2
+ },
+ {
+  "id": "HIDDEN_LINK",
+  "name": "Shortened or disguised link",
+  "why": "Shortened links hide where they actually go. Legitimate organisations link to their own domain.",
+  "weight": 2
+ },
+ {
+  "id": "CHAT_ONLY",
+  "name": "Exists only on WhatsApp or Telegram",
+  "why": "No office, no website, no landline \u2014 only a chat window. There is nothing to hold accountable afterwards.",
+  "weight": 1
+ },
+ {
+  "id": "THREAT",
+  "name": "Threatens legal or police action",
+  "why": "Threats of FIRs, court cases or arrest over a message are a pressure tactic. Real legal process does not arrive by WhatsApp.",
+  "weight": 2
+ },
+ {
+  "id": "SIGHT_UNSEEN",
+  "name": "Asks for rent before you have seen the place",
+  "why": "Paying a token or advance before visiting is how fake listings work. The photos are usually taken from a real listing elsewhere.",
+  "weight": 3
+ },
+ {
+  "id": "COURIER_CUSTOMS",
+  "name": "Parcel held, pay a fee to release it",
+  "why": "Couriers do not hold parcels for a fee over SMS. Customs duty is paid to the government, never to a WhatsApp number.",
+  "weight": 3
+ },
+ {
+  "id": "ELECTRICITY_CUT",
+  "name": "Electricity disconnection threat",
+  "why": "Power utilities do not warn you by SMS from a personal number, and they never ask you to call one to avoid disconnection tonight.",
+  "weight": 3
+ },
+ {
+  "id": "LOTTERY_WIN",
+  "name": "A prize you never entered for",
+  "why": "You cannot win a lottery you never entered. Every version of this ends with a fee to release the winnings.",
+  "weight": 4
+ },
+ {
+  "id": "LOAN_HARASSMENT",
+  "name": "Loan-app style pressure",
+  "why": "Threatening to contact your phonebook over a loan is illegal recovery practice, not a legitimate demand.",
+  "weight": 3
+ },
+ {
+  "id": "INVESTMENT_TIP",
+  "name": "Guaranteed returns or a tips group",
+  "why": "Guaranteed returns do not exist. Groups offering them exist to take deposits that cannot be withdrawn.",
+  "weight": 3
+ },
+ {
+  "id": "TASK_COMMISSION",
+  "name": "Prepaid task or commission work",
+  "why": "Task scams start with small payouts that work, then ask you to deposit for a bigger task. The deposit is the point.",
+  "weight": 3
+ },
+ {
+  "id": "ARMY_OFFICER",
+  "name": "Claims to be posted far away and cannot meet",
+  "why": "The soldier-being-transferred story is the oldest marketplace scam in India. It exists to explain why you must pay before meeting.",
+  "weight": 3
+ }
+]

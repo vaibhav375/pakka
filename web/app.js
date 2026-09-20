@@ -109,6 +109,24 @@ const EXAMPLES = {
     'Single room near PES RR campus, fully furnished, 7500/month including wifi. ' +
     'I am currently abroad so I cannot show the room, please transfer the token amount ' +
     'to 9845012345 on google pay and I will block it for you.',
+  'Parcel stuck':
+    'Your parcel is held at customs due to incomplete documents. Pay the customs ' +
+    'clearance charge of Rs 850 within 24 hours or the shipment will be returned. ' +
+    'Track at cutt.ly/parcel-release',
+  'Lottery win':
+    'Congratulations!! You have won KBC lucky draw prize of Rs 25,00,000. To claim your ' +
+    'prize pay the processing charge of Rs 6,500 and share your bank details. ' +
+    'Contact us only on WhatsApp immediately.',
+  'Task scheme':
+    'Join our part time team. Complete 5 simple tasks daily, like and subscribe videos, ' +
+    'earn Rs 3,000 per day from home. First prepaid task of Rs 1,000 required to unlock ' +
+    'commission. Join our telegram.',
+  'Loan app':
+    'Your loan payment is overdue. If not cleared today we will inform your contacts ' +
+    'and family and take legal action. An FIR will be filed against you.',
+  'Electricity cut':
+    'Dear consumer, your electricity will be disconnected tonight at 9:30 pm because ' +
+    'your previous bill was not updated. Immediately contact our officer on 9812345678.',
   'A normal message':
     'Hi Vaibhav, this is Priya from the placement cell. Your Infosys interview is on ' +
     'Monday at 10am in Seminar Hall 2. Please carry two copies of your resume.',
@@ -229,6 +247,31 @@ function render(d) {
   marks.forEach((m, i) => setTimeout(() => m.classList.add('lit'), 900 + i * 170));
   cards.forEach((c, i) => setTimeout(() => c.classList.add('in'), 1040 + i * 170));
 }
+
+/* hovering a flag lights only its own phrases, and the reverse — the link
+   between an explanation and the words it is about should not need reading */
+const linkHover = (on) => (e) => {
+  const flag = e.target.closest('.flag');
+  const mk = e.target.closest('mark');
+  const id = flag?.dataset.id || mk?.dataset.id;
+  if (!id) return;
+  document.querySelectorAll(`mark[data-id="${id}"]`).forEach((m) => m.classList.toggle('focus', on));
+  document.querySelectorAll(`.flag[data-id="${id}"]`).forEach((f) => f.classList.toggle('focus', on));
+};
+document.addEventListener('mouseover', linkHover(true));
+document.addEventListener('mouseout', linkHover(false));
+
+/* the rulebook, generated from the same file the API runs */
+fetch('rules.json')
+  .then((r) => r.json())
+  .then((rules) => {
+    const g = document.getElementById('rulegrid');
+    if (g) g.innerHTML = rules
+      .sort((a, b) => b.weight - a.weight)
+      .map((r) => `<div class="rulecard"><div class="w">+${r.weight}</div>
+        <h4>${r.name}</h4><p>${r.why}</p></div>`).join('');
+  })
+  .catch(() => {});
 
 $('copyfwd').onclick = async () => {
   const v = $('fwdtext').value;
