@@ -1,0 +1,14 @@
+# No build step on purpose: the front end is plain HTML, CSS and JS, so there
+# is nothing to compile and nothing that can fail at deploy time. Amplify just
+# publishes web/ as it stands.
+version: 1
+frontend:
+  phases:
+    build:
+      commands: []
+  artifacts:
+    baseDirectory: web
+    files:
+      - '**/*'
+  cache:
+    paths: []
