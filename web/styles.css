@@ -317,8 +317,8 @@ mark.peek{background:rgba(198,255,61,.22)!important;color:#eaffc0!important;
 .door h3{font-size:22px;letter-spacing:-.02em;margin:6px 0 0}
 .door p{color:var(--soft);margin:0;flex:1}
 .go.small{align-self:flex-start;padding:11px 18px;font-size:14px;
-          text-decoration:none;display:inline-block}
-.door .note{color:var(--dim);font-size:11px;line-height:1.5;min-height:3.1em}
+          text-decoration:none;display:inline-block;margin-top:auto}
+.door .note{color:var(--dim);font-size:11px;line-height:1.5;margin-bottom:4px}
 @media (max-width:1040px){.doors{grid-template-columns:1fr 1fr}}
 @media (max-width:700px){.doors{grid-template-columns:1fr}}
 
