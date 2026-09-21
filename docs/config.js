@@ -4,4 +4,4 @@ window.PAKKA_API = "https://t3ezfzhv5jh7qacktlcizc7hwy0mzodw.lambda-url.ap-south
 
 /* The Telegram bot's handle, without the @. Left empty, the page says the bot
    is not configured rather than linking somewhere that does not exist. */
-window.PAKKA_TELEGRAM = "";
+window.PAKKA_TELEGRAM = "pakka_check_bot";
