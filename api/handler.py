@@ -100,7 +100,9 @@ def _verdict_for(text: str) -> tuple[dict, dict, str | None, dict | None]:
     try:
         scan_id = store.new_id()
         store.put(scan_id, {"text": text, **verdict, "advice": advice})
-        link = f"{PUBLIC_URL}/v/{scan_id}" if PUBLIC_URL else None
+        # the page reads a shared verdict from the hash, not from a path, so
+        # "/v/{id}" would 404 on the static host while looking perfectly right
+        link = f"{PUBLIC_URL}/#{scan_id}" if PUBLIC_URL else None
     except Exception:
         traceback.print_exc()          # a storage failure must not cost the answer
     return verdict, advice, link, hunch
