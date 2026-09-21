@@ -279,6 +279,41 @@ decoded strings character for character against Python's.
 Meanwhile `https://www.amazon.in/orders` and `https://developer.mozilla.org/...`
 stay clean, which is the part that took the care.
 
+## The number that matters: 25 real messages
+
+Everything else on this page is measured against messages I wrote. That will
+always flatter rules I also wrote. So `tools/holdout.py` holds 25 scam messages
+quoted from eight published sources, including the government's own fact-check
+unit, and it is frozen: nothing in it may be used to write a rule, widen a
+pattern or train the model.
+
+```
+python3 tools/run_holdout.py
+```
+
+First run, and the one that counts:
+
+| | |
+|---|---|
+| rules fire at all | 16/25 (64%) |
+| rules reach "be careful" | **13/25 (52%)** |
+| model alone, p ≥ 0.6 | 24/25 (96%) |
+| what the page would actually warn about | 19/25 (76%) |
+
+**The rules catch 52% of real messages and 100% of mine.** That gap is the
+honest cost of writing a rulebook and its test set in the same week, and it is
+the single most useful thing this project measured about itself. It is also the
+clearest argument for the model, which was added to cover phrasings no rule
+anticipated and here catches 24 of 25.
+
+Six messages would have gone unwarned. Four of them sit between 0.6 and 0.72 on
+the model, just under the 0.75 the page requires before it will say "this reads
+like a scam". Lowering that threshold to 0.7 would warn on five of the six and
+still raise zero false positives across the 62 legitimate messages, which is
+measured on the legitimate corpus rather than on the holdout. That change has
+deliberately not been made yet. The moment it is, this holdout stops being one,
+and the number above stops being true. It is recorded here as it first ran.
+
 ## Auditing the rulebook against somebody else's data
 
 A rulebook cannot answer two questions about itself: which shapes of fraud it
