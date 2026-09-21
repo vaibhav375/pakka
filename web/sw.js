@@ -4,7 +4,11 @@
    Network first, cache second. The rules are the whole product and a stale
    copy of them is worse than a slow one, so a working network always wins and
    the cache is there for the times there is none. */
-const SHELL = 'pakka-v1';
+/* The cache name carries the build. It used to be a fixed string, which meant
+   install() ran once and never again, so anyone who had installed the app
+   could stay pinned to the files from whatever day they installed it. Changing
+   the name on every deploy is what makes a new version take. */
+const SHELL = 'pakka-f2cf9cf';
 const FILES = ['./', './index.html', './styles.css', './app.js',
                './rules.generated.js', './config.js', './scene.js',
                './manifest.webmanifest', './icon-192.png'];
