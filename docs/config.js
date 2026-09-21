@@ -5,3 +5,9 @@ window.PAKKA_API = "https://t3ezfzhv5jh7qacktlcizc7hwy0mzodw.lambda-url.ap-south
 /* The Telegram bot's handle, without the @. Left empty, the page says the bot
    is not configured rather than linking somewhere that does not exist. */
 window.PAKKA_TELEGRAM = "pakka_check_bot";
+
+/* WhatsApp, through Twilio's sandbox. The sandbox only answers numbers that
+   have sent it the join code first, so the button sends that message for you.
+   Left empty, the page says WhatsApp is not configured rather than sending
+   someone to a number that will ignore them. */
+window.PAKKA_WHATSAPP = { number: "14155238886", join: "join flow-double" };

@@ -540,6 +540,24 @@ if (location.hash.length > 1) {
     if (note) note.textContent = `@${bot} · works on every phone and on desktop`;
   }
 
+  const wa = window.PAKKA_WHATSAPP || {};
+  const waLink = document.getElementById('wa');
+  const waNote = document.getElementById('wanote');
+  if (wa.number && waLink) {
+    /* wa.me pre-fills the message, so the join code is one tap rather than
+       something to copy off a slide */
+    waLink.href = `https://wa.me/${wa.number}?text=${encodeURIComponent(wa.join || '')}`;
+    waLink.hidden = false;
+    waLink.target = '_blank';
+    waLink.rel = 'noopener';
+    if (waNote) {
+      waNote.textContent = wa.join
+        ? `Twilio sandbox, so the first message has to be "${wa.join}". `
+          + 'The button sends it.'
+        : 'Forward anything to it.';
+    }
+  }
+
   /* Chrome fires this when the app is installable. Until then the button would
      do nothing, so it says what to do by hand instead of lying. */
   const btn = document.getElementById('install');
