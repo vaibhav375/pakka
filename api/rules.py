@@ -187,6 +187,7 @@ RULES: tuple[Rule, ...] = (
            r"(?:with)?in\s+\d+\s*(?:hours?|hrs?|days?|minutes?)",
            r"expires? (?:today|tonight|soon)", r"immediately", r"hurry", r"\burgently\b",
            r"\bturant\b", r"\bjaldi\b", r"urgent hai",
+           r"\b(?:claim|collect|redeem|grab) (?:your |the |it )?(?:\w+ ){0,3}\bnow\b",
            r"limited (?:slots?|seats?|offer)", r"only \d+ (?:slots?|seats?) left",
            r"before (?:you )?(?:lose|miss)", r"\b(?:click|claim|act|apply) (?:it |this |here |the link )?now\b"),
     ),
@@ -232,6 +233,14 @@ RULES: tuple[Rule, ...] = (
         "link to their own domain.",
         2,
         _p(r"\b(?:bit\.ly|tinyurl\.com|cutt\.ly|rb\.gy|t\.me|rebrand\.ly|is\.gd|shorturl\.at)/\S+"),
+    ),
+    Rule(
+        "BARE_LINK", "A link with nowhere named",
+        "Messages you can trust say where they are sending you, by name. "
+        "\"This link\" is the whole address you are given.",
+        1,
+        _p(r"(?:click|tap|open)(?:ing)? (?:on )?(?:this|the|below|following|attached) link",
+           r"link (?:par|pe) click"),
     ),
     Rule(
         "CHAT_ONLY", "Exists only on WhatsApp or Telegram",
@@ -290,7 +299,8 @@ RULES: tuple[Rule, ...] = (
            r"lottery lag gay", r"\bjeeta hai\b", r"(?:lakh|crore) rupaye jeet",
            r"\b(?:won|winning|win a)\b.{0,40}(?:iphone|mac ?book|laptop|smartphone|"
            r"scooter|\bcar\b|\bbike\b|gift (?:card|voucher|hamper)|voucher|cash prize|\bgift\b)",
-           r"\bfree\b.{0,20}(?:iphone|mac ?book|laptop|smartphone|\bcar\b|scooter|\bbike\b)"),
+           r"\bfree\b\s+(?:\w+\s+){0,2}(?:iphone|ipad|tablet|laptop|mac ?book|smartphone|"
+           r"\bphone\b|\btv\b|television|smart ?watch|airpods|headphones|\bcar\b|scooter|\bbike\b)"),
     ),
     Rule(
         "QR_SCAN", "A QR code to receive money",

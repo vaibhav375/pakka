@@ -35,7 +35,7 @@ window.PAKKA_RULES = [
     "name": "Manufactured urgency",
     "why": "Pressure to act within hours exists to stop you checking. Anything genuine will still be there tomorrow.",
     "weight": 1,
-    "re": "within \\d+ ?(?:hours?|hrs?|minutes?|mins?)|today only|last chance|(?:block|suspend|deactivat|expir|clos|disconnect|cancel|terminat)\\w*\\s+(?:with)?in\\s+\\d+\\s*(?:hours?|hrs?|days?|minutes?)|expires? (?:today|tonight|soon)|immediately|hurry|\\burgently\\b|\\bturant\\b|\\bjaldi\\b|urgent hai|limited (?:slots?|seats?|offer)|only \\d+ (?:slots?|seats?) left|before (?:you )?(?:lose|miss)|\\b(?:click|claim|act|apply) (?:it |this |here |the link )?now\\b"
+    "re": "within \\d+ ?(?:hours?|hrs?|minutes?|mins?)|today only|last chance|(?:block|suspend|deactivat|expir|clos|disconnect|cancel|terminat)\\w*\\s+(?:with)?in\\s+\\d+\\s*(?:hours?|hrs?|days?|minutes?)|expires? (?:today|tonight|soon)|immediately|hurry|\\burgently\\b|\\bturant\\b|\\bjaldi\\b|urgent hai|\\b(?:claim|collect|redeem|grab) (?:your |the |it )?(?:\\w+ ){0,3}\\bnow\\b|limited (?:slots?|seats?|offer)|only \\d+ (?:slots?|seats?) left|before (?:you )?(?:lose|miss)|\\b(?:click|claim|act|apply) (?:it |this |here |the link )?now\\b"
   },
   {
     "id": "NO_INTERVIEW",
@@ -71,6 +71,13 @@ window.PAKKA_RULES = [
     "why": "Shortened links hide where they actually go. Legitimate organisations link to their own domain.",
     "weight": 2,
     "re": "\\b(?:bit\\.ly|tinyurl\\.com|cutt\\.ly|rb\\.gy|t\\.me|rebrand\\.ly|is\\.gd|shorturl\\.at)/\\S+"
+  },
+  {
+    "id": "BARE_LINK",
+    "name": "A link with nowhere named",
+    "why": "Messages you can trust say where they are sending you, by name. \"This link\" is the whole address you are given.",
+    "weight": 1,
+    "re": "(?:click|tap|open)(?:ing)? (?:on )?(?:this|the|below|following|attached) link|link (?:par|pe) click"
   },
   {
     "id": "CHAT_ONLY",
@@ -112,7 +119,7 @@ window.PAKKA_RULES = [
     "name": "A prize you never entered for",
     "why": "You cannot win a lottery you never entered. Every version of this ends with a fee to release the winnings.",
     "weight": 4,
-    "re": "(?:won|winner).{0,30}(?:lottery|lucky draw|prize|kbc)|\\bkbc\\b|lucky (?:winner|draw)|congratulations.{0,30}\\b(?:won|winning|winner)\\b.{0,50}(?:\\brs\\.?\\s*\\d|₹|lakh|crore|lottery|lucky draw|prize|gift|iphone|mac ?book|laptop|\\bcar\\b|voucher|hamper)|lottery lag gay|\\bjeeta hai\\b|(?:lakh|crore) rupaye jeet|\\b(?:won|winning|win a)\\b.{0,40}(?:iphone|mac ?book|laptop|smartphone|scooter|\\bcar\\b|\\bbike\\b|gift (?:card|voucher|hamper)|voucher|cash prize|\\bgift\\b)|\\bfree\\b.{0,20}(?:iphone|mac ?book|laptop|smartphone|\\bcar\\b|scooter|\\bbike\\b)"
+    "re": "(?:won|winner).{0,30}(?:lottery|lucky draw|prize|kbc)|\\bkbc\\b|lucky (?:winner|draw)|congratulations.{0,30}\\b(?:won|winning|winner)\\b.{0,50}(?:\\brs\\.?\\s*\\d|₹|lakh|crore|lottery|lucky draw|prize|gift|iphone|mac ?book|laptop|\\bcar\\b|voucher|hamper)|lottery lag gay|\\bjeeta hai\\b|(?:lakh|crore) rupaye jeet|\\b(?:won|winning|win a)\\b.{0,40}(?:iphone|mac ?book|laptop|smartphone|scooter|\\bcar\\b|\\bbike\\b|gift (?:card|voucher|hamper)|voucher|cash prize|\\bgift\\b)|\\bfree\\b\\s+(?:\\w+\\s+){0,2}(?:iphone|ipad|tablet|laptop|mac ?book|smartphone|\\bphone\\b|\\btv\\b|television|smart ?watch|airpods|headphones|\\bcar\\b|scooter|\\bbike\\b)"
   },
   {
     "id": "QR_SCAN",

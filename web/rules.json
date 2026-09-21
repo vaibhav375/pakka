@@ -60,6 +60,12 @@
   "weight": 2
  },
  {
+  "id": "BARE_LINK",
+  "name": "A link with nowhere named",
+  "why": "Messages you can trust say where they are sending you, by name. \"This link\" is the whole address you are given.",
+  "weight": 1
+ },
+ {
   "id": "CHAT_ONLY",
   "name": "Exists only on WhatsApp or Telegram",
   "why": "No office, no website, no landline \u2014 only a chat window. There is nothing to hold accountable afterwards.",

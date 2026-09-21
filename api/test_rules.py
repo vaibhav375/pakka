@@ -134,7 +134,7 @@ CASES = [
 
     ("hinglish kyc scare",
      "Aapka KYC update nahi hua hai, account block ho jayega. Turant is link par click kare",
-     {"KYC_PANIC", "URGENCY"}),
+     {"KYC_PANIC", "URGENCY", "BARE_LINK"}),
 
     ("an emoji does not shift the highlights",
      "Congratulations 🎉 you have W-O-N a lucky draw prize of Rs 10,00,000",
@@ -150,6 +150,14 @@ CASES = [
 
     ("a real brand address, must stay clean",
      "Your order at https://www.amazon.in/orders is out for delivery today.",
+     set()),
+
+    ("a free gadget and a nameless link",
+     "claim your free tablet now by clicking on this link",
+     {"LOTTERY_WIN", "URGENCY", "BARE_LINK"}),
+
+    ("a real message that names where it sends you, must stay clean",
+     "Your order has shipped. Track it at https://www.amazon.in/orders or in the app.",
      set()),
 
     ("ordinary message, must stay clean",

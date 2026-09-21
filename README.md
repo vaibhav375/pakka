@@ -27,7 +27,7 @@ So Pakka answers in sentences, points at the exact words, and gives you a link.
 
 ## How it decides
 
-**Thirty-five rules, in plain Python. No model gets a vote.**
+**Thirty-six rules, in plain Python. No model gets a vote.**
 
 A scam verdict has to be identical every time and has to survive being explained
 to the person who nearly paid. A language model can do neither reliably, so the
@@ -46,31 +46,32 @@ in the message and say in one sentence why what it found is a problem.
 | 8 | Money goes to a personal account | 3 |
 | 9 | Company mail sent from a free inbox | 2 |
 | 10 | Shortened or disguised link | 2 |
-| 11 | Exists only on WhatsApp or Telegram | 1 |
-| 12 | Threatens legal or police action | 2 |
-| 13 | Asks for rent before you have seen the place | 3 |
-| 14 | Parcel held, pay a fee to release it | 3 |
-| 15 | Electricity disconnection threat | 3 |
-| 16 | A prize you never entered for | 4 |
-| 17 | A QR code to receive money | 3 |
-| 18 | Wants to see or control your screen | 4 |
-| 19 | Wants you to install an app from outside the store | 4 |
-| 20 | A web address dressed up as a real company | 3 |
-| 21 | Wants your details to avoid something bad | 2 |
-| 22 | Asks for your Aadhaar or PAN | 3 |
-| 23 | A personal mobile posing as a helpline | 2 |
-| 24 | Asks you to approve something to receive money | 4 |
-| 25 | A stranger opening with money talk | 2 |
-| 26 | An inheritance or fortune from a stranger | 3 |
-| 27 | Wants your account number to send you money | 3 |
-| 28 | Threatens to block your SIM or connection | 3 |
-| 29 | A new number that needs money | 3 |
-| 30 | Stranded somewhere and needs money now | 2 |
-| 31 | A web address that is not the characters it appears to be | 3 |
-| 32 | Loan-app style pressure | 3 |
-| 33 | Guaranteed returns or a tips group | 3 |
-| 34 | Prepaid task or commission work | 3 |
-| 35 | Claims to be posted far away and cannot meet | 3 |
+| 11 | A link with nowhere named | 1 |
+| 12 | Exists only on WhatsApp or Telegram | 1 |
+| 13 | Threatens legal or police action | 2 |
+| 14 | Asks for rent before you have seen the place | 3 |
+| 15 | Parcel held, pay a fee to release it | 3 |
+| 16 | Electricity disconnection threat | 3 |
+| 17 | A prize you never entered for | 4 |
+| 18 | A QR code to receive money | 3 |
+| 19 | Wants to see or control your screen | 4 |
+| 20 | Wants you to install an app from outside the store | 4 |
+| 21 | A web address dressed up as a real company | 3 |
+| 22 | Wants your details to avoid something bad | 2 |
+| 23 | Asks for your Aadhaar or PAN | 3 |
+| 24 | A personal mobile posing as a helpline | 2 |
+| 25 | Asks you to approve something to receive money | 4 |
+| 26 | A stranger opening with money talk | 2 |
+| 27 | An inheritance or fortune from a stranger | 3 |
+| 28 | Wants your account number to send you money | 3 |
+| 29 | Threatens to block your SIM or connection | 3 |
+| 30 | A new number that needs money | 3 |
+| 31 | Stranded somewhere and needs money now | 2 |
+| 32 | A web address that is not the characters it appears to be | 3 |
+| 33 | Loan-app style pressure | 3 |
+| 34 | Guaranteed returns or a tips group | 3 |
+| 35 | Prepaid task or commission work | 3 |
+| 36 | Claims to be posted far away and cannot meet | 3 |
 
 Weights add up to a score, the score picks a band. Ordinary messages have to come
 back clean — a checker that flags everything gets ignored, so a real placement-cell
@@ -396,7 +397,7 @@ browser JavaScript.
 
 ## What it does not do
 
-It does not detect scams it has never seen — thirty-five patterns are thirty-five
+It does not detect scams it has never seen — thirty-six patterns are thirty-six
 patterns, and a clean result says only that none of them fired. The page says so
 rather than implying safety. It reads English and Hinglish written in Latin
 script; Devanagari input is not handled yet. And it is not legal or financial

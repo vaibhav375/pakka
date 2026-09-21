@@ -21,6 +21,8 @@ FRAUD = [
  ("prize", "Claim your free MacBook Air now before you lose the offer. Scan the QR code to claim."),
  ("prize", "Dear customer congratulations on winning a gift hamper from Flipkart. Share your address and pay handling charge."),
  ("prize", "Your number is selected in Amazon Great Indian Lucky Draw. Claim your prize by sharing bank account number."),
+ ("prize", "claim your free tablet now by clicking on this link"),
+ ("prize", "Congratulations, you are entitled to a free smartphone. Tap the link below to collect."),
  # --- job scams
  ("job", "Congratulations! You are shortlisted for Amazon data entry without interview. Pay Rs 1,999 registration fee."),
  ("job", "Work from home opportunity. Earn Rs 4000 daily. No experience needed. Contact us only on WhatsApp 9812345670."),
@@ -149,6 +151,7 @@ LEGIT = [
  ("marketing", "Free delivery on all orders above Rs 499 this week. Order on the app."),
  ("marketing", "Limited seats left for the weekend yoga batch. Reply to book."),
  ("marketing", "Your Zomato Gold expires in 3 days. Renew in the app to keep your benefits."),
+ ("marketing", "Your invoice is ready. Download it from your account on freshbooks.com"),
  # --- friends and family, including money and numbers
  ("personal", "Call me on 9876543210 when you reach the gate, I will come down."),
  ("personal", "Can you send me a photo of your notes from today's class?"),

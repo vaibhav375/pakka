@@ -228,7 +228,7 @@ function adviceFor(findings) {
     return {
       actions: [
         'Nothing matched, but that is not proof it is safe — it means this message ' +
-        'does not use any of the thirty-five patterns Pakka knows.',
+        `does not use any of the ${(window.PAKKA_RULES || []).length} patterns Pakka knows.`,
         'If it still feels wrong, verify on a number you already had, not one from the message.',
       ],
       forward: '',
@@ -349,7 +349,7 @@ function render(d) {
       </div>
     </div>`).join('') || `
     <div class="flag in"><div class="w" style="color:var(--acid)">\u2713</div>
-      <div><h4>None of the thirty-five checks fired</h4>
+      <div><h4>None of the ${(window.PAKKA_RULES || []).length} checks fired</h4>
       <p>That is not a guarantee \u2014 it means this message does not use any of the
          patterns Pakka knows about. If something still feels wrong, trust that.</p></div></div>`;
 
@@ -438,7 +438,7 @@ fetch('rules.json')
     const el = document.getElementById(id);
     if (el) el.textContent = n;
   });
-  document.querySelectorAll('b[data-to="35"]').forEach((el) => { el.dataset.to = n; });
+  document.querySelectorAll('b[data-to="36"]').forEach((el) => { el.dataset.to = n; });
 })();
 
 /* ---------- rules gallery: a column that walks itself ---------- */
@@ -588,15 +588,29 @@ function hunch(text, verdict) {
   const fired = (verdict.findings || []).length;
   box.classList.toggle('high', r.p >= 0.6);
 
-  /* the model may raise concern and may never clear it: a headline of
+  /* The model may raise concern and may never clear it: a headline of
      "Nothing suspicious found" over a 90-out-of-100 reading is the one failure
-     that actually costs someone money */
+     that actually costs someone money.
+
+     The dial has to move with it. A green 0 beside an amber warning reads as
+     "safe" to anyone glancing at it, and the number is the part people glance
+     at, so when the warning comes from the model the dial shows the model's
+     number instead of a rule score of zero. */
   const label = document.getElementById('vlabel');
-  if (!fired && r.p >= 0.8 && label) {
+  const dial = document.getElementById('diallabel');
+  const card = document.getElementById('card');
+  const gauge = document.getElementById('gfill');
+  const modelLed = !fired && r.p >= 0.8;
+  if (modelLed && label) {
     label.textContent = 'Nothing matched, but be careful';
     label.classList.add('warn');
-  } else if (label) {
-    label.classList.remove('warn');
+    if (card) card.className = 'verdict band-careful';
+    if (dial) dial.textContent = 'Model reading';
+    countUp($('vscore'), pct);
+    if (gauge) setTimeout(() => (gauge.style.strokeDashoffset = String(198 - 198 * r.p)), 60);
+  } else {
+    if (label) label.classList.remove('warn');
+    if (dial) dial.textContent = 'Risk score';
   }
 
   /* 0.75, not 0.6. The calibration table says 0.6 to 0.8 is only about seven in
