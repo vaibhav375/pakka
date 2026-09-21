@@ -7,6 +7,8 @@ POST /whatsapp    a message forwarded to the WhatsApp number, answered in the
                   same thread, which is where the scam arrived in the first place
 POST /telegram    the same thing for a Telegram bot, which needs no business
                   account to stand up
+POST /twilio      WhatsApp through Twilio's sandbox, which answers in the
+                  response body rather than with a second call
 
 The same function object serves the local development server, so what runs on
 a laptop is the code that runs in production rather than a sibling of it.
@@ -25,6 +27,7 @@ sys.path.insert(0, str(pathlib.Path(__file__).parent))
 import model as linear_model
 import store
 import telegram
+import twilio
 import whatsapp
 from chat import reply_for
 from advice import build as build_advice
@@ -172,6 +175,35 @@ def telegram_webhook(event, send=telegram.send) -> dict:
     return {"statusCode": 200, "body": "ok"}
 
 
+def twilio_webhook(event) -> dict:
+    """Answer in the response body. Twilio renders whatever TwiML comes back,
+    so there is no second request to fail after the scan is already done."""
+    form = twilio.params(event)
+    headers = {k.lower(): v for k, v in (event.get("headers") or {}).items()}
+    if not twilio.signature_ok(twilio.callback_url(event), form,
+                               headers.get("x-twilio-signature"),
+                               os.environ.get("TWILIO_AUTH_TOKEN", "")):
+        print("twilio: rejected a request with a missing or wrong signature")
+        return {"statusCode": 403, "body": "bad signature"}
+
+    reply = ""
+    for msg in twilio.incoming(form):
+        try:
+            text = (msg["text"] or "").strip()[:MAX_CHARS]
+            if not text or msg["type"] != "text":
+                reply = reply_for(None, None, None, kind=msg["type"])
+                continue
+            verdict, advice, link, hunch = _verdict_for(text)
+            reply = reply_for(verdict, advice, link, hunch=hunch)
+        except Exception:
+            traceback.print_exc()
+            reply = ("Something broke checking that. Try again, or paste it at "
+                     f"{PUBLIC_URL}" if PUBLIC_URL else "Something broke checking that.")
+    return {"statusCode": 200,
+            "headers": {"content-type": "text/xml; charset=utf-8"},
+            "body": twilio.twiml(reply) if reply else twilio.twiml("")}
+
+
 def lambda_handler(event, context=None):
     """A crash here becomes a bare 502 with an empty body, which tells the
     caller nothing and tells the developer less. Catch it, log it, and answer
@@ -191,6 +223,9 @@ def _route(event):
 
     if method == "OPTIONS":
         return {"statusCode": 204, "headers": CORS, "body": ""}
+
+    if method == "POST" and path.rstrip("/").endswith("/twilio"):
+        return twilio_webhook(event)
 
     if method == "POST" and path.rstrip("/").endswith("/telegram"):
         return telegram_webhook(event)

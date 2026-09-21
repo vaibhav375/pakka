@@ -216,6 +216,45 @@ Locally, with no bot at all:
 python3 api/test_telegram.py     # the webhook end to end, network stubbed out
 ```
 
+### WhatsApp through Twilio, which is the one that actually works
+
+Meta's own Cloud API needs a business account and an app review, and the
+dashboard is frequently unreachable depending on where you are. Twilio's
+WhatsApp sandbox needs neither.
+
+It is also simpler in a way that matters: Twilio takes the reply from the body
+of the HTTP response, as TwiML, so there is no outbound API call, no access
+token to store and no second request that can fail after the scan has already
+run.
+
+1. Sign up at [twilio.com/try-twilio](https://www.twilio.com/try-twilio) and
+   open **Messaging → Try it out → Send a WhatsApp message**.
+2. The sandbox page shows a number and a join code. Send
+   `join <your-code>` to that number on WhatsApp.
+3. On the same page, under **Sandbox settings**, set
+   **When a message comes in** to your Function URL with `/twilio` on the end,
+   method POST.
+4. Copy the **Auth Token** from the Twilio console into Lambda as
+   `TWILIO_AUTH_TOKEN`, so the webhook can verify that a request really came
+   from Twilio.
+5. Message the sandbox number.
+
+Locally, with no Twilio account at all:
+
+```
+python3 api/local_server.py
+curl -X POST localhost:8787/twilio \
+  -H 'content-type: application/x-www-form-urlencoded' \
+  --data-urlencode 'From=whatsapp:+919812345670' \
+  --data-urlencode 'Body=Your KYC has expired, share OTP now' \
+  --data-urlencode 'NumMedia=0'
+
+python3 api/test_twilio.py     # signature checking and TwiML, end to end
+```
+
+The sandbox only talks to numbers that have sent the join code, which is fine
+for a demo and is the trade for not needing a business account.
+
 ## The WhatsApp front door
 
 The scam arrives on WhatsApp. Asking someone to copy it, open a browser, paste
@@ -234,8 +273,8 @@ accepting whoever asks, and always answers 200 once the signature passes,
 because Meta retries anything else and a retry would send the answer twice.
 
 Meta requires a business account and an app review, and the dashboard is
-frequently unreachable depending on where you are, which is why Telegram is the
-path of least resistance above. The code is here and tested either way. Four
+frequently unreachable depending on where you are, which is why Telegram and
+the Twilio sandbox are the paths of least resistance above. The code is here and tested either way. Four
 environment variables switch it on, and with none of them set nothing else
 about the project changes:
 

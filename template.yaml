@@ -31,6 +31,15 @@ Parameters:
     Default: ""
     NoEcho: true
     Description: The app secret, used to check that a webhook really came from Meta
+  TwilioAuthToken:
+    Type: String
+    Default: ""
+    NoEcho: true
+    Description: Twilio auth token, used to verify the webhook signature
+  TwilioWebhookUrl:
+    Type: String
+    Default: ""
+    Description: The exact URL Twilio calls, only needed if a proxy rewrites the host
 
 Resources:
   PakkaApi:
@@ -50,6 +59,9 @@ Resources:
           WHATSAPP_TOKEN: !Ref WhatsAppToken
           WHATSAPP_PHONE_ID: !Ref WhatsAppPhoneId
           WHATSAPP_APP_SECRET: !Ref WhatsAppAppSecret
+          # WhatsApp the easy way: Twilio's sandbox, no business account
+          TWILIO_AUTH_TOKEN: !Ref TwilioAuthToken
+          TWILIO_WEBHOOK_URL: !Ref TwilioWebhookUrl
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref ScansTable
