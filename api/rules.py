@@ -189,6 +189,8 @@ RULES: tuple[Rule, ...] = (
            r"(?:update|complete|verify) .{0,20}kyc .{0,40}"
            r"(?:\bor\b|else|otherwise|to avoid|immediately|now|today|link|http|block|suspend|frozen)",
            r"(?:account|khata|kyc).{0,30}(?:block|band) ho jayega", r"kyc update nahi", r"केवाईसी",
+           r"\bkyc\b.{0,25}(?:तुरंत|पूरा कर|अपडेट कर|करें)",
+           r"(?:तुरंत|जल्दी).{0,20}\bkyc\b",
            r"(?:खाता|अकाउंट).{0,20}(?:ब्लॉक|बंद|बाधित)"),
     ),
     Rule(
@@ -292,7 +294,9 @@ RULES: tuple[Rule, ...] = (
         "Couriers do not hold parcels for a fee over SMS. Customs duty is paid "
         "to the government, never to a WhatsApp number.",
         3,
-        _p(r"(?:parcel|package|courier|shipment|consignment).{0,40}(?:held|stuck|seized|customs|clearance)",
+        _p(r"(?:parcel|package|courier|shipment|consignment).{0,40}"
+           r"(?:held|on hold|stuck|seized|customs|clearance|detained)",
+           r"customs (?:fee|duty|charge|clearance)",
            r"customs (?:duty|clearance|charge).{0,30}(?:pay|transfer)",
            r"(?:fedex|dhl|bluedart|india post).{0,40}(?:pay|fee|charge)"),
     ),
@@ -303,6 +307,7 @@ RULES: tuple[Rule, ...] = (
         3,
         _p(r"electricity .{0,30}(?:disconnect|cut off|discontinue)",
            r"बिजली.{0,30}(?:काट|कट|बंद)",
+           r"(?:power|electricity)(?: supply| connection)?.{0,30}(?:cut off|cut-off|switched off)",
            r"power .{0,20}(?:will be )?disconnect", r"bill .{0,20}not updated.{0,30}disconnect"),
     ),
     Rule(
@@ -502,7 +507,14 @@ RULES: tuple[Rule, ...] = (
            r"(?:selected|eligible|entitled|approved).{0,30}(?:grant|scheme|yojana|subsidy|fund)",
            r"(?:selected|eligible|entitled) for .{0,25}(?:₹|rs\.?)\s?[\d,]+",
            r"(?:pm|pradhan mantri) .{0,20}yojana.{0,40}(?:claim|apply|register|call)",
-           r"unclaimed (?:refund|amount|deposit|fund)"),
+           r"unclaimed (?:refund|amount|deposit|fund)",
+           # the scheme names fraud borrows. Real ones are applied for on a
+           # portal, and none of them are awarded to you by text message.
+           r"(?:pm|pradhan mantri|ayushman|jan dhan|ujjwala|kisan samman|"
+           r"digital (?:bharat|india)|skill india|\bpmay\b|\bpmjay\b)[\w\s]{0,30}"
+           r"(?:subsidy|scheme|yojana|card|grant|nidhi|extension|upgrade|approved|selected)",
+           r"(?:selected|approved|eligible)[\w\s,]{0,30}(?:pm|pradhan mantri|ayushman|"
+           r"government|govt)[\w\s]{0,25}(?:scheme|yojana|subsidy|card|grant)"),
     ),
     Rule(
         "ROMANCE_BAIT", "A stranger opening with flattery",
@@ -515,6 +527,103 @@ RULES: tuple[Rule, ...] = (
            r"(?:waiting|near you|meet|chat|call)",
            r"\b(?:hi|hey|hello) (?:beautiful|handsome|sexy|dear)\b.{0,70}"
            r"(?:reply|chat|call|whats ?app|profile)"),
+    ),
+    Rule(
+        "TXN_ALERT_BAIT", "A charge you did not make, with the fix attached",
+        "Your bank does tell you about a transaction. It does not put the way "
+        "to cancel it in the same message. The alarm is real, the link is not.",
+        4,
+        _p(r"(?:if (?:this|it) (?:is|was) not you|not you\?|if not (?:you|done by you))"
+           r".{0,70}(?:click|tap|\bhttps?://|\bwww\.|\b[6-9]\d{9}\b|this link|the link)",
+           r"(?:click|tap) .{0,30}(?:to )?(?:cancel|reverse|stop) (?:the )?transaction"),
+    ),
+    Rule(
+        "REWARD_EXPIRY", "Points or cashback about to expire",
+        "Reward points do not need a link in a text message to redeem. The "
+        "deadline exists so you move before you think.",
+        3,
+        _p(r"(?:reward|loyalty|credit card|bonus)\s*points?\b.{0,50}"
+           r"(?:expir|lapse|redeem|claim)",
+           r"(?:cashback|reward|points?).{0,40}(?:expire|expiring|lapse)\w*\s*"
+           r"(?:today|tonight|soon|in \d+)",
+           r"redeem .{0,30}(?:before|within) .{0,20}(?:today|tonight|midnight|\d+ ?(?:hours?|days?))"),
+    ),
+    Rule(
+        "DIGITAL_ARREST", "An arrest or investigation run over a call",
+        "There is no such thing as a digital arrest in Indian law. No officer "
+        "investigates you by video call, and none of them will ask you to move "
+        "money to prove you are innocent.",
+        4,
+        _p(r"digital(?:ly)? arrest",
+           r"(?:stay|remain) on (?:this |the )?(?:video )?call.{0,40}"
+           r"(?:until|till|24)",
+           r"(?:transfer|deposit|move) .{0,40}(?:funds?|money|amount).{0,40}"
+           r"(?:for )?verification",
+           r"(?:rbi|reserve bank|supreme court|cbi|police|customs) .{0,20}"
+           r"(?:escrow|verification) account",
+           r"(?:section \d+|\bipc\b|\bndps\b|money laundering).{0,60}"
+           r"(?:jail|arrest|warrant|aadhaar|pan\b)",
+           r"(?:aadhaar|aadhar|pan card).{0,50}(?:linked to|used in|found in).{0,40}"
+           r"(?:parcel|drug|case|laundering|illegal)"),
+    ),
+    Rule(
+        "SECRECY", "Asks you to keep it from your family",
+        "Every honest institution is happy for you to ask someone. Being told "
+        "not to is the tell, and it is there because the person you would ask "
+        "would stop this.",
+        3,
+        _p(r"(?:do not|don'?t|never) (?:tell|inform|call|contact|involve|discuss (?:this|it) with)"
+           r"\s*(?:your )?(?:family|anyone|anybody|wife|husband|parents|father|mother|friends|police)",
+           r"keep (?:this|it) (?:strictly )?(?:confidential|secret|between us)",
+           r"\bsub[- ]?judice\b"),
+    ),
+    Rule(
+        "SERVICE_SUSPENDED", "A service you use, suddenly suspended",
+        "Suspension notices that arrive with a link are the shape phishing "
+        "takes. The real thing is in the app you already have.",
+        3,
+        _p(r"(?:your |the )?(?:upi(?: id)?|aadhaar|aadhar|pan card|netbanking|net banking|"
+           r"wallet|debit card|credit card|account)\b.{0,40}"
+           r"(?:has been|have been|is|are|will be)\s*(?:temporarily\s*|permanently\s*)?"
+           r"(?:suspend|deactivat|block|freez|restrict)",
+           r"(?:suspicious|unusual) activity .{0,40}(?:card|account).{0,40}"
+           r"(?:blocked|suspended|restricted)"),
+    ),
+    Rule(
+        "DELIVERY_ADDRESS", "A delivery that failed and wants your details",
+        "A courier that cannot find you leaves a slip or calls. It does not ask "
+        "you to retype your address into a link on a deadline.",
+        3,
+        _p(r"(?:could not|couldn'?t|unable to|failed to|attempted) .{0,30}deliver\w*"
+           r".{0,80}(?:update|confirm|verify|re-?schedule|correct)",
+           r"(?:update|confirm|verify) .{0,25}(?:delivery )?(?:address|location)"
+           r".{0,50}(?:within|before|or|link|http)",
+           r"(?:incomplete|incorrect|wrong) address.{0,60}(?:update|confirm|link|http)"),
+    ),
+    Rule(
+        "CHALLAN", "A traffic fine that arrives by link",
+        "A challan lives on the Parivahan portal and you go and look it up. It "
+        "is not sent to you as a download, and it does not threaten you with a "
+        "court case by SMS.",
+        3,
+        _p(r"(?:e-?challan|traffic challan|\bchallan\b).{0,60}"
+           r"(?:pending|download|pay|link|http|जमा|भुगतान|डाउनलोड|पेंडिंग|बकाया)",
+           r"(?:vehicle|गाड़ी|वाहन).{0,40}(?:challan|चालान).{0,50}"
+           r"(?:pending|pay|legal|पेंडिंग|भुगतान|कानूनी)",
+           r"चालान.{0,60}(?:कानूनी कार्रवाई|तुरंत भुगतान)",
+           r"(?:ई-?)?चालान.{0,40}(?:डाउनलोड|भुगतान|पेंडिंग|जमा|करें)"),
+    ),
+    Rule(
+        "BILL_UPDATE", "Asks you to update a bill",
+        "A bill is paid, never updated. The word is there because the message "
+        "needs you to open something, and there is nothing in a real bill to "
+        "update.",
+        3,
+        _p(r"(?:update|updation of|updating) .{0,25}"
+           r"(?:electricity |power |gas |water |mobile |phone )?bill\b",
+           r"bill\b.{0,20}(?:is )?not updated",
+           r"(?:बिल|bill)\s*(?:को\s*)?(?:अपडेट|अद्यतन)",
+           r"(?:अपडेट|अद्यतन).{0,20}(?:बिल|bill)"),
     ),
     Rule(
         "LOAN_HARASSMENT", "Loan-app style pressure",

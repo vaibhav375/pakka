@@ -18,7 +18,7 @@ CASES = [
     ("kyc phishing",
      "Dear customer, your KYC has expired and your account will be blocked today. "
      "Update immediately at bit.ly/kyc-fix or share OTP with our executive.",
-     {"KYC_PANIC", "URGENCY", "HIDDEN_LINK", "ASKS_FOR_SECRET"}),
+     {"KYC_PANIC", "URGENCY", "HIDDEN_LINK", "ASKS_FOR_SECRET", "SERVICE_SUSPENDED"}),
 
     ("fake pg listing",
      "2BHK near PES, fully furnished, 8000/month. I am currently abroad so please "
@@ -50,7 +50,7 @@ CASES = [
 
     ("lookalike domain",
      "Your SBI account will be deactivated. Verify your PAN details at http://sbi-verify-kyc.xyz/login",
-     {"KYC_PANIC", "LOOKALIKE_DOMAIN", "VERIFY_DETAILS"}),
+     {"KYC_PANIC", "LOOKALIKE_DOMAIN", "VERIFY_DETAILS", "SERVICE_SUSPENDED"}),
 
     ("id document harvesting",
      "Send a photo of your Aadhaar card and PAN card for verification.",

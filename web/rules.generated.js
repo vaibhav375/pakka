@@ -28,7 +28,7 @@ window.PAKKA_RULES = [
     "name": "KYC or account-block scare",
     "why": "Banks do not block accounts over SMS links. This is the most common phishing script in India right now.",
     "weight": 3,
-    "re": "kyc .{0,25}(?:expire|pending|suspend|incomplete|not (?:done|updated))|(?:needs?|requires?) .{0,20}kyc|immediate kyc|account .{0,30}(?:will be |has been )?(?:block|suspend|freeze|deactivat)|(?:update|complete|verify) .{0,20}kyc .{0,40}(?:\\bor\\b|else|otherwise|to avoid|immediately|now|today|link|http|block|suspend|frozen)|(?:account|khata|kyc).{0,30}(?:block|band) ho jayega|kyc update nahi|केवाईसी|(?:खाता|अकाउंट).{0,20}(?:ब्लॉक|बंद|बाधित)"
+    "re": "kyc .{0,25}(?:expire|pending|suspend|incomplete|not (?:done|updated))|(?:needs?|requires?) .{0,20}kyc|immediate kyc|account .{0,30}(?:will be |has been )?(?:block|suspend|freeze|deactivat)|(?:update|complete|verify) .{0,20}kyc .{0,40}(?:\\bor\\b|else|otherwise|to avoid|immediately|now|today|link|http|block|suspend|frozen)|(?:account|khata|kyc).{0,30}(?:block|band) ho jayega|kyc update nahi|केवाईसी|\\bkyc\\b.{0,25}(?:तुरंत|पूरा कर|अपडेट कर|करें)|(?:तुरंत|जल्दी).{0,20}\\bkyc\\b|(?:खाता|अकाउंट).{0,20}(?:ब्लॉक|बंद|बाधित)"
   },
   {
     "id": "URGENCY",
@@ -105,14 +105,14 @@ window.PAKKA_RULES = [
     "name": "Parcel held, pay a fee to release it",
     "why": "Couriers do not hold parcels for a fee over SMS. Customs duty is paid to the government, never to a WhatsApp number.",
     "weight": 3,
-    "re": "(?:parcel|package|courier|shipment|consignment).{0,40}(?:held|stuck|seized|customs|clearance)|customs (?:duty|clearance|charge).{0,30}(?:pay|transfer)|(?:fedex|dhl|bluedart|india post).{0,40}(?:pay|fee|charge)"
+    "re": "(?:parcel|package|courier|shipment|consignment).{0,40}(?:held|on hold|stuck|seized|customs|clearance|detained)|customs (?:fee|duty|charge|clearance)|customs (?:duty|clearance|charge).{0,30}(?:pay|transfer)|(?:fedex|dhl|bluedart|india post).{0,40}(?:pay|fee|charge)"
   },
   {
     "id": "ELECTRICITY_CUT",
     "name": "Electricity disconnection threat",
     "why": "Power utilities do not warn you by SMS from a personal number, and they never ask you to call one to avoid disconnection tonight.",
     "weight": 3,
-    "re": "electricity .{0,30}(?:disconnect|cut off|discontinue)|बिजली.{0,30}(?:काट|कट|बंद)|power .{0,20}(?:will be )?disconnect|bill .{0,20}not updated.{0,30}disconnect"
+    "re": "electricity .{0,30}(?:disconnect|cut off|discontinue)|बिजली.{0,30}(?:काट|कट|बंद)|(?:power|electricity)(?: supply| connection)?.{0,30}(?:cut off|cut-off|switched off)|power .{0,20}(?:will be )?disconnect|bill .{0,20}not updated.{0,30}disconnect"
   },
   {
     "id": "LOTTERY_WIN",
@@ -238,7 +238,7 @@ window.PAKKA_RULES = [
     "name": "A government payout you never applied for",
     "why": "No ministry selects people for money by SMS. Every real scheme has an application you made and a portal you log into yourself.",
     "weight": 3,
-    "re": "(?:pmo|prime minister|ministry|govt|government|\\brbi\\b)\\b.{0,50}(?:selected|eligible|entitled|approved).{0,30}(?:grant|scheme|yojana|subsidy|fund)|(?:selected|eligible|entitled) for .{0,25}(?:₹|rs\\.?)\\s?[\\d,]+|(?:pm|pradhan mantri) .{0,20}yojana.{0,40}(?:claim|apply|register|call)|unclaimed (?:refund|amount|deposit|fund)"
+    "re": "(?:pmo|prime minister|ministry|govt|government|\\brbi\\b)\\b.{0,50}(?:selected|eligible|entitled|approved).{0,30}(?:grant|scheme|yojana|subsidy|fund)|(?:selected|eligible|entitled) for .{0,25}(?:₹|rs\\.?)\\s?[\\d,]+|(?:pm|pradhan mantri) .{0,20}yojana.{0,40}(?:claim|apply|register|call)|unclaimed (?:refund|amount|deposit|fund)|(?:pm|pradhan mantri|ayushman|jan dhan|ujjwala|kisan samman|digital (?:bharat|india)|skill india|\\bpmay\\b|\\bpmjay\\b)[\\w\\s]{0,30}(?:subsidy|scheme|yojana|card|grant|nidhi|extension|upgrade|approved|selected)|(?:selected|approved|eligible)[\\w\\s,]{0,30}(?:pm|pradhan mantri|ayushman|government|govt)[\\w\\s]{0,25}(?:scheme|yojana|subsidy|card|grant)"
   },
   {
     "id": "ROMANCE_BAIT",
@@ -246,6 +246,62 @@ window.PAKKA_RULES = [
     "why": "A profile you never posted, seen by someone who will move you to another app and then to money. It always starts as attention.",
     "weight": 2,
     "re": "(?:saw|liked|viewed) your (?:profile|photo|picture|pic)\\b.{0,50}(?:chat|meet|reply|message|whats ?app)|(?:single|hot|lonely) (?:women|men|girls|guys|ladies).{0,50}(?:waiting|near you|meet|chat|call)|\\b(?:hi|hey|hello) (?:beautiful|handsome|sexy|dear)\\b.{0,70}(?:reply|chat|call|whats ?app|profile)"
+  },
+  {
+    "id": "TXN_ALERT_BAIT",
+    "name": "A charge you did not make, with the fix attached",
+    "why": "Your bank does tell you about a transaction. It does not put the way to cancel it in the same message. The alarm is real, the link is not.",
+    "weight": 4,
+    "re": "(?:if (?:this|it) (?:is|was) not you|not you\\?|if not (?:you|done by you)).{0,70}(?:click|tap|\\bhttps?://|\\bwww\\.|\\b[6-9]\\d{9}\\b|this link|the link)|(?:click|tap) .{0,30}(?:to )?(?:cancel|reverse|stop) (?:the )?transaction"
+  },
+  {
+    "id": "REWARD_EXPIRY",
+    "name": "Points or cashback about to expire",
+    "why": "Reward points do not need a link in a text message to redeem. The deadline exists so you move before you think.",
+    "weight": 3,
+    "re": "(?:reward|loyalty|credit card|bonus)\\s*points?\\b.{0,50}(?:expir|lapse|redeem|claim)|(?:cashback|reward|points?).{0,40}(?:expire|expiring|lapse)\\w*\\s*(?:today|tonight|soon|in \\d+)|redeem .{0,30}(?:before|within) .{0,20}(?:today|tonight|midnight|\\d+ ?(?:hours?|days?))"
+  },
+  {
+    "id": "DIGITAL_ARREST",
+    "name": "An arrest or investigation run over a call",
+    "why": "There is no such thing as a digital arrest in Indian law. No officer investigates you by video call, and none of them will ask you to move money to prove you are innocent.",
+    "weight": 4,
+    "re": "digital(?:ly)? arrest|(?:stay|remain) on (?:this |the )?(?:video )?call.{0,40}(?:until|till|24)|(?:transfer|deposit|move) .{0,40}(?:funds?|money|amount).{0,40}(?:for )?verification|(?:rbi|reserve bank|supreme court|cbi|police|customs) .{0,20}(?:escrow|verification) account|(?:section \\d+|\\bipc\\b|\\bndps\\b|money laundering).{0,60}(?:jail|arrest|warrant|aadhaar|pan\\b)|(?:aadhaar|aadhar|pan card).{0,50}(?:linked to|used in|found in).{0,40}(?:parcel|drug|case|laundering|illegal)"
+  },
+  {
+    "id": "SECRECY",
+    "name": "Asks you to keep it from your family",
+    "why": "Every honest institution is happy for you to ask someone. Being told not to is the tell, and it is there because the person you would ask would stop this.",
+    "weight": 3,
+    "re": "(?:do not|don'?t|never) (?:tell|inform|call|contact|involve|discuss (?:this|it) with)\\s*(?:your )?(?:family|anyone|anybody|wife|husband|parents|father|mother|friends|police)|keep (?:this|it) (?:strictly )?(?:confidential|secret|between us)|\\bsub[- ]?judice\\b"
+  },
+  {
+    "id": "SERVICE_SUSPENDED",
+    "name": "A service you use, suddenly suspended",
+    "why": "Suspension notices that arrive with a link are the shape phishing takes. The real thing is in the app you already have.",
+    "weight": 3,
+    "re": "(?:your |the )?(?:upi(?: id)?|aadhaar|aadhar|pan card|netbanking|net banking|wallet|debit card|credit card|account)\\b.{0,40}(?:has been|have been|is|are|will be)\\s*(?:temporarily\\s*|permanently\\s*)?(?:suspend|deactivat|block|freez|restrict)|(?:suspicious|unusual) activity .{0,40}(?:card|account).{0,40}(?:blocked|suspended|restricted)"
+  },
+  {
+    "id": "DELIVERY_ADDRESS",
+    "name": "A delivery that failed and wants your details",
+    "why": "A courier that cannot find you leaves a slip or calls. It does not ask you to retype your address into a link on a deadline.",
+    "weight": 3,
+    "re": "(?:could not|couldn'?t|unable to|failed to|attempted) .{0,30}deliver\\w*.{0,80}(?:update|confirm|verify|re-?schedule|correct)|(?:update|confirm|verify) .{0,25}(?:delivery )?(?:address|location).{0,50}(?:within|before|or|link|http)|(?:incomplete|incorrect|wrong) address.{0,60}(?:update|confirm|link|http)"
+  },
+  {
+    "id": "CHALLAN",
+    "name": "A traffic fine that arrives by link",
+    "why": "A challan lives on the Parivahan portal and you go and look it up. It is not sent to you as a download, and it does not threaten you with a court case by SMS.",
+    "weight": 3,
+    "re": "(?:e-?challan|traffic challan|\\bchallan\\b).{0,60}(?:pending|download|pay|link|http|जमा|भुगतान|डाउनलोड|पेंडिंग|बकाया)|(?:vehicle|गाड़ी|वाहन).{0,40}(?:challan|चालान).{0,50}(?:pending|pay|legal|पेंडिंग|भुगतान|कानूनी)|चालान.{0,60}(?:कानूनी कार्रवाई|तुरंत भुगतान)|(?:ई-?)?चालान.{0,40}(?:डाउनलोड|भुगतान|पेंडिंग|जमा|करें)"
+  },
+  {
+    "id": "BILL_UPDATE",
+    "name": "Asks you to update a bill",
+    "why": "A bill is paid, never updated. The word is there because the message needs you to open something, and there is nothing in a real bill to update.",
+    "weight": 3,
+    "re": "(?:update|updation of|updating) .{0,25}(?:electricity |power |gas |water |mobile |phone )?bill\\b|bill\\b.{0,20}(?:is )?not updated|(?:बिल|bill)\\s*(?:को\\s*)?(?:अपडेट|अद्यतन)|(?:अपडेट|अद्यतन).{0,20}(?:बिल|bill)"
   },
   {
     "id": "LOAN_HARASSMENT",
@@ -413,17 +469,20 @@ function pakkaWholeWords(text, a, b) {
 window.pakkaEvaluate = function (text) {
   const [norm, idx, ends] = window.pakkaNormalise(text);
   const findings = [];
+  let deferred = null;
   for (const r of window.PAKKA_RULES) {
     /* the one check that is about the characters rather than the words, so it
        is answered by web/urls.js instead of by a pattern */
     if (r.id === 'LOOKALIKE_URL') {
+      /* held back and pushed after the loop, because api/rules.py appends it
+         last and equal weights would otherwise tie in a different order */
       const hits = (window.pakkaUrls ? window.pakkaUrls(text) : []);
       if (hits.length) {
         const why = [...new Set(hits.map(([, reason]) => reason))].join('; ');
         const sp = [...new Set(hits.map(([, , a, b]) => a + ':' + b))]
           .map((k) => k.split(':').map(Number)).sort((x, y) => x[0] - y[0]);
-        findings.push({ id: r.id, name: r.name, why, weight: r.weight,
-                        spans: sp, quotes: sp.map(([a, b]) => text.slice(a, b)) });
+        deferred = { id: r.id, name: r.name, why, weight: r.weight,
+                     spans: sp, quotes: sp.map(([a, b]) => text.slice(a, b)) };
       }
       continue;
     }
@@ -440,6 +499,7 @@ window.pakkaEvaluate = function (text) {
       spans, quotes: spans.map(([a, b]) => text.slice(a, b)),
     });
   }
+  if (deferred) findings.push(deferred);
   const score = findings.reduce((s, f) => s + f.weight, 0);
   const [, band, label] = window.PAKKA_BANDS.find(([t]) => score >= t);
   findings.sort((a, b) => b.weight - a.weight);

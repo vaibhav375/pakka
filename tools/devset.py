@@ -1,8 +1,16 @@
-"""A frozen test set of real scam messages, collected from published sources.
+"""Real scam messages from published sources. BURNED: used to write rules.
 
-FROZEN. Nothing in this file may be used to write or tune a rule, widen a
-pattern or train the model. It exists to answer one question honestly: how does
-a rulebook written against messages I made up perform on messages I did not?
+This started as a frozen holdout and it measured what it was built to measure:
+the rules caught 52% of these and 100% of the messages I wrote myself. That gap
+was the point of collecting them.
+
+It was then spent, deliberately, to fix what it exposed. Six rules came out of
+it: fake transaction alerts, reward-point expiry, digital arrest, demands for
+secrecy, service suspension notices and failed-delivery address updates. So
+every number measured on this file is now in-sample and flatters the rules.
+
+tools/testset.py holds a second set, collected from different sources after
+those rules were written. That one is the honest number, and it is frozen.
 
 Every entry is quoted from a public page that documented it: journalism,
 consumer-protection writeups and the government's own fact-check unit. Where a
@@ -14,7 +22,7 @@ These are published examples, which is not the same as a random sample of what
 lands on a phone. They skew towards campaigns big enough to be written about.
 That is a real limitation and the README says so next to the number.
 
-    python3 tools/run_holdout.py
+    python3 tools/run_holdout.py dev
 """
 
 SOURCES = {

@@ -438,7 +438,7 @@ fetch('rules.json')
     const el = document.getElementById(id);
     if (el) el.textContent = n;
   });
-  document.querySelectorAll('b[data-to="39"]').forEach((el) => { el.dataset.to = n; });
+  document.querySelectorAll('b[data-to="47"]').forEach((el) => { el.dataset.to = n; });
 })();
 
 /* ---------- rules gallery: a column that walks itself ---------- */

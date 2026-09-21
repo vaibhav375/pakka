@@ -103,17 +103,20 @@ function pakkaWholeWords(text, a, b) {{
 window.pakkaEvaluate = function (text) {{
   const [norm, idx, ends] = window.pakkaNormalise(text);
   const findings = [];
+  let deferred = null;
   for (const r of window.PAKKA_RULES) {{
     /* the one check that is about the characters rather than the words, so it
        is answered by web/urls.js instead of by a pattern */
     if (r.id === 'LOOKALIKE_URL') {{
+      /* held back and pushed after the loop, because api/rules.py appends it
+         last and equal weights would otherwise tie in a different order */
       const hits = (window.pakkaUrls ? window.pakkaUrls(text) : []);
       if (hits.length) {{
         const why = [...new Set(hits.map(([, reason]) => reason))].join('; ');
         const sp = [...new Set(hits.map(([, , a, b]) => a + ':' + b))]
           .map((k) => k.split(':').map(Number)).sort((x, y) => x[0] - y[0]);
-        findings.push({{ id: r.id, name: r.name, why, weight: r.weight,
-                        spans: sp, quotes: sp.map(([a, b]) => text.slice(a, b)) }});
+        deferred = {{ id: r.id, name: r.name, why, weight: r.weight,
+                     spans: sp, quotes: sp.map(([a, b]) => text.slice(a, b)) }};
       }}
       continue;
     }}
@@ -130,6 +133,7 @@ window.pakkaEvaluate = function (text) {{
       spans, quotes: spans.map(([a, b]) => text.slice(a, b)),
     }});
   }}
+  if (deferred) findings.push(deferred);
   const score = findings.reduce((s, f) => s + f.weight, 0);
   const [, band, label] = window.PAKKA_BANDS.find(([t]) => score >= t);
   findings.sort((a, b) => b.weight - a.weight);

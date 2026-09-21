@@ -210,6 +210,54 @@
   "weight": 2
  },
  {
+  "id": "TXN_ALERT_BAIT",
+  "name": "A charge you did not make, with the fix attached",
+  "why": "Your bank does tell you about a transaction. It does not put the way to cancel it in the same message. The alarm is real, the link is not.",
+  "weight": 4
+ },
+ {
+  "id": "REWARD_EXPIRY",
+  "name": "Points or cashback about to expire",
+  "why": "Reward points do not need a link in a text message to redeem. The deadline exists so you move before you think.",
+  "weight": 3
+ },
+ {
+  "id": "DIGITAL_ARREST",
+  "name": "An arrest or investigation run over a call",
+  "why": "There is no such thing as a digital arrest in Indian law. No officer investigates you by video call, and none of them will ask you to move money to prove you are innocent.",
+  "weight": 4
+ },
+ {
+  "id": "SECRECY",
+  "name": "Asks you to keep it from your family",
+  "why": "Every honest institution is happy for you to ask someone. Being told not to is the tell, and it is there because the person you would ask would stop this.",
+  "weight": 3
+ },
+ {
+  "id": "SERVICE_SUSPENDED",
+  "name": "A service you use, suddenly suspended",
+  "why": "Suspension notices that arrive with a link are the shape phishing takes. The real thing is in the app you already have.",
+  "weight": 3
+ },
+ {
+  "id": "DELIVERY_ADDRESS",
+  "name": "A delivery that failed and wants your details",
+  "why": "A courier that cannot find you leaves a slip or calls. It does not ask you to retype your address into a link on a deadline.",
+  "weight": 3
+ },
+ {
+  "id": "CHALLAN",
+  "name": "A traffic fine that arrives by link",
+  "why": "A challan lives on the Parivahan portal and you go and look it up. It is not sent to you as a download, and it does not threaten you with a court case by SMS.",
+  "weight": 3
+ },
+ {
+  "id": "BILL_UPDATE",
+  "name": "Asks you to update a bill",
+  "why": "A bill is paid, never updated. The word is there because the message needs you to open something, and there is nothing in a real bill to update.",
+  "weight": 3
+ },
+ {
   "id": "LOAN_HARASSMENT",
   "name": "Loan-app style pressure",
   "why": "Threatening to contact your phonebook over a loan is illegal recovery practice, not a legitimate demand.",

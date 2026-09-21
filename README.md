@@ -27,7 +27,7 @@ So Pakka answers in sentences, points at the exact words, and gives you a link.
 
 ## How it decides
 
-**Thirty-nine rules, in plain Python. No model gets a vote.**
+**Forty-seven rules, in plain Python. No model gets a vote.**
 
 A scam verdict has to be identical every time and has to survive being explained
 to the person who nearly paid. A language model can do neither reliably, so the
@@ -71,10 +71,18 @@ in the message and say in one sentence why what it found is a problem.
 | 33 | An alarm about your account, with a link attached | 3 |
 | 34 | A government payout you never applied for | 3 |
 | 35 | A stranger opening with flattery | 2 |
-| 36 | Loan-app style pressure | 3 |
-| 37 | Guaranteed returns or a tips group | 3 |
-| 38 | Prepaid task or commission work | 3 |
-| 39 | Claims to be posted far away and cannot meet | 3 |
+| 36 | A charge you did not make, with the fix attached | 4 |
+| 37 | Points or cashback about to expire | 3 |
+| 38 | An arrest or investigation run over a call | 4 |
+| 39 | Asks you to keep it from your family | 3 |
+| 40 | A service you use, suddenly suspended | 3 |
+| 41 | A delivery that failed and wants your details | 3 |
+| 42 | A traffic fine that arrives by link | 3 |
+| 43 | Asks you to update a bill | 3 |
+| 44 | Loan-app style pressure | 3 |
+| 45 | Guaranteed returns or a tips group | 3 |
+| 46 | Prepaid task or commission work | 3 |
+| 47 | Claims to be posted far away and cannot meet | 3 |
 
 Weights add up to a score, the score picks a band. Ordinary messages have to come
 back clean — a checker that flags everything gets ignored, so a real placement-cell
@@ -279,40 +287,42 @@ decoded strings character for character against Python's.
 Meanwhile `https://www.amazon.in/orders` and `https://developer.mozilla.org/...`
 stay clean, which is the part that took the care.
 
-## The number that matters: 25 real messages
+## The number that matters: real messages, measured three times
 
-Everything else on this page is measured against messages I wrote. That will
-always flatter rules I also wrote. So `tools/holdout.py` holds 25 scam messages
-quoted from eight published sources, including the government's own fact-check
-unit, and it is frozen: nothing in it may be used to write a rule, widen a
-pattern or train the model.
+Everything else on this page is measured against messages I wrote, and that
+will always flatter rules I also wrote. So three sets of real scam messages
+were collected from published sources, including the government's own
+fact-check unit and the I4C advisory reported in Hindi. Each was measured once
+while frozen, then deliberately spent fixing what it exposed, and a fresh set
+was collected from different sources to find out whether the fixes generalised
+or only memorised.
 
 ```
-python3 tools/run_holdout.py
+python3 tools/run_holdout.py          the last set
+python3 tools/run_holdout.py dev      round one
+python3 tools/run_holdout.py test     round two
 ```
 
-First run, and the one that counts:
+| round | messages | rules reach "be careful", first run | what it exposed |
+|---|---|---|---|
+| one, `devset.py` | 25 | **52%** | fake transaction alerts, reward-point expiry, digital arrest, demands for secrecy, service suspension, failed-delivery address updates |
+| two, `testset.py` | 20 | **75%** | traffic challans, bills that ask to be "updated", mixed Latin and Devanagari in one message |
+| three, `finalset.py` | 10 | **80%** | government scheme names used as bait, PM Kisan and Ayushman |
 
-| | |
-|---|---|
-| rules fire at all | 16/25 (64%) |
-| rules reach "be careful" | **13/25 (52%)** |
-| model alone, p ≥ 0.6 | 24/25 (96%) |
-| what the page would actually warn about | 19/25 (76%) |
+**52%, then 75%, then 80%, each on messages the rules had never seen.** Against
+100% on the corpus I wrote myself. That gap is the most useful thing this
+project measured about itself, and the improvement across rounds is real rather
+than remembered, because each number was taken before that set was used for
+anything.
 
-**The rules catch 52% of real messages and 100% of mine.** That gap is the
-honest cost of writing a rulebook and its test set in the same week, and it is
-the single most useful thing this project measured about itself. It is also the
-clearest argument for the model, which was added to cover phrasings no rule
-anticipated and here catches 24 of 25.
+Three honest caveats. The sets are small, and ten messages cannot resolve a
+percentage to better than about ten points. They are *published* examples, so
+they skew towards campaigns big enough to be written about. And all three are
+now spent, so the tests in the repository treat them as regression checks, not
+as evidence.
 
-Six messages would have gone unwarned. Four of them sit between 0.6 and 0.72 on
-the model, just under the 0.75 the page requires before it will say "this reads
-like a scam". Lowering that threshold to 0.7 would warn on five of the six and
-still raise zero false positives across the 62 legitimate messages, which is
-measured on the legitimate corpus rather than on the holdout. That change has
-deliberately not been made yet. The moment it is, this holdout stops being one,
-and the number above stops being true. It is recorded here as it first ran.
+Getting to a defensible ninety per cent is a data problem rather than a rules
+problem. Forty real forwards, from actual phones, would settle it.
 
 ## Auditing the rulebook against somebody else's data
 
@@ -479,7 +489,7 @@ browser JavaScript.
 
 ## What it does not do
 
-It does not detect scams it has never seen — thirty-nine patterns are thirty-nine
+It does not detect scams it has never seen — forty-seven patterns are forty-seven
 patterns, and a clean result says only that none of them fired. The page says so
 rather than implying safety. It reads English and Hinglish written in Latin
 script; Devanagari input is not handled yet. And it is not legal or financial

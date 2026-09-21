@@ -24,7 +24,7 @@ you, so you are not stuck looking for the words.
 
 There are three things doing the checking, and the order matters.
 
-Thirty-nine rules written in ordinary Python decide the verdict. No model gets
+Forty-seven rules written in ordinary Python decide the verdict. No model gets
 a vote there, which means the same message always produces the same answer and
 every answer can be explained line by line.
 
@@ -138,7 +138,7 @@ text, every highlighted phrase and every model probability. It is currently
 
 Solo project, so all of it is mine.
 
-- The rules engine: thirty-nine detection rules with weights, quoted spans and
+- The rules engine: forty-seven detection rules with weights, quoted spans and
   stated reasons, plus the advice and the auto-generated reply.
 - The text normaliser, which undoes the tricks scam messages use to get past
   filters: letters spaced out, an O typed as a zero, an accent on a vowel, with
