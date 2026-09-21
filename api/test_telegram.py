@@ -87,6 +87,21 @@ def main() -> int:
     bad += check("a signed one is accepted", res["statusCode"], 200)
     del os.environ["TELEGRAM_SECRET"]
 
+    # a Hindi message must come back in Hindi
+    sent.clear()
+    handler.telegram_webhook(
+        {"headers": {}, "body": json.dumps(update(
+            "आपका केवाईसी अपडेट नहीं हुआ है। खाता ब्लॉक हो जाएगा। तुरंत इस लिंक पर क्लिक करें"))},
+        send=lambda cid, t: sent.append((cid, t)))
+    bad += check("a hindi message is answered in hindi",
+                 "जाँचें चलीं" in sent[0][1] and "checks fired" not in sent[0][1], True)
+    sent.clear()
+    handler.telegram_webhook(
+        {"headers": {}, "body": json.dumps(update("Your KYC has expired, share OTP now"))},
+        send=lambda cid, t: sent.append((cid, t)))
+    bad += check("an english one is still answered in english",
+                 "checks fired" in sent[0][1], True)
+
     print(f"\n  {'all tests passed' if not bad else f'{bad} FAILED'}")
     return 1 if bad else 0
 

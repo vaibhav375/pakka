@@ -7,6 +7,8 @@ so the advice can never contradict the verdict.
 """
 from __future__ import annotations
 
+import hindi
+
 # How each rule reads inside a sentence you would actually send someone.
 CLAUSE = {
     "PAY_TO_GET_JOB": "it asks for money before a job",
@@ -53,24 +55,33 @@ IMPERSONATION = {"KYC_PANIC", "ELECTRICITY_CUT", "LOAN_HARASSMENT", "THREAT", "C
 PROPERTY = {"SIGHT_UNSEEN", "ARMY_OFFICER"}
 
 
-def build(verdict: dict) -> dict:
+def build(verdict: dict, lang: str = "en") -> dict:
+    """The steps and the reply. In Hindi when the message came in Hindi:
+    numbered English instructions inside a Hindi answer help nobody."""
+    hi = lang == "hi"
+    A = hindi.ACTIONS if hi else {}
     fired = {f["id"] for f in verdict["findings"]}
 
     if not fired:
         return {
             "actions": [
-                "Nothing matched, but that is not proof it is safe — it means this "
-                "message does not use any of the twenty patterns Pakka knows.",
-                "If it still feels wrong, verify on a number you already had, not "
-                "one from the message.",
+                A.get("nothing",
+                      "Nothing matched, but that is not proof it is safe — it means "
+                      "this message does not use any of the patterns Pakka knows."),
+                A.get("verify",
+                      "If it still feels wrong, verify on a number you already had, "
+                      "not one from the message."),
             ],
             "forward": "",
         }
 
-    actions = ["Do not pay anything and do not share any code, however small the amount."]
+    actions = [A.get("no_pay",
+                     "Do not pay anything and do not share any code, however small "
+                     "the amount.")]
     if "ASKS_FOR_SECRET" in fired:
-        actions.append("Never share an OTP, PIN or CVV. No bank, delivery agent or "
-                       "employer will ever ask for one.")
+        actions.append(A.get("no_otp",
+                       "Never share an OTP, PIN or CVV. No bank, delivery agent or "
+                       "employer will ever ask for one."))
     if fired & MONEY:
         actions.append("Money sent to a personal UPI ID or account is very hard to get "
                        "back, which is exactly why they ask for it that way.")
@@ -78,20 +89,30 @@ def build(verdict: dict) -> dict:
         actions.append("Search the company name with the word careers and apply only "
                        "from its own site.")
     if fired & IMPERSONATION:
-        actions.append("If you think it might be genuine, call the number printed on "
-                       "your own bill, card or the official website — never the one in "
-                       "the message.")
+        actions.append(A.get("own_number",
+                       "If you think it might be genuine, call the number printed on "
+                       "your own bill, card or the official website — never the one "
+                       "in the message."))
     if fired & PROPERTY:
         actions.append("See the place in person and meet the owner before any money "
                        "moves. No photo, video call or document replaces that.")
-    actions.append("Report it at cybercrime.gov.in or call 1930. If money has already "
-                   "gone, report within the first hour, while it can still be frozen.")
-    actions.append("Block the sender, then tell whoever forwarded it to you.")
+    actions.append(A.get("report",
+                   "Report it at cybercrime.gov.in or call 1930. If money has already "
+                   "gone, report within the first hour, while it can still be frozen."))
+    actions.append(A.get("block",
+                   "Block the sender, then tell whoever forwarded it to you."))
 
-    top = [CLAUSE[f["id"]] for f in verdict["findings"][:2] if f["id"] in CLAUSE]
-    reasons = " and ".join(top) if top else "it matches known scam patterns"
-    forward = (f"I checked this before replying — {reasons}. That is how this kind of "
-               f"scam works, so I am not paying or sharing anything. Please do not "
-               f"send money either. (Checked with Pakka)")
+    clauses = hindi.CLAUSE if hi else CLAUSE
+    top = [clauses.get(f["id"], CLAUSE.get(f["id"]))
+           for f in verdict["findings"][:2]]
+    top = [t for t in top if t]
+    if hi:
+        reasons = " और ".join(top) if top else "यह जानी-पहचानी धोखाधड़ी जैसा है"
+        forward = hindi.UI["forward_template"].replace("{reasons}", reasons)
+    else:
+        reasons = " and ".join(top) if top else "it matches known scam patterns"
+        forward = (f"I checked this before replying — {reasons}. That is how this kind "
+                   f"of scam works, so I am not paying or sharing anything. Please do "
+                   f"not send money either. (Checked with Pakka)")
 
     return {"actions": actions, "forward": forward}

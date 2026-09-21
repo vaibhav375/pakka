@@ -227,29 +227,44 @@ function adviceFor(findings) {
   if (!ids.length) {
     return {
       actions: [
-        'Nothing matched, but that is not proof it is safe — it means this message ' +
-        `does not use any of the ${(window.PAKKA_RULES || []).length} patterns Pakka knows.`,
-        'If it still feels wrong, verify on a number you already had, not one from the message.',
+        window.PakkaLang.action('nothing',
+          'Nothing matched, but that is not proof it is safe — it means this message ' +
+          `does not use any of the ${(window.PAKKA_RULES || []).length} patterns Pakka knows.`),
+        window.PakkaLang.action('verify',
+          'If it still feels wrong, verify on a number you already had, not one from the message.'),
       ],
       forward: '',
     };
   }
-  const actions = ['Do not pay anything and do not share any code, however small the amount.'];
+  const L = window.PakkaLang;
+  const actions = [L.action('no_pay',
+    'Do not pay anything and do not share any code, however small the amount.')];
   if (ids.includes('ASKS_FOR_SECRET'))
-    actions.push('Never share an OTP, PIN or CVV. No bank, delivery agent or employer will ever ask for one.');
+    actions.push(L.action('no_otp',
+      'Never share an OTP, PIN or CVV. No bank, delivery agent or employer will ever ask for one.'));
   if (has('money'))
     actions.push('Money sent to a personal UPI ID or account is very hard to get back, which is exactly why they ask for it that way.');
   if (has('job'))
     actions.push('Search the company name with the word careers and apply only from its own site.');
   if (has('impersonation'))
-    actions.push('If you think it might be genuine, call the number printed on your own bill, card or the official website — never the one in the message.');
+    actions.push(L.action('own_number',
+      'If you think it might be genuine, call the number printed on your own bill, card or the official website — never the one in the message.'));
   if (has('property'))
     actions.push('See the place in person and meet the owner before any money moves. No photo, video call or document replaces that.');
-  actions.push('Report it at cybercrime.gov.in or call 1930. If money has already gone, report within the first hour, while it can still be frozen.');
-  actions.push('Block the sender, then tell whoever forwarded it to you.');
+  actions.push(L.action('report',
+    'Report it at cybercrime.gov.in or call 1930. If money has already gone, report within the first hour, while it can still be frozen.'));
+  actions.push(L.action('block', 'Block the sender, then tell whoever forwarded it to you.'));
 
-  const top = ids.slice(0, 2).map((id) => A.clause[id]).filter(Boolean);
-  const reasons = top.length ? top.join(' and ') : 'it matches known scam patterns';
+  const top = ids.slice(0, 2).map((id) => L.clause(id, A.clause[id])).filter(Boolean);
+  const joiner = L.hi() ? ` ${L.t('and', 'and')} ` : ' and ';
+  const reasons = top.length ? top.join(joiner)
+    : L.t('no_reason', 'it matches known scam patterns');
+  if (L.hi()) {
+    return {
+      actions,
+      forward: L.t('forward_template', '').replace('{reasons}', reasons),
+    };
+  }
   return {
     actions,
     forward: `I checked this before replying — ${reasons}. That is how this kind of scam ` +
@@ -324,7 +339,7 @@ function render(d) {
 
   out.classList.add('show');
   card.className = `verdict band-${d.band}`;
-  $('vlabel').textContent = d.label;
+  $('vlabel').textContent = window.PakkaLang.band(d.band, d.label);
   countUp($('vscore'), d.score);
   const g = document.getElementById('gfill');
   if (g) {                       /* 198 is the dash length of the three-quarter arc */
@@ -339,19 +354,24 @@ function render(d) {
     .map((f) => `<i style="width:${(f.weight / total) * 100}%" title="${f.name} +${f.weight}"></i>`)
     .join('');
 
-  $('flags').innerHTML = d.findings.map((f) => `
+  $('flags').innerHTML = d.findings.map((f) => {
+    const tr = window.PakkaLang.rule(f.id, f.name, f.why);
+    return `
     <div class="flag" data-id="${f.id}">
       <div class="w">+${f.weight}</div>
       <div>
-        <h4>${f.name}</h4>
-        <p>${f.why}</p>
+        <h4>${tr.name}</h4>
+        <p>${tr.why}</p>
         ${f.quotes.length ? `<div class="quote">\u201c${f.quotes.slice(0, 3).join('\u201d \u00b7 \u201c')}\u201d</div>` : ''}
       </div>
-    </div>`).join('') || `
+    </div>`; }).join('') || `
     <div class="flag in"><div class="w" style="color:var(--acid)">\u2713</div>
-      <div><h4>None of the ${(window.PAKKA_RULES || []).length} checks fired</h4>
-      <p>That is not a guarantee \u2014 it means this message does not use any of the
-         patterns Pakka knows about. If something still feels wrong, trust that.</p></div></div>`;
+      <div><h4>${window.PakkaLang.t('nothing_fired',
+        `None of the ${(window.PAKKA_RULES || []).length} checks fired`)}</h4>
+      <p>${window.PakkaLang.t('nothing_fired_why',
+        'That is not a guarantee \u2014 it means this message does not use any of the '
+        + 'patterns Pakka knows about. If something still feels wrong, trust that.')}</p>
+      </div></div>`;
 
   /* what to do about it, and what to send back */
   const adv = d.advice || adviceFor(d.findings || []);
@@ -623,19 +643,47 @@ function hunch(text, verdict) {
     label.textContent = 'Nothing matched, but be careful';
     label.classList.add('warn');
     if (card) card.className = 'verdict band-careful';
-    if (dial) dial.textContent = 'Model reading';
+    if (dial) dial.textContent = window.PakkaLang.t('model_reading', 'Model reading');
     countUp($('vscore'), pct);
     if (gauge) setTimeout(() => (gauge.style.strokeDashoffset = String(198 - 198 * r.p)), 60);
   } else {
     if (label) label.classList.remove('warn');
-    if (dial) dial.textContent = 'Risk score';
+    if (dial) dial.textContent = window.PakkaLang.t('risk', 'Risk score');
   }
 
   /* 0.75, not 0.6. The calibration table says 0.6 to 0.8 is only about seven in
      ten, and telling somebody their delivery notification reads like a scam on
      those odds is how a tool stops being believed. */
+  const safeTxt = (x) => x.replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+  const _spans = window.pakkaModelSpans(text, r.heat || []);
+  let spansNote = '';
+  if (_spans.length && r.p >= 0.5) {
+    const bits = _spans.map(([a, b]) => safeTxt(text.slice(a, b).trim())).filter(Boolean);
+    if (bits.length) {
+      const lead = window.PakkaLang.hi() ? ' इसने सबसे ज़्यादा ध्यान दिया ' : ' It reacted most to ';
+      spansNote = lead + '<mark class="hunch-mark">'
+                + bits.join('</mark>, <mark class="hunch-mark">') + '</mark>.';
+    }
+  }
+  const L = window.PakkaLang;
+  const hiFrag = (k, en) => L.t(k, en);
   let line;
-  if (!fired && r.p >= 0.75) {
+  if (L.hi()) {
+    if (!fired && r.p >= 0.75) {
+      line = `<b>${hiFrag('model_flag', '')}</b> मॉडल इसे ${pct} में से 100 पर रखता है, `
+           + 'जहाँ दस में से लगभग नौ संदेश धोखाधड़ी निकलते हैं। यह सावधान रहने की वजह है, सबूत नहीं।';
+    } else if (!fired && r.p >= 0.5) {
+      line = `कुछ नहीं मिला, और मॉडल को भी पक्का नहीं है, ${pct} में से 100। `
+           + 'ऐसे लगने वाले करीब आधे संदेश ठीक निकलते हैं।';
+    } else if (fired && r.p >= 0.6) {
+      line = `${hiFrag('model_agrees', '')} ${pct} में से 100।`;
+    } else if (fired) {
+      line = `${hiFrag('model_unsure', '')} ${pct} में से 100। ऊपर के नियम असली शब्द दिखाते हैं, `
+           + 'इसलिए उन्हें पढ़िए।';
+    } else {
+      line = `${hiFrag('model_low', '')} ${pct} ${hiFrag('model_low_tail', '')}`;
+    }
+  } else if (!fired && r.p >= 0.75) {
     line = `<b>No rule fired, but this still reads like a scam.</b> The model puts it at
             ${pct} out of 100, which is where about nine in ten messages turn out to be
             fraud. That is a reason to be careful, not proof, and it is also how new
@@ -652,16 +700,66 @@ function hunch(text, verdict) {
     line = `The model puts this at ${pct} out of 100, which is where most messages sit.
             Nothing here looks like the fraud it was trained on.`;
   }
+  if (L.hi() && spansNote) line += spansNote;
 
   const safe = (x) => x.replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
-  const spans = window.pakkaModelSpans(text, r.heat || []);
-  if (spans.length && r.p >= 0.5) {
-    const bits = spans.map(([a, b]) => safe(text.slice(a, b).trim())).filter(Boolean);
-    if (bits.length) {
-      line += ` It reacted most to <mark class="hunch-mark">`
-            + bits.join('</mark>, <mark class="hunch-mark">') + '</mark>.';
-    }
-  }
+  if (!L.hi() && spansNote) line += spansNote;
   out.innerHTML = line;
   box.hidden = false;
 }
+
+/* ---------- the language toggle ---------- */
+(() => {
+  const btn = document.getElementById('lang');
+  if (!btn || !window.PakkaLang) return;
+
+  /* the static copy on the page, keyed to what each element should say */
+  const STATIC = [
+    ['#t', 'placeholder', 'placeholder'],
+    ['#go', 'check', 'text'],
+    ['#copy', 'copy_link', 'text'],
+    ['#copyfwd', 'copy_message', 'text'],
+    ['#l-verdict', 'verdict', 'text'],
+    ['#l-of', 'of', 'text'],
+    ['#l-fired', 'checks_fired', 'text'],
+    ['#l-model', 'model_says', 'text'],
+    ['#l-todo', 'what_to_do', 'text'],
+    ['#l-sendback', 'forward_back', 'text'],
+    ['#l-forward', 'share', 'text'],
+    ['#diallabel', 'risk', 'text'],
+    ['#l-fwdnote', 'fwd_note', 'text'],
+  ];
+  const ENGLISH = new Map();
+
+  const paint = () => {
+    const L = window.PakkaLang;
+    btn.textContent = L.hi() ? 'English' : 'हिंदी';
+    btn.setAttribute('aria-label', L.hi() ? 'Switch to English' : 'हिंदी में देखें');
+    for (const [sel, key, how] of STATIC) {
+      const el = document.querySelector(sel);
+      if (!el) continue;
+      if (!ENGLISH.has(sel)) {
+        ENGLISH.set(sel, how === 'placeholder' ? el.placeholder : el.textContent);
+      }
+      const value = L.t(key, ENGLISH.get(sel));
+      if (how === 'placeholder') el.placeholder = value; else el.textContent = value;
+    }
+    const tag = document.getElementById('tagline');
+    if (tag) {
+      const n = (window.PAKKA_RULES || []).length;
+      tag.innerHTML = L.hi()
+        ? `<span id="rulecount">${n}</span> ${L.t('tagline', 'rules · runs on your device')}`
+        : `<span id="rulecount">${n}</span> rules · runs on your device`;
+    }
+    /* a verdict already on screen is re-rendered in the new language */
+    const out = document.getElementById('out');
+    if (out && !out.hidden && window.pakkaEvaluate) {
+      const text = document.getElementById('t').value;
+      if (text.trim()) render(window.pakkaEvaluate(text));
+    }
+  };
+
+  btn.onclick = () => window.PakkaLang.set(window.PakkaLang.hi() ? 'en' : 'hi');
+  document.addEventListener('pakka:lang', paint);
+  paint();
+})();

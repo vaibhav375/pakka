@@ -3,7 +3,7 @@
    editorial feel comes from. */
 :root{
   --ground:#0a0a0b; --surface:#111114; --line:#1e1e22;
-  --ink:#f4f4f1; --muted:#87877f; --dim:#5a5a55;
+  --ink:#f4f4f1; --muted:#87877f; --dim:#80807b;
   --acid:#c6ff3d; --warn:#ffb03d; --bad:#ff5d47;
   --shell:min(1180px,92vw);
   --r:14px;
@@ -332,3 +332,20 @@ mark.peek{background:rgba(198,255,61,.22)!important;color:#eaffc0!important;
 mark.hunch-mark{background:rgba(198,255,61,.14);color:#e8ffc4;
                 box-shadow:inset 0 -1px 0 rgba(198,255,61,.4)}
 .vlabel.warn{color:#ffc46b}
+
+/* language toggle */
+.barright{display:flex;align-items:center;gap:14px}
+.lang{background:none;border:1px solid var(--line);color:var(--muted);
+      border-radius:999px;padding:5px 12px;font-size:11px;cursor:pointer;
+      letter-spacing:.06em;transition:color .2s,border-color .2s}
+.lang:hover,.lang:focus-visible{color:var(--acid);border-color:var(--acid)}
+@media (max-width:560px){
+  .barright{gap:8px}
+  .lang{padding:4px 9px}
+}
+
+/* Devanagari has no capitals and its conjuncts need to sit together, so the
+   wide tracking the mono labels use in English pulls the script apart */
+html[lang="hi"] .mono,
+html[lang="hi"] .lang{letter-spacing:0;text-transform:none}
+html[lang="hi"] .vlabel{letter-spacing:-.01em}

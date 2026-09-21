@@ -29,7 +29,7 @@ import store
 import telegram
 import twilio
 import whatsapp
-from chat import reply_for
+from chat import devanagari, reply_for
 from advice import build as build_advice
 from rules import evaluate
 
@@ -92,8 +92,9 @@ def _verdict_for(text: str) -> tuple[dict, dict, str | None, dict | None]:
     """The scan, the advice, the model's reading and a link, shared by every
     front door. The model is optional everywhere: without the weights file the
     whole thing degrades to exactly what shipped before it existed."""
+    lang = "hi" if devanagari(text) else "en"
     verdict = evaluate(text)
-    advice = build_advice(verdict)
+    advice = build_advice(verdict, lang)
     try:
         hunch = linear_model.score(text)
     except Exception:
@@ -108,7 +109,7 @@ def _verdict_for(text: str) -> tuple[dict, dict, str | None, dict | None]:
         link = f"{PUBLIC_URL}/#{scan_id}" if PUBLIC_URL else None
     except Exception:
         traceback.print_exc()          # a storage failure must not cost the answer
-    return verdict, advice, link, hunch
+    return verdict, advice, link, hunch, lang
 
 
 def whatsapp_webhook(event, send=whatsapp.send) -> dict:
@@ -137,8 +138,8 @@ def whatsapp_webhook(event, send=whatsapp.send) -> dict:
                 send(msg["from"], reply_for(None, None, None, kind=msg["type"]),
                      msg["phone_number_id"])
                 continue
-            verdict, advice, link, hunch = _verdict_for(text)
-            send(msg["from"], reply_for(verdict, advice, link, hunch=hunch),
+            verdict, advice, link, hunch, lang = _verdict_for(text)
+            send(msg["from"], reply_for(verdict, advice, link, hunch=hunch, lang=lang),
                  msg["phone_number_id"])
         except Exception:               # one bad message must not drop the rest
             traceback.print_exc()
@@ -168,8 +169,8 @@ def telegram_webhook(event, send=telegram.send) -> dict:
             if msg["type"] != "text" or not text:
                 send(msg["chat_id"], reply_for(None, None, None, kind=msg["type"]))
                 continue
-            verdict, advice, link, hunch = _verdict_for(text)
-            send(msg["chat_id"], reply_for(verdict, advice, link, hunch=hunch))
+            verdict, advice, link, hunch, lang = _verdict_for(text)
+            send(msg["chat_id"], reply_for(verdict, advice, link, hunch=hunch, lang=lang))
         except Exception:               # one bad update must not drop the rest
             traceback.print_exc()
     return {"statusCode": 200, "body": "ok"}
@@ -193,8 +194,8 @@ def twilio_webhook(event) -> dict:
             if not text or msg["type"] != "text":
                 reply = reply_for(None, None, None, kind=msg["type"])
                 continue
-            verdict, advice, link, hunch = _verdict_for(text)
-            reply = reply_for(verdict, advice, link, hunch=hunch)
+            verdict, advice, link, hunch, lang = _verdict_for(text)
+            reply = reply_for(verdict, advice, link, hunch=hunch, lang=lang)
         except Exception:
             traceback.print_exc()
             reply = ("Something broke checking that. Try again, or paste it at "

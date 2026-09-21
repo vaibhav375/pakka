@@ -16,6 +16,7 @@ import sys
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent / "api"))
 from advice import CLAUSE, IMPERSONATION, JOB, MONEY, PROPERTY  # noqa: E402
 from rules import BANDS, RULES  # noqa: E402
+import hindi  # noqa: E402
 
 OUT = pathlib.Path(__file__).resolve().parent.parent / "web" / "rules.generated.js"
 
@@ -41,6 +42,7 @@ OUT.write_text(f"""/* Generated from api/rules.py by tools/build_rules_js.py —
 window.PAKKA_RULES = {json.dumps(rules, indent=2, ensure_ascii=False)};
 window.PAKKA_ADVICE = {json.dumps(advice, indent=2, ensure_ascii=False)};
 window.PAKKA_BANDS = {json.dumps(bands)};
+window.PAKKA_HI = {json.dumps({"bands": hindi.BANDS, "rules": hindi.RULES, "clause": hindi.CLAUSE, "actions": hindi.ACTIONS, "ui": hindi.UI}, ensure_ascii=False, indent=1)};
 
 /* The same normalisation as normalise() in api/rules.py. Change one, change
    both: tools/check_parity.py fails the build if they disagree. */

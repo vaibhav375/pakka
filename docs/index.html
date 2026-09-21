@@ -26,7 +26,10 @@
 
 <div class="bar" id="bar"><div class="shell">
   <div class="brand">पक्का <i>/</i> pakka</div>
-  <div class="mono"><span id="rulecount">47</span> rules · runs on your device</div>
+  <div class="barright">
+    <span class="mono" id="tagline"><span id="rulecount">47</span> rules · runs on your device</span>
+    <button class="lang mono" id="lang" aria-label="Switch language">हिंदी</button>
+  </div>
 </div></div>
 
 <header class="hero"><div class="shell">
@@ -60,8 +63,9 @@
 <div class="verdict" id="card">
   <div class="vtop">
     <div>
-      <div class="mono" style="margin-bottom:12px">The verdict ·
-        <span id="glcount">0</span> of <span id="gltotal">47</span> checks fired</div>
+      <div class="mono" style="margin-bottom:12px"><span id="l-verdict">The verdict</span> ·
+        <span id="glcount">0</span> <span id="l-of">of</span> <span id="gltotal">47</span>
+        <span id="l-fired">checks fired</span></div>
       <div class="vlabel" id="vlabel">—</div>
     </div>
     <div class="dial">
@@ -79,23 +83,23 @@
   <div class="msg" id="msg"></div>
   <div class="flags" id="flags"></div>
   <div class="hunch" id="hunch" hidden>
-    <span class="mono">The model's reading</span>
+    <span class="mono" id="l-model">The model's reading</span>
     <p id="hunchtext"></p>
   </div>
   <div class="advice" id="advice" hidden>
-    <span class="mono">What to do now</span>
+    <span class="mono" id="l-todo">What to do now</span>
     <ol id="actions"></ol>
   </div>
   <div class="fwd" id="fwd" hidden>
-    <span class="mono">Send this back to whoever forwarded it</span>
+    <span class="mono" id="l-sendback">Send this back to whoever forwarded it</span>
     <textarea id="fwdtext" readonly></textarea>
     <div class="fwdrow">
-      <span class="mono" style="color:var(--dim)">Written from the rules that fired, so it cannot overstate the verdict</span>
+      <span class="mono" id="l-fwdnote" style="color:var(--dim)">Written from the rules that fired, so it cannot overstate the verdict</span>
       <button class="copy" id="copyfwd">Copy message</button>
     </div>
   </div>
   <div class="share">
-    <span class="mono">Forward this verdict</span>
+    <span class="mono" id="l-forward">Forward this verdict</span>
     <input id="link" readonly value="—">
     <button class="copy" id="copy">Copy link</button>
   </div>
@@ -225,6 +229,7 @@
 <script src="rules.generated.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="config.js"></script>
+<script src="i18n.js"></script>
 <script src="urls.js"></script>
 <script src="model.generated.js"></script>
 <script src="model.js"></script>
