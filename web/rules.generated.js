@@ -14,28 +14,28 @@ window.PAKKA_RULES = [
     "name": "Asks for an OTP, PIN or password",
     "why": "Nobody legitimate will ever ask for your OTP, UPI PIN, CVV or password — not your bank, not a delivery agent, not HR.",
     "weight": 4,
-    "re": "(?:share|send|tell|give|provide|forward|confirm|read out)\\s+(?:me\\s+|us\\s+|the\\s+|your\\s+)*\\b(?:otp|cvv|pin|password|code)\\b(?!\\s*(?:is\\s*)?\\d{4,8})|\\b(?:apna|apne) otp\\b|\\botp\\b .{0,15}(?:bhej|batao|bataiye|share kij)|\\b(?:otp|cvv|pin)\\b.{0,25}(?:with (?:our|the|me|us)|to (?:our|the|me|us|verify))|what(?:'s| is) (?:your |the )?(?:otp|cvv|pin)\\b|\\bcvv\\b.{0,20}(?:number|digits)|\\bupi pin\\b|\\batm pin\\b|share (?:your )?password|\\bnet ?banking password\\b"
+    "re": "(?:share|send|tell|give|provide|forward|confirm|read out)\\s+(?:me\\s+|us\\s+|the\\s+|your\\s+)*\\b(?:otp|cvv|pin|password|code)\\b(?!\\s*(?:is\\s*)?\\d{4,8})|\\b(?:apna|apne) otp\\b|(?:अपना|अपनी)?\\s*(?:ओटीपी|ओ\\.?टी\\.?पी)|(?:पिन|पासवर्ड)\\s*(?:बताइए|बताएं|भेजिए|शेयर)|\\botp\\b .{0,15}(?:bhej|batao|bataiye|share kij)|\\b(?:otp|cvv|pin)\\b.{0,25}(?:with (?:our|the|me|us)|to (?:our|the|me|us|verify))|what(?:'s| is) (?:your |the )?(?:otp|cvv|pin)\\b|\\bcvv\\b.{0,20}(?:number|digits)|\\bupi pin\\b|\\batm pin\\b|share (?:your )?password|\\bnet ?banking password\\b"
   },
   {
     "id": "PAY_TO_RECEIVE",
     "name": "Asks you to pay to receive money",
     "why": "You are being asked to send money to unlock money. Refunds, prizes and lottery winnings never require a payment from you first.",
     "weight": 4,
-    "re": "pay .{0,30}to (?:claim|release|receive|unlock)|(?:claim|release|receive) .{0,30}after (?:payment|paying)|processing charge .{0,20}refund|to receive your (?:prize|refund|winnings)|pay .{0,25}(?:delivery|shipping|handling|courier) charge"
+    "re": "pay .{0,30}to (?:claim|release|receive|unlock)|(?:claim|release|receive) .{0,30}after (?:payment|paying)|processing charge .{0,20}refund|to receive your (?:prize|refund|winnings)|pay .{0,25}(?:delivery|shipping|handling|courier) charge|(?:फीस|शुल्क|पैसे|रकम).{0,20}(?:भेज|जमा|ट्रांसफर)"
   },
   {
     "id": "KYC_PANIC",
     "name": "KYC or account-block scare",
     "why": "Banks do not block accounts over SMS links. This is the most common phishing script in India right now.",
     "weight": 3,
-    "re": "kyc .{0,25}(?:expire|pending|suspend|incomplete|not (?:done|updated))|account .{0,30}(?:will be |has been )?(?:block|suspend|freeze|deactivat)|(?:update|complete|verify) .{0,20}kyc .{0,40}(?:\\bor\\b|else|otherwise|to avoid|immediately|now|today|link|http|block|suspend|frozen)|(?:account|khata|kyc).{0,30}(?:block|band) ho jayega|kyc update nahi"
+    "re": "kyc .{0,25}(?:expire|pending|suspend|incomplete|not (?:done|updated))|(?:needs?|requires?) .{0,20}kyc|immediate kyc|account .{0,30}(?:will be |has been )?(?:block|suspend|freeze|deactivat)|(?:update|complete|verify) .{0,20}kyc .{0,40}(?:\\bor\\b|else|otherwise|to avoid|immediately|now|today|link|http|block|suspend|frozen)|(?:account|khata|kyc).{0,30}(?:block|band) ho jayega|kyc update nahi|केवाईसी|(?:खाता|अकाउंट).{0,20}(?:ब्लॉक|बंद|बाधित)"
   },
   {
     "id": "URGENCY",
     "name": "Manufactured urgency",
     "why": "Pressure to act within hours exists to stop you checking. Anything genuine will still be there tomorrow.",
     "weight": 1,
-    "re": "within \\d+ ?(?:hours?|hrs?|minutes?|mins?)|today only|last chance|(?:block|suspend|deactivat|expir|clos|disconnect|cancel|terminat)\\w*\\s+(?:with)?in\\s+\\d+\\s*(?:hours?|hrs?|days?|minutes?)|expires? (?:today|tonight|soon)|immediately|hurry|\\burgently\\b|\\bturant\\b|\\bjaldi\\b|urgent hai|\\b(?:claim|collect|redeem|grab) (?:your |the |it )?(?:\\w+ ){0,3}\\bnow\\b|limited (?:slots?|seats?|offer)|only \\d+ (?:slots?|seats?) left|before (?:you )?(?:lose|miss)|\\b(?:click|claim|act|apply) (?:it |this |here |the link )?now\\b"
+    "re": "within \\d+ ?(?:hours?|hrs?|minutes?|mins?)|today only|last chance|(?:block|suspend|deactivat|expir|clos|disconnect|cancel|terminat)\\w*\\s+(?:with)?in\\s+\\d+\\s*(?:hours?|hrs?|days?|minutes?)|expires? (?:today|tonight|soon)|immediately|hurry|\\burgently\\b|\\bturant\\b|\\bjaldi\\b|urgent hai|तुरंत|जल्दी|अभी\\s*(?:ही|करें)|\\b(?:claim|collect|redeem|grab) (?:your |the |it )?(?:\\w+ ){0,3}\\bnow\\b|limited (?:slots?|seats?|offer|time|period)|only \\d+ (?:slots?|seats?) left|before (?:you )?(?:lose|miss)|\\b(?:click|claim|act|apply) (?:it |this |here |the link )?now\\b"
   },
   {
     "id": "NO_INTERVIEW",
@@ -49,7 +49,7 @@ window.PAKKA_RULES = [
     "name": "Pay that does not match the work",
     "why": "Earnings far above the going rate for a few hours a day are bait. The money is the hook, not the job.",
     "weight": 2,
-    "re": "(?:rs\\.?|₹)\\s?[1-9]\\d{3,}[^.]{0,30}(?:per day|/day|daily|per week)|earn (?:rs\\.?|₹)\\s?\\d[\\d,]*.{0,25}(?:from home|part[- ]?time|\\d ?(?:hours?|hrs?))|\\d ?(?:hours?|hrs?) (?:work )?daily.{0,25}(?:rs\\.?|₹)\\s?\\d|ghar baithe .{0,25}kama|(?:rupaye|rupay) (?:daily|roz|rozana)"
+    "re": "(?:rs\\.?|₹)\\s?[1-9]\\d{3,}[^.]{0,30}(?:per day|/day|daily|per week)|earn (?:rs\\.?|₹)\\s?\\d[\\d,]*.{0,25}(?:from home|part[- ]?time|\\d ?(?:hours?|hrs?))|\\d ?(?:hours?|hrs?) (?:work )?daily.{0,25}(?:rs\\.?|₹)\\s?\\d|ghar baithe .{0,25}kama|(?:rupaye|rupay) (?:daily|roz|rozana)|घर बैठे.{0,25}कमा|(?:रोज|रोजाना|प्रतिदिन).{0,25}रुपये"
   },
   {
     "id": "PERSONAL_PAYMENT",
@@ -77,14 +77,14 @@ window.PAKKA_RULES = [
     "name": "A link with nowhere named",
     "why": "Messages you can trust say where they are sending you, by name. \"This link\" is the whole address you are given.",
     "weight": 1,
-    "re": "(?:click|tap|open)(?:ing)? (?:on )?(?:this|the|below|following|attached) link|link (?:par|pe) click"
+    "re": "(?:click|tap|open)(?:ing)? (?:on )?(?:this|the|below|following|attached) link|link (?:par|pe) click|(?:इस|नीचे|दिए गए)\\s*लिंक पर\\s*क्लिक"
   },
   {
     "id": "CHAT_ONLY",
     "name": "Exists only on WhatsApp or Telegram",
     "why": "No office, no website, no landline — only a chat window. There is nothing to hold accountable afterwards.",
     "weight": 1,
-    "re": "(?:contact|message|ping|dm|reach) (?:me |us )?(?:only )?on (?:whats ?app|telegram)|join (?:our )?telegram|whats ?app (?:only|me at)|(?:whats ?app|telegram) par (?:contact|message|baat|kare)"
+    "re": "(?:contact|message|ping|dm|reach) (?:me |us )?(?:only )?on (?:whats ?app|telegram)|join (?:our )?telegram|whats ?app (?:only|me at)|(?:whats ?app|telegram) par (?:contact|message|baat|kare)|(?:व्हाट्सएप|व्हाट्सऐप|टेलीग्राम).{0,20}(?:करें|कीजिए|संपर्क)"
   },
   {
     "id": "THREAT",
@@ -112,14 +112,14 @@ window.PAKKA_RULES = [
     "name": "Electricity disconnection threat",
     "why": "Power utilities do not warn you by SMS from a personal number, and they never ask you to call one to avoid disconnection tonight.",
     "weight": 3,
-    "re": "electricity .{0,30}(?:disconnect|cut off|discontinue)|power .{0,20}(?:will be )?disconnect|bill .{0,20}not updated.{0,30}disconnect"
+    "re": "electricity .{0,30}(?:disconnect|cut off|discontinue)|बिजली.{0,30}(?:काट|कट|बंद)|power .{0,20}(?:will be )?disconnect|bill .{0,20}not updated.{0,30}disconnect"
   },
   {
     "id": "LOTTERY_WIN",
     "name": "A prize you never entered for",
     "why": "You cannot win a lottery you never entered. Every version of this ends with a fee to release the winnings.",
     "weight": 4,
-    "re": "(?:won|winner).{0,30}(?:lottery|lucky draw|prize|kbc)|\\bkbc\\b|lucky (?:winner|draw)|congratulations.{0,30}\\b(?:won|winning|winner)\\b.{0,50}(?:\\brs\\.?\\s*\\d|₹|lakh|crore|lottery|lucky draw|prize|gift|iphone|mac ?book|laptop|\\bcar\\b|voucher|hamper)|lottery lag gay|\\bjeeta hai\\b|(?:lakh|crore) rupaye jeet|\\b(?:won|winning|win a)\\b.{0,40}(?:iphone|mac ?book|laptop|smartphone|scooter|\\bcar\\b|\\bbike\\b|gift (?:card|voucher|hamper)|voucher|cash prize|\\bgift\\b)|\\bfree\\b\\s+(?:\\w+\\s+){0,2}(?:iphone|ipad|tablet|laptop|mac ?book|smartphone|\\bphone\\b|\\btv\\b|television|smart ?watch|airpods|headphones|\\bcar\\b|scooter|\\bbike\\b)"
+    "re": "(?:won|winner).{0,30}(?:lottery|lucky draw|prize|kbc)|\\bkbc\\b|lucky (?:winner|draw)|congratulations.{0,30}\\b(?:won|winning|winner)\\b.{0,50}(?:\\brs\\.?\\s*\\d|₹|lakh|crore|lottery|lucky draw|prize|gift|iphone|mac ?book|laptop|\\bcar\\b|voucher|hamper)|lottery lag gay|\\bjeeta hai\\b|(?:लॉटरी|इनाम|लकी ड्रॉ)|बधाई.{0,30}(?:जीत|इनाम|लाख|करोड़)|(?:lakh|crore) rupaye jeet|\\b(?:won|winning|win a)\\b.{0,40}(?:iphone|mac ?book|laptop|smartphone|scooter|\\bcar\\b|\\bbike\\b|gift (?:card|voucher|hamper)|voucher|cash prize|\\bgift\\b)|\\bfree\\b\\s+(?:\\w+\\s+){0,2}(?:iphone|ipad|tablet|laptop|mac ?book|smartphone|\\bphone\\b|\\btv\\b|television|smart ?watch|airpods|headphones|\\bcar\\b|scooter|\\bbike\\b|subscription|recharge|data pack|membership)"
   },
   {
     "id": "QR_SCAN",
@@ -147,7 +147,7 @@ window.PAKKA_RULES = [
     "name": "A web address dressed up as a real company",
     "why": "The brand name is in the address but the domain is not theirs. Real organisations send you to their own domain, not a lookalike.",
     "weight": 3,
-    "re": "https?://[^\\s]*\\b(?:sbi|hdfc|icici|axis|kotak|paytm|phonepe|amazon|flipkart|netflix|irctc|epfo|uidai|income ?tax|indiapost)[-_][a-z0-9-]+\\.|https?://[^\\s]*\\b(?:sbi|hdfc|icici|axis|paytm|phonepe|amazon|flipkart|netflix|irctc|epfo|uidai)[^\\s]*\\.(?:xyz|info|top|online|site|club|icu|buzz|link|shop|tk|ml|ga|cf)\\b|https?://[^\\s]*\\bhdfc-bank\\b"
+    "re": "https?://[^\\s]*\\b(?:sbi|hdfc|icici|axis|kotak|pnb|canara|bob|rbi|lic|paytm|phonepe|amazon|flipkart|myntra|meesho|nykaa|bigbasket|swiggy|zomato|ola|uber|jio|airtel|\\bvi\\b|vodafone|bsnl|tata|netflix|irctc|epfo|uidai|income ?tax|indiapost)[-_][a-z0-9-]+\\.|https?://[^\\s]*\\b(?:sbi|hdfc|icici|axis|paytm|phonepe|amazon|flipkart|netflix|irctc|epfo|uidai)[^\\s]*\\.(?:xyz|info|top|online|site|club|icu|buzz|link|shop|tk|ml|ga|cf)\\b|https?://[^\\s]*\\bhdfc-bank\\b"
   },
   {
     "id": "VERIFY_DETAILS",
@@ -168,7 +168,7 @@ window.PAKKA_RULES = [
     "name": "A personal mobile posing as a helpline",
     "why": "Real companies publish landlines or 1800 numbers you can look up. A ten digit mobile presented as customer care belongs to a person, not a bank.",
     "weight": 2,
-    "re": "(?:customer care|help ?line|support number|official number|toll ?free)[^\\d]{0,25}\\b[6-9]\\d{9}\\b|\\b[6-9]\\d{9}\\b[^\\d]{0,25}(?:customer care|help ?line)|call (?:this|our|the above) number.{0,25}(?:to |and )?(?:cancel|stop|block|verify|reverse|claim|confirm)"
+    "re": "(?:customer care|help ?line|support number|official number|toll ?free)[^\\d]{0,25}\\b[6-9]\\d{9}\\b|\\b[6-9]\\d{9}\\b[^\\d]{0,25}(?:customer care|help ?line)|call\\s+(?:\\+?91[- ]?)?[6-9]\\d{9}\\b.{0,30}(?:to |and )?(?:claim|verify|confirm|cancel|reverse|block|activate|process)|call (?:this|our|the above) number.{0,25}(?:to |and )?(?:cancel|stop|block|verify|reverse|claim|confirm)"
   },
   {
     "id": "COLLECT_REQUEST",
@@ -210,7 +210,7 @@ window.PAKKA_RULES = [
     "name": "A new number that needs money",
     "why": "Someone claiming a new number and then asking for money is how a family member's identity gets borrowed. Call them on the number you already have.",
     "weight": 3,
-    "re": "(?:this is|it'?s) (?:my |me,? )?(?:new|changed) number.{0,120}(?:send|transfer|urgent|money|pay\\b|rs\\.?\\s?\\d|\\u20b9)|\\b(?:mom|mum|mummy|dad|papa|mama)\\b.{0,60}\\bnew number\\b.{0,120}(?:send|transfer|urgent|money|pay\\b|rs\\.?\\s?\\d)|(?:lost|broke|damaged|changed) my phone.{0,80}(?:send|transfer|money|rs\\.?\\s?\\d)|(?:mera|mere) naya number.{0,120}(?:bhej|rupaye|rupay|paise|transfer|urgent)|purana phone (?:kho gaya|kharab)"
+    "re": "(?:this is|it'?s) (?:my |me,? )?(?:new|changed) number.{0,120}(?:send|transfer|urgent|money|pay\\b|rs\\.?\\s?\\d|\\u20b9)|\\b(?:mom|mum|mummy|dad|papa|mama)\\b.{0,60}\\bnew number\\b.{0,120}(?:send|transfer|urgent|money|pay\\b|rs\\.?\\s?\\d)|(?:lost|broke|damaged|changed) my phone.{0,80}(?:send|transfer|money|rs\\.?\\s?\\d)|(?:mera|mere) naya number.{0,120}(?:bhej|rupaye|rupay|paise|transfer|urgent)|purana phone (?:kho gaya|kharab)|(?:मेरा|यह) नया नंबर.{0,80}(?:भेज|रुपये|पैसे|तुरंत)"
   },
   {
     "id": "STRANDED_PLEA",
@@ -225,6 +225,27 @@ window.PAKKA_RULES = [
     "why": "Letters from another alphabet, punycode, digits inside a brand name or a bare IP address. The address reads correctly to a person and goes somewhere else.",
     "weight": 3,
     "re": "(?!x)x"
+  },
+  {
+    "id": "UNUSUAL_LOGIN",
+    "name": "An alarm about your account, with a link attached",
+    "why": "Banks do tell you about a new device. They do not put the fix behind a link in the message. The alarm is real, the link is the scam.",
+    "weight": 3,
+    "re": "(?:unusual|unauthori[sz]ed|suspicious|new device) (?:login|sign[- ]?in|access|activity)|(?:login|sign[- ]?in) (?:detected|attempt).{0,40}(?:new|unknown|another) device|secure your account.{0,40}https?://"
+  },
+  {
+    "id": "GOVT_GRANT",
+    "name": "A government payout you never applied for",
+    "why": "No ministry selects people for money by SMS. Every real scheme has an application you made and a portal you log into yourself.",
+    "weight": 3,
+    "re": "(?:pmo|prime minister|ministry|govt|government|\\brbi\\b)\\b.{0,50}(?:selected|eligible|entitled|approved).{0,30}(?:grant|scheme|yojana|subsidy|fund)|(?:selected|eligible|entitled) for .{0,25}(?:₹|rs\\.?)\\s?[\\d,]+|(?:pm|pradhan mantri) .{0,20}yojana.{0,40}(?:claim|apply|register|call)|unclaimed (?:refund|amount|deposit|fund)"
+  },
+  {
+    "id": "ROMANCE_BAIT",
+    "name": "A stranger opening with flattery",
+    "why": "A profile you never posted, seen by someone who will move you to another app and then to money. It always starts as attention.",
+    "weight": 2,
+    "re": "(?:saw|liked|viewed) your (?:profile|photo|picture|pic)\\b.{0,50}(?:chat|meet|reply|message|whats ?app)|(?:single|hot|lonely) (?:women|men|girls|guys|ladies).{0,50}(?:waiting|near you|meet|chat|call)|\\b(?:hi|hey|hello) (?:beautiful|handsome|sexy|dear)\\b.{0,70}(?:reply|chat|call|whats ?app|profile)"
   },
   {
     "id": "LOAN_HARASSMENT",
@@ -382,7 +403,7 @@ window.pakkaNormalise = function (text) {
 
 /* grow a span out to word edges, so a highlight never cuts "expired" into
    "expire" and a stranded "d" */
-const pakkaWord = (c) => !!c && /[A-Za-z0-9_]/.test(c);
+const pakkaWord = (c) => !!c && /[A-Za-z0-9_ऀ-ॣ०-ॿ]/.test(c);
 function pakkaWholeWords(text, a, b) {
   while (a > 0 && pakkaWord(text[a - 1]) && pakkaWord(text[a])) a -= 1;
   while (b < text.length && pakkaWord(text[b]) && pakkaWord(text[b - 1])) b += 1;

@@ -15,6 +15,8 @@ FRAUD = [
  ("kyc", "HDFC ALERT: Your netbanking will expire today. Re-activate your account details here immediately."),
  ("kyc", "Dear user your Paytm KYC is pending, complete verification now or wallet will be frozen. http://paytm-kyc.online"),
  ("kyc", "Your account has been temporarily suspended due to incomplete KYC. Verify your details now to restore access."),
+ ("kyc", "SBI: Unusual login detected from a new device. Secure your account here: http://sbi-secure24.in"),
+ ("kyc", "RBI: Your bank account needs immediate KYC verification. Click http://rbi-verify9.in"),
  # --- prize and lottery
  ("prize", "Congratulations!! Your mobile number has won Rs 25,00,000 in the KBC lucky draw. Contact Mr Rana on WhatsApp."),
  ("prize", "You have won an iPhone 15 Pro in our Diwali lucky draw. Pay Rs 499 delivery charge to claim it."),
@@ -81,6 +83,10 @@ FRAUD = [
  ("advancefee", "I am Mrs Grace Williams, a widow suffering from cancer. I wish to donate my 5 million dollar fund to a trustworthy person."),
  ("advancefee", "You have been named next of kin to an unclaimed inheritance of USD 8.5 million. Reply for details."),
  ("advancefee", "Barrister John here. Your late relative left a fund. A small processing fee is needed to transfer it."),
+ ("govt", "PMO India: You are selected for Rs 86,200 grant under the scheme. Call 9812345670 to claim."),
+ ("govt", "Income Tax Department: you have an unclaimed refund of INR 8,475. Process it now at http://incometax-refund12.in"),
+ ("romance", "Hi beautiful! I saw your profile. Want to chat? Reply YES to 9409249465"),
+ ("romance", "Single women near you are waiting to meet. Call now to connect."),
  # --- fake customer care
  ("support", "For complaint regarding your order call our customer care 9876543210. We are the official helpline."),
  ("support", "Your credit card has an unauthorised transaction of Rs 89,000. If not done by you call this number to cancel it."),
@@ -106,6 +112,13 @@ FRAUD = [
  ("hinglish", "Aapke naam par parcel customs me ruka hai, clearance fee pay kijiye."),
  ("hinglish", "Ghar baithe kamaye 3000 rupaye daily. Whatsapp par contact kare."),
  ("hinglish", "Apna OTP share kijiye, hum bank se bol rahe hai."),
+ # --- Devanagari, which is what people type on an Indic keyboard
+ ("hindi", "आपका केवाईसी अपडेट नहीं हुआ है। खाता ब्लॉक हो जाएगा। तुरंत इस लिंक पर क्लिक करें"),
+ ("hindi", "बधाई हो! आपने 10 लाख रुपये की लॉटरी जीती है। प्रोसेसिंग फीस भेजें।"),
+ ("hindi", "अपना ओटीपी बताइए, हम बैंक से बोल रहे हैं।"),
+ ("hindi", "बिजली कनेक्शन आज रात काट दिया जाएगा। तुरंत संपर्क करें।"),
+ ("hindi", "घर बैठे रोज 3000 रुपये कमाएं। व्हाट्सएप करें।"),
+ ("hindi", "पापा, यह मेरा नया नंबर है। मुझे तुरंत 20000 रुपये भेज दीजिए।"),
  # --- addresses that are not the characters they appear to be
  ("lookalike", "Your account needs verification. Update it at http://\u0430mazon.in/verify now"),
  ("lookalike", "Apple ID locked. Sign in at https://xn--80ak6aa92e.com/login to restore access"),
@@ -152,6 +165,8 @@ LEGIT = [
  ("marketing", "Limited seats left for the weekend yoga batch. Reply to book."),
  ("marketing", "Your Zomato Gold expires in 3 days. Renew in the app to keep your benefits."),
  ("marketing", "Your invoice is ready. Download it from your account on freshbooks.com"),
+ ("marketing", "Myntra: end of season sale is live. Shop at https://www.myntra.com/sale"),
+ ("bank", "SBI: a new device signed in to YONO. If this was you, no action is needed. Visit any branch if not."),
  # --- friends and family, including money and numbers
  ("personal", "Call me on 9876543210 when you reach the gate, I will come down."),
  ("personal", "Can you send me a photo of your notes from today's class?"),
@@ -166,6 +181,7 @@ LEGIT = [
  ("personal", "Rent for September received, thanks. I will send the receipt tomorrow."),
  ("personal", "Please send me your address, I want to courier the book to you."),
  ("personal", "Dad, please transfer 5000 for the hostel mess bill when you get time."),
+ ("personal", "Hey, loved your profile picture from the trek! Send me the rest."),
  ("personal", "I lost my wallet yesterday, had to block all the cards. What a day."),
  # --- real services
  ("service", "Your appointment at Apollo is confirmed for 22 Sept, 4pm. Reply CANCEL to cancel."),
@@ -176,4 +192,7 @@ LEGIT = [
  ("service", "Fee payment reminder: semester fee due 30 Sept. Pay via the college ERP portal."),
  ("service", "Track your shipment at https://www.bluedart.com/tracking or in the app."),
  ("service", "Read the docs at https://developer.mozilla.org/en-US/docs/Web/Manifest"),
+ ("hindi", "नमस्ते, कल मीटिंग सुबह 10 बजे है। कृपया समय पर आएं।"),
+ ("hindi", "आपका ऑर्डर भेज दिया गया है। ऐप में ट्रैक करें।"),
+ ("hindi", "बिजली बिल 1,240 रुपये का भुगतान सफल रहा। रसीद ऐप में है।"),
 ]

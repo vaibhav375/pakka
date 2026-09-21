@@ -160,6 +160,38 @@ CASES = [
      "Your order has shipped. Track it at https://www.amazon.in/orders or in the app.",
      set()),
 
+    ("a bank alarm with the fix behind a link",
+     "SBI Bank: Unusual login detected from new device. Secure your account: http://verify-bank119.com",
+     {"UNUSUAL_LOGIN"}),
+
+    ("a government payout nobody applied for",
+     "PMO India: You are selected for Rs 86,200 grant under the scheme. Call 9812345670 to claim.",
+     {"GOVT_GRANT", "CALLBACK_NUMBER"}),
+
+    ("a stranger opening with flattery",
+     "Hi beautiful! I saw your profile. Want to chat? Reply YES to 9409249465",
+     {"ROMANCE_BAIT"}),
+
+    ("a brand name on a domain that is not theirs",
+     "Myntra: Exclusive 70% discount for you only! Shop now: http://myntra-fashion507.in",
+     {"LOOKALIKE_DOMAIN"}),
+
+    ("selected with no interview",
+     "Congratulations, you are selected without interview for the data entry post.",
+     {"NO_INTERVIEW"}),
+
+    ("account details to release a refund",
+     "Your refund of Rs 4,999 is approved. Share your bank account number and IFSC to receive it.",
+     {"BANK_DETAILS"}),
+
+    ("devanagari kyc scare",
+     "आपका केवाईसी अपडेट नहीं हुआ है। खाता ब्लॉक हो जाएगा। तुरंत इस लिंक पर क्लिक करें",
+     {"KYC_PANIC", "URGENCY", "BARE_LINK"}),
+
+    ("an ordinary hindi message, must stay clean",
+     "नमस्ते, कल मीटिंग सुबह 10 बजे है। कृपया समय पर आएं।",
+     set()),
+
     ("ordinary message, must stay clean",
      "Hi Vaibhav, this is Priya from the placement cell. Your Infosys interview is "
      "on Monday at 10am in Seminar Hall 2. Please carry two copies of your resume.",

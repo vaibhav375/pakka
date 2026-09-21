@@ -192,6 +192,24 @@
   "weight": 3
  },
  {
+  "id": "UNUSUAL_LOGIN",
+  "name": "An alarm about your account, with a link attached",
+  "why": "Banks do tell you about a new device. They do not put the fix behind a link in the message. The alarm is real, the link is the scam.",
+  "weight": 3
+ },
+ {
+  "id": "GOVT_GRANT",
+  "name": "A government payout you never applied for",
+  "why": "No ministry selects people for money by SMS. Every real scheme has an application you made and a portal you log into yourself.",
+  "weight": 3
+ },
+ {
+  "id": "ROMANCE_BAIT",
+  "name": "A stranger opening with flattery",
+  "why": "A profile you never posted, seen by someone who will move you to another app and then to money. It always starts as attention.",
+  "weight": 2
+ },
+ {
   "id": "LOAN_HARASSMENT",
   "name": "Loan-app style pressure",
   "why": "Threatening to contact your phonebook over a loan is illegal recovery practice, not a legitimate demand.",

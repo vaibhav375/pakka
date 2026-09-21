@@ -21,7 +21,7 @@ that inside the first hour while the money can still be frozen. It also writes
 a short reply you can send straight back to whoever forwarded the message to
 you, so you are not stuck trying to find the words.
 
-The check itself is thirty-six rules written in ordinary Python. No model gets a
+The check itself is thirty-nine rules written in ordinary Python. No model gets a
 vote. That means the same message always produces the same verdict, and every
 verdict can be explained line by line. The rules are generated into JavaScript
 at build time, so the whole check runs on your own device. Nothing you paste
@@ -112,7 +112,7 @@ check can never drift apart.
 
 Solo project, so all of it is mine.
 
-- The rules engine: thirty-six detection rules in Python with weights, quoted spans
+- The rules engine: thirty-nine detection rules in Python with weights, quoted spans
   and stated reasons, plus the advice and auto reply generator.
 - The test set, including the false positive cases that ordinary messages have
   to pass.

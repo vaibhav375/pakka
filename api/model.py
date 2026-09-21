@@ -90,7 +90,17 @@ def _hot_spans(text: str, heat: list[float], limit: int = 3) -> list[tuple[int, 
 
 
 def _word(c: str) -> bool:
-    return c.isalnum() or c == "_"
+    """ASCII word characters plus the Devanagari block.
+
+    Not str.isalnum(): a Hindi vowel sign is a combining mark, so isalnum()
+    says False and a highlight stops in the middle of a word, giving "ेट"
+    where the word is "अपडेट". The danda U+0964 sits inside the same block and
+    is punctuation, so it is excluded. web/model.js and the generated rules
+    evaluator use this definition character for character.
+    """
+    return ("A" <= c <= "Z" or "a" <= c <= "z" or "0" <= c <= "9"
+            or c == "_"
+            or ("\u0900" <= c <= "\u0963" or "\u0966" <= c <= "\u097f"))
 
 
 def _whole(text: str, a: int, b: int) -> tuple[int, int]:

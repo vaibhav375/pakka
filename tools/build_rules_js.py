@@ -93,7 +93,7 @@ window.pakkaNormalise = function (text) {{
 
 /* grow a span out to word edges, so a highlight never cuts "expired" into
    "expire" and a stranded "d" */
-const pakkaWord = (c) => !!c && /[A-Za-z0-9_]/.test(c);
+const pakkaWord = (c) => !!c && /[A-Za-z0-9_\u0900-\u0963\u0966-\u097F]/.test(c);
 function pakkaWholeWords(text, a, b) {{
   while (a > 0 && pakkaWord(text[a - 1]) && pakkaWord(text[a])) a -= 1;
   while (b < text.length && pakkaWord(text[b]) && pakkaWord(text[b - 1])) b += 1;

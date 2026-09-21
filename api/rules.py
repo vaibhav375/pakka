@@ -95,7 +95,17 @@ def normalise(text: str) -> tuple[str, list[int]]:
 
 
 def _word(c: str) -> bool:
-    return c.isalnum() or c == "_"
+    """ASCII word characters plus the Devanagari block.
+
+    Not str.isalnum(): a Hindi vowel sign is a combining mark, so isalnum()
+    says False and a highlight stops in the middle of a word, giving "ेट"
+    where the word is "अपडेट". The danda U+0964 sits inside the same block and
+    is punctuation, so it is excluded. web/model.js and the generated rules
+    evaluator use this definition character for character.
+    """
+    return ("A" <= c <= "Z" or "a" <= c <= "z" or "0" <= c <= "9"
+            or c == "_"
+            or ("\u0900" <= c <= "\u0963" or "\u0966" <= c <= "\u097f"))
 
 
 def _whole_words(text: str, a: int, b: int) -> tuple[int, int]:
@@ -150,7 +160,8 @@ RULES: tuple[Rule, ...] = (
         "— not your bank, not a delivery agent, not HR.",
         4,
         _p(r"(?:share|send|tell|give|provide|forward|confirm|read out)\s+(?:me\s+|us\s+|the\s+|your\s+)*\b(?:otp|cvv|pin|password|code)\b(?!\s*(?:is\s*)?\d{4,8})",
-           r"\b(?:apna|apne) otp\b", r"\botp\b .{0,15}(?:bhej|batao|bataiye|share kij)",
+           r"\b(?:apna|apne) otp\b", r"(?:अपना|अपनी)?\s*(?:ओटीपी|ओ\.?टी\.?पी)",
+           r"(?:पिन|पासवर्ड)\s*(?:बताइए|बताएं|भेजिए|शेयर)", r"\botp\b .{0,15}(?:bhej|batao|bataiye|share kij)",
            r"\b(?:otp|cvv|pin)\b.{0,25}(?:with (?:our|the|me|us)|to (?:our|the|me|us|verify))",
            r"what(?:'s| is) (?:your |the )?(?:otp|cvv|pin)\b",
            r"\bcvv\b.{0,20}(?:number|digits)", r"\bupi pin\b", r"\batm pin\b",
@@ -164,7 +175,8 @@ RULES: tuple[Rule, ...] = (
         _p(r"pay .{0,30}to (?:claim|release|receive|unlock)",
            r"(?:claim|release|receive) .{0,30}after (?:payment|paying)",
            r"processing charge .{0,20}refund", r"to receive your (?:prize|refund|winnings)",
-           r"pay .{0,25}(?:delivery|shipping|handling|courier) charge"),
+           r"pay .{0,25}(?:delivery|shipping|handling|courier) charge",
+           r"(?:फीस|शुल्क|पैसे|रकम).{0,20}(?:भेज|जमा|ट्रांसफर)"),
     ),
     Rule(
         "KYC_PANIC", "KYC or account-block scare",
@@ -172,10 +184,12 @@ RULES: tuple[Rule, ...] = (
         "phishing script in India right now.",
         3,
         _p(r"kyc .{0,25}(?:expire|pending|suspend|incomplete|not (?:done|updated))",
+           r"(?:needs?|requires?) .{0,20}kyc", r"immediate kyc",
            r"account .{0,30}(?:will be |has been )?(?:block|suspend|freeze|deactivat)",
            r"(?:update|complete|verify) .{0,20}kyc .{0,40}"
            r"(?:\bor\b|else|otherwise|to avoid|immediately|now|today|link|http|block|suspend|frozen)",
-           r"(?:account|khata|kyc).{0,30}(?:block|band) ho jayega", r"kyc update nahi"),
+           r"(?:account|khata|kyc).{0,30}(?:block|band) ho jayega", r"kyc update nahi", r"केवाईसी",
+           r"(?:खाता|अकाउंट).{0,20}(?:ब्लॉक|बंद|बाधित)"),
     ),
     Rule(
         "URGENCY", "Manufactured urgency",
@@ -187,8 +201,9 @@ RULES: tuple[Rule, ...] = (
            r"(?:with)?in\s+\d+\s*(?:hours?|hrs?|days?|minutes?)",
            r"expires? (?:today|tonight|soon)", r"immediately", r"hurry", r"\burgently\b",
            r"\bturant\b", r"\bjaldi\b", r"urgent hai",
+           r"तुरंत", r"जल्दी", r"अभी\s*(?:ही|करें)",
            r"\b(?:claim|collect|redeem|grab) (?:your |the |it )?(?:\w+ ){0,3}\bnow\b",
-           r"limited (?:slots?|seats?|offer)", r"only \d+ (?:slots?|seats?) left",
+           r"limited (?:slots?|seats?|offer|time|period)", r"only \d+ (?:slots?|seats?) left",
            r"before (?:you )?(?:lose|miss)", r"\b(?:click|claim|act|apply) (?:it |this |here |the link )?now\b"),
     ),
     Rule(
@@ -207,7 +222,8 @@ RULES: tuple[Rule, ...] = (
         _p(r"(?:rs\.?|₹)\s?[1-9]\d{3,}[^.]{0,30}(?:per day|/day|daily|per week)",
            r"earn (?:rs\.?|₹)\s?\d[\d,]*.{0,25}(?:from home|part[- ]?time|\d ?(?:hours?|hrs?))",
            r"\d ?(?:hours?|hrs?) (?:work )?daily.{0,25}(?:rs\.?|₹)\s?\d",
-           r"ghar baithe .{0,25}kama", r"(?:rupaye|rupay) (?:daily|roz|rozana)"),
+           r"ghar baithe .{0,25}kama", r"(?:rupaye|rupay) (?:daily|roz|rozana)",
+           r"घर बैठे.{0,25}कमा", r"(?:रोज|रोजाना|प्रतिदिन).{0,25}रुपये"),
     ),
     Rule(
         "PERSONAL_PAYMENT", "Money goes to a personal account",
@@ -240,7 +256,7 @@ RULES: tuple[Rule, ...] = (
         "\"This link\" is the whole address you are given.",
         1,
         _p(r"(?:click|tap|open)(?:ing)? (?:on )?(?:this|the|below|following|attached) link",
-           r"link (?:par|pe) click"),
+           r"link (?:par|pe) click", r"(?:इस|नीचे|दिए गए)\s*लिंक पर\s*क्लिक"),
     ),
     Rule(
         "CHAT_ONLY", "Exists only on WhatsApp or Telegram",
@@ -249,7 +265,8 @@ RULES: tuple[Rule, ...] = (
         1,
         _p(r"(?:contact|message|ping|dm|reach) (?:me |us )?(?:only )?on (?:whats ?app|telegram)",
            r"join (?:our )?telegram", r"whats ?app (?:only|me at)",
-           r"(?:whats ?app|telegram) par (?:contact|message|baat|kare)"),
+           r"(?:whats ?app|telegram) par (?:contact|message|baat|kare)",
+           r"(?:व्हाट्सएप|व्हाट्सऐप|टेलीग्राम).{0,20}(?:करें|कीजिए|संपर्क)"),
     ),
     Rule(
         "THREAT", "Threatens legal or police action",
@@ -285,6 +302,7 @@ RULES: tuple[Rule, ...] = (
         "they never ask you to call one to avoid disconnection tonight.",
         3,
         _p(r"electricity .{0,30}(?:disconnect|cut off|discontinue)",
+           r"बिजली.{0,30}(?:काट|कट|बंद)",
            r"power .{0,20}(?:will be )?disconnect", r"bill .{0,20}not updated.{0,30}disconnect"),
     ),
     Rule(
@@ -296,11 +314,13 @@ RULES: tuple[Rule, ...] = (
            r"\bkbc\b", r"lucky (?:winner|draw)",
            r"congratulations.{0,30}\b(?:won|winning|winner)\b.{0,50}"
            r"(?:\brs\.?\s*\d|₹|lakh|crore|lottery|lucky draw|prize|gift|iphone|mac ?book|laptop|\bcar\b|voucher|hamper)",
-           r"lottery lag gay", r"\bjeeta hai\b", r"(?:lakh|crore) rupaye jeet",
+           r"lottery lag gay", r"\bjeeta hai\b",
+           r"(?:लॉटरी|इनाम|लकी ड्रॉ)", r"बधाई.{0,30}(?:जीत|इनाम|लाख|करोड़)", r"(?:lakh|crore) rupaye jeet",
            r"\b(?:won|winning|win a)\b.{0,40}(?:iphone|mac ?book|laptop|smartphone|"
            r"scooter|\bcar\b|\bbike\b|gift (?:card|voucher|hamper)|voucher|cash prize|\bgift\b)",
            r"\bfree\b\s+(?:\w+\s+){0,2}(?:iphone|ipad|tablet|laptop|mac ?book|smartphone|"
-           r"\bphone\b|\btv\b|television|smart ?watch|airpods|headphones|\bcar\b|scooter|\bbike\b)"),
+           r"\bphone\b|\btv\b|television|smart ?watch|airpods|headphones|\bcar\b|scooter|\bbike\b|"
+           r"subscription|recharge|data pack|membership)"),
     ),
     Rule(
         "QR_SCAN", "A QR code to receive money",
@@ -335,8 +355,10 @@ RULES: tuple[Rule, ...] = (
         "The brand name is in the address but the domain is not theirs. Real "
         "organisations send you to their own domain, not a lookalike.",
         3,
-        _p(r"https?://[^\s]*\b(?:sbi|hdfc|icici|axis|kotak|paytm|phonepe|amazon|flipkart|"
-           r"netflix|irctc|epfo|uidai|income ?tax|indiapost)[-_][a-z0-9-]+\.",
+        _p(r"https?://[^\s]*\b(?:sbi|hdfc|icici|axis|kotak|pnb|canara|bob|rbi|lic|paytm|phonepe|"
+           r"amazon|flipkart|myntra|meesho|nykaa|bigbasket|swiggy|zomato|ola|uber|jio|airtel|"
+           r"\bvi\b|vodafone|bsnl|tata|netflix|irctc|epfo|uidai|income ?tax|indiapost)"
+           r"[-_][a-z0-9-]+\.",
            r"https?://[^\s]*\b(?:sbi|hdfc|icici|axis|paytm|phonepe|amazon|flipkart|netflix|"
            r"irctc|epfo|uidai)[^\s]*\.(?:xyz|info|top|online|site|club|icu|buzz|link|shop|tk|ml|ga|cf)\b",
            r"https?://[^\s]*\bhdfc-bank\b"),
@@ -371,6 +393,8 @@ RULES: tuple[Rule, ...] = (
         _p(r"(?:customer care|help ?line|support number|official number|toll ?free)"
            r"[^\d]{0,25}\b[6-9]\d{9}\b",
            r"\b[6-9]\d{9}\b[^\d]{0,25}(?:customer care|help ?line)",
+           r"call\s+(?:\+?91[- ]?)?[6-9]\d{9}\b.{0,30}(?:to |and )?"
+           r"(?:claim|verify|confirm|cancel|reverse|block|activate|process)",
            r"call (?:this|our|the above) number.{0,25}(?:to |and )?"
            r"(?:cancel|stop|block|verify|reverse|claim|confirm)"),
     ),
@@ -437,7 +461,8 @@ RULES: tuple[Rule, ...] = (
            r".{0,120}(?:send|transfer|urgent|money|pay\b|rs\.?\s?\d)",
            r"(?:lost|broke|damaged|changed) my phone.{0,80}(?:send|transfer|money|rs\.?\s?\d)",
            r"(?:mera|mere) naya number.{0,120}(?:bhej|rupaye|rupay|paise|transfer|urgent)",
-           r"purana phone (?:kho gaya|kharab)"),
+           r"purana phone (?:kho gaya|kharab)",
+           r"(?:मेरा|यह) नया नंबर.{0,80}(?:भेज|रुपये|पैसे|तुरंत)"),
     ),
     Rule(
         "STRANDED_PLEA", "Stranded somewhere and needs money now",
@@ -458,6 +483,38 @@ RULES: tuple[Rule, ...] = (
         "somewhere else.",
         3,
         _p(r"(?!x)x"),
+    ),
+    Rule(
+        "UNUSUAL_LOGIN", "An alarm about your account, with a link attached",
+        "Banks do tell you about a new device. They do not put the fix behind a "
+        "link in the message. The alarm is real, the link is the scam.",
+        3,
+        _p(r"(?:unusual|unauthori[sz]ed|suspicious|new device) (?:login|sign[- ]?in|access|activity)",
+           r"(?:login|sign[- ]?in) (?:detected|attempt).{0,40}(?:new|unknown|another) device",
+           r"secure your account.{0,40}https?://"),
+    ),
+    Rule(
+        "GOVT_GRANT", "A government payout you never applied for",
+        "No ministry selects people for money by SMS. Every real scheme has an "
+        "application you made and a portal you log into yourself.",
+        3,
+        _p(r"(?:pmo|prime minister|ministry|govt|government|\brbi\b)\b.{0,50}"
+           r"(?:selected|eligible|entitled|approved).{0,30}(?:grant|scheme|yojana|subsidy|fund)",
+           r"(?:selected|eligible|entitled) for .{0,25}(?:₹|rs\.?)\s?[\d,]+",
+           r"(?:pm|pradhan mantri) .{0,20}yojana.{0,40}(?:claim|apply|register|call)",
+           r"unclaimed (?:refund|amount|deposit|fund)"),
+    ),
+    Rule(
+        "ROMANCE_BAIT", "A stranger opening with flattery",
+        "A profile you never posted, seen by someone who will move you to "
+        "another app and then to money. It always starts as attention.",
+        2,
+        _p(r"(?:saw|liked|viewed) your (?:profile|photo|picture|pic)\b.{0,50}"
+           r"(?:chat|meet|reply|message|whats ?app)",
+           r"(?:single|hot|lonely) (?:women|men|girls|guys|ladies).{0,50}"
+           r"(?:waiting|near you|meet|chat|call)",
+           r"\b(?:hi|hey|hello) (?:beautiful|handsome|sexy|dear)\b.{0,70}"
+           r"(?:reply|chat|call|whats ?app|profile)"),
     ),
     Rule(
         "LOAN_HARASSMENT", "Loan-app style pressure",

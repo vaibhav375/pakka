@@ -83,13 +83,14 @@
     if (run) out.push(run);
     /* character n-grams end mid-word, and "ur KY" explains nothing to a
        person, so every span grows out to the words it sits inside */
-    const word = (c) => !!c && /[A-Za-z0-9_\u0900-\u097F]/.test(c);
+    const word = (c) => !!c && /[A-Za-z0-9_\u0900-\u0963\u0966-\u097F]/.test(c);
     const whole = ([a, b]) => {
       while (a > 0 && word(text[a - 1]) && word(text[a])) a -= 1;
       while (b < text.length && word(text[b]) && word(text[b - 1])) b += 1;
       return [a, b];
     };
     return out.sort((x, y) => y.w - x.w).slice(0, limit)
-              .map((r) => whole([r.a, r.b])).sort((x, y) => x[0] - y[0]);
+              .map((r) => whole([r.a, r.b]))
+              .sort((x, y) => x[0] - y[0] || x[1] - y[1]);
   };
 })();

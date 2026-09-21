@@ -27,7 +27,7 @@ So Pakka answers in sentences, points at the exact words, and gives you a link.
 
 ## How it decides
 
-**Thirty-six rules, in plain Python. No model gets a vote.**
+**Thirty-nine rules, in plain Python. No model gets a vote.**
 
 A scam verdict has to be identical every time and has to survive being explained
 to the person who nearly paid. A language model can do neither reliably, so the
@@ -68,10 +68,13 @@ in the message and say in one sentence why what it found is a problem.
 | 30 | A new number that needs money | 3 |
 | 31 | Stranded somewhere and needs money now | 2 |
 | 32 | A web address that is not the characters it appears to be | 3 |
-| 33 | Loan-app style pressure | 3 |
-| 34 | Guaranteed returns or a tips group | 3 |
-| 35 | Prepaid task or commission work | 3 |
-| 36 | Claims to be posted far away and cannot meet | 3 |
+| 33 | An alarm about your account, with a link attached | 3 |
+| 34 | A government payout you never applied for | 3 |
+| 35 | A stranger opening with flattery | 2 |
+| 36 | Loan-app style pressure | 3 |
+| 37 | Guaranteed returns or a tips group | 3 |
+| 38 | Prepaid task or commission work | 3 |
+| 39 | Claims to be posted far away and cannot meet | 3 |
 
 Weights add up to a score, the score picks a band. Ordinary messages have to come
 back clean — a checker that flags everything gets ignored, so a real placement-cell
@@ -276,6 +279,50 @@ decoded strings character for character against Python's.
 Meanwhile `https://www.amazon.in/orders` and `https://developer.mozilla.org/...`
 stay clean, which is the part that took the care.
 
+## Auditing the rulebook against somebody else's data
+
+A rulebook cannot answer two questions about itself: which shapes of fraud it
+does not cover, and which of its rules never fire on anything.
+
+```
+python3 tools/audit_rules.py
+```
+
+This runs the rules over `CloveAI/india-spam-sms` (20,010 rows, MIT licensed).
+That dataset is **templated, not collected**: its 5,951 spam rows share 41
+distinct skeletons, 0.7% unique. That makes it worthless for training or for
+any claim about accuracy, and genuinely useful for this, because 41 skeletons
+is an inventory of the shapes Indian SMS fraud takes. Every skeleton is counted
+once, so a template repeated 353 times does not vote 353 times.
+
+The first run covered **29 of 41 shapes**. The twelve it missed became four
+changes:
+
+| what was missing | what it became |
+|---|---|
+| "Unusual login detected from a new device. Secure your account: <link>" | a rule: banks do warn you about a new device, they do not put the fix behind a link |
+| "PMO India: you are selected for a grant", unclaimed tax refunds | a rule: no ministry selects people for money by SMS |
+| "Hi beautiful, I saw your profile" | a rule: it always starts as attention |
+| brand names on domains that are not theirs, a free *subscription*, "immediate KYC", "limited time" | widened patterns, including Indian brands the list had never heard of |
+
+Coverage is now **41 of 41**, with no new false positives on this project's own
+corpus. The audit also prints how often each rule fires across every message
+available, which is how `NO_INTERVIEW` and `BANK_DETAILS` were found to be
+untested rather than useless, and got test cases instead of deletion.
+
+The twelve "ordinary" messages the rules still flag are all the same template,
+and the dataset is wrong about them: `TATA Power: Bill for September is INR
+3723. Pay via UPI: 9447519896@ok8931909010` is a personal UPI handle. A real
+utility does not collect on one.
+
+**On Hindi.** The only Hindi SMS corpus available is a machine translation of
+the same English UCI set, and it is badly mangled: "Dakag बिंदु तक जाओ, पागल".
+Training on it would teach the model nonsense. So Hindi arrived as rules and
+corpus entries instead, in Devanagari as well as transliteration, and the
+normalisation and highlighting were fixed to handle it: a Hindi vowel sign is a
+combining mark, so `str.isalnum()` says False and a highlight stops mid-word,
+giving "ेट" where the word is "अपडेट".
+
 ## The model that sits beside the rules
 
 Rules have perfect precision on what they describe and no opinion at all about
@@ -397,7 +444,7 @@ browser JavaScript.
 
 ## What it does not do
 
-It does not detect scams it has never seen — thirty-six patterns are thirty-six
+It does not detect scams it has never seen — thirty-nine patterns are thirty-nine
 patterns, and a clean result says only that none of them fired. The page says so
 rather than implying safety. It reads English and Hinglish written in Latin
 script; Devanagari input is not handled yet. And it is not legal or financial
