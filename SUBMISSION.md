@@ -5,6 +5,8 @@ Copy these into the form. Tracks: Build It and Ship It.
 Project: Pakka, check before you pay
 GitHub: https://github.com/vaibhav375/pakka
 Live: https://main.d1nvlrv96k8kj1.amplifyapp.com/
+Telegram: @pakka_check_bot, message it anything
+WhatsApp: live on Twilio's sandbox, join code in the demo
 
 ---
 
@@ -21,6 +23,14 @@ pay, do not share the OTP, report it at cybercrime.gov.in or call 1930, and do
 that inside the first hour while the money can still be frozen. It also writes
 a short reply you can send straight back to whoever forwarded the message to
 you, so you are not stuck looking for the words.
+
+You do not have to open the page to get that answer. The scam arrives in a
+chat, and copying it out, opening a browser and pasting it is four things to do
+while somebody is rushing you, which is the moment you are least able to do
+them. So the same verdict comes back in the thread the message was already in:
+message @pakka_check_bot on Telegram, or forward it to the WhatsApp number. On
+Android the site also registers as a share target, so a message can be
+long-pressed and shared to Pakka from inside WhatsApp itself with no bot at all.
 
 There are three things doing the checking, and the order matters.
 
@@ -156,8 +166,11 @@ Solo project, so all of it is mine.
 - The front end: offline-first scanning, the verdict card, the rule
   constellation, and an Android share target so the site appears in WhatsApp's
   own share sheet.
-- A Telegram bot and a WhatsApp Cloud API webhook, both with signature
-  verification.
+- Three chat front doors, all sharing one reply writer and differing only in
+  plumbing: a Telegram bot, WhatsApp through Twilio's sandbox, and a Meta
+  WhatsApp Cloud API webhook. All three verify that a request really came from
+  who it claims, and all three are tested end to end with the network stubbed
+  out. The first two are live.
 - The test suites, the labelled corpus, the evaluation harness and the rule
   audit.
 - Documentation and the demo.
