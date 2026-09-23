@@ -10,6 +10,8 @@ Built at **First Commit (AWS × WeMakeDevs)**, 17–20 September 2026.
 
 ---
 
+**New here?** [GUIDE.md](GUIDE.md) explains the whole thing from scratch: what it does in plain language, then every technical piece down to why the model is linear and how two copies of the rules are kept honest.
+
 ## The problem
 
 My mother forwards me messages to check. So do my juniors, about PG listings and
