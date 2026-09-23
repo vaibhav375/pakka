@@ -58,7 +58,8 @@ textarea::placeholder{color:var(--dim)}
     transition:transform .18s cubic-bezier(.2,.8,.2,1),filter .18s}
 .go:hover:not(:disabled){transform:translateY(-2px);filter:brightness(1.08)}
 .go:active:not(:disabled){transform:translateY(0)}
-.go:disabled{opacity:.45;cursor:default}
+.go:disabled{background:none;color:var(--dim);box-shadow:inset 0 0 0 1px var(--line);
+             opacity:1;cursor:default}
 .go:focus-visible,textarea:focus-visible,.chip:focus-visible{outline:2px solid var(--acid);outline-offset:3px}
 .chips{display:flex;gap:9px;flex-wrap:wrap;margin-top:18px}
 .chip{background:none;border:1px solid var(--line);color:var(--muted);border-radius:99px;
@@ -102,7 +103,7 @@ mark.lit{background:rgba(255,93,71,.16);color:#ffd9d2;box-shadow:inset 0 -1px 0 
 .copy:hover{border-color:var(--acid);color:var(--acid)}
 
 /* ---------- lower sections ---------- */
-section.pad{padding:100px 0;border-top:1px solid var(--line)}
+section.pad{padding:88px 0;border-top:1px solid var(--line)}
 h2{font-size:clamp(30px,5vw,60px);line-height:1;letter-spacing:-.035em;margin:22px 0 16px;font-weight:700}
 .sub{color:var(--muted);max-width:60ch}
 .grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(255px,1fr));gap:1px;background:var(--line);
@@ -349,3 +350,23 @@ mark.hunch-mark{background:rgba(198,255,61,.14);color:#e8ffc4;
 html[lang="hi"] .mono,
 html[lang="hi"] .lang{letter-spacing:0;text-transform:none}
 html[lang="hi"] .vlabel{letter-spacing:-.01em}
+
+/* Every section was a column of text down the left with the right half empty.
+   The heading and its opening line now sit side by side, so the block uses the
+   measure it was given and the page reads as composed rather than sparse.
+   Everything after them still spans the full width. */
+section.pad > .shell{display:grid;grid-template-columns:1.1fr .9fr;
+                     column-gap:56px;align-items:start}
+section.pad > .shell > *{grid-column:1 / -1}
+section.pad > .shell > h2{grid-column:1;margin-bottom:0}
+section.pad > .shell > h2 + p{grid-column:2;align-self:end;margin-top:0;
+                              padding-bottom:6px;max-width:44ch}
+@media (max-width:900px){
+  section.pad > .shell{display:block}
+  section.pad > .shell > h2 + p{max-width:none;padding-bottom:0;margin-top:18px}
+}
+
+/* the rulebook grid paints its hairlines with a background behind 1px gaps, so
+   an incomplete last row shows as a shaded phantom block. The fillers are
+   added in app.js, recounted whenever the column count changes. */
+.rulecard.blank{background:var(--ground);min-height:0;pointer-events:none}

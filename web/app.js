@@ -763,3 +763,32 @@ function hunch(text, verdict) {
   document.addEventListener('pakka:lang', paint);
   paint();
 })();
+
+/* ---------- finish the last row of the rulebook ----------
+
+   The grid draws its hairlines as a background behind 1px gaps, which is neat
+   until the last row is short: the leftover cells show that background and
+   read as a shaded block somebody forgot to fill. */
+(() => {
+  const grid = document.getElementById('rulegrid');
+  if (!grid) return;
+  const fill = () => {
+    grid.querySelectorAll('.rulecard.blank').forEach((el) => el.remove());
+    const real = grid.querySelectorAll('.rulecard').length;
+    const cols = getComputedStyle(grid).gridTemplateColumns.split(' ').filter(Boolean).length;
+    if (!cols || !real) return;
+    const short = (cols - (real % cols)) % cols;
+    for (let i = 0; i < short; i++) {
+      const d = document.createElement('div');
+      d.className = 'rulecard blank';
+      d.setAttribute('aria-hidden', 'true');
+      grid.appendChild(d);
+    }
+  };
+  /* the cards are rendered by another block, so wait for them to exist */
+  const ready = setInterval(() => {
+    if (grid.querySelector('.rulecard')) { clearInterval(ready); fill(); }
+  }, 120);
+  setTimeout(() => clearInterval(ready), 6000);
+  addEventListener('resize', fill, { passive: true });
+})();
