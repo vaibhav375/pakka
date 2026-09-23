@@ -407,7 +407,7 @@ Four combinations, and each says something different:
 
 ---
 
-# Part six: where it runs
+# Part six: where it runs, and what each AWS piece actually does
 
 Everything is in **ap-south-1, Mumbai**, because the people using this are in
 India and their messages should not leave the country to be checked.
@@ -417,37 +417,287 @@ India and their messages should not leave the country to be checked.
         |
         |  the whole check already ran here, offline
         |
-        v  (only when you press Share)
+        v  (only when you press Share, or a bot receives a message)
   Lambda Function URL  ──>  Lambda (Python 3.12)  ──>  DynamoDB
         ^                        |                     (30-day TTL)
         |                        v
   Telegram / Twilio         CloudWatch Logs
 ```
 
-**Why each choice:**
+Six services. Here is what each one is, what it does here, and why it was
+chosen over the obvious alternative.
 
-- **Lambda, not EC2.** Traffic for a tool people open only when something looks
-  wrong is spiky and mostly zero. Paying for a server by the hour is the wrong
-  shape.
-- **Function URL, not API Gateway.** All this needs is one public HTTPS
-  endpoint with CORS. Function URLs carry no additional charge; the API Gateway
-  free tier expires after twelve months.
-- **DynamoDB provisioned at 1 read and 1 write unit**, which sits inside the
-  always-free 25 of each, so the cost is certain rather than hopeful.
-- **A 30-day TTL on every item.** A saved scan is evidence for the person who
-  nearly paid, not an archive anyone has business keeping. TTL is one attribute
-  name in a settings panel, which replaces a cleanup job you would otherwise
-  write, schedule, monitor and eventually get wrong.
-- **Amplify Hosting** serves the front end straight from GitHub with no build
-  step, so build minutes stay at zero and nothing can fail at deploy time.
-- **CloudWatch Logs** is the only reason any of it got working. Every 502 named
-  itself in a traceback.
+## What "serverless" actually means here
 
-The same handler also runs with **no AWS account at all**: storage falls back to
-a local JSON file, and `python3 api/local_server.py` wraps the Lambda handler in
-a standard-library HTTP server with nothing to install.
+There is no machine that belongs to this project. Nothing is running right now.
 
----
+When a request arrives, AWS finds a spare slot on a machine it already has,
+unzips a 90 KB bundle of Python into it, runs one function, sends the answer
+back, and eventually throws the slot away. Between requests, nothing exists and
+nothing is billed.
+
+That is either a brilliant fit or a terrible one depending on the shape of your
+traffic. For a tool people open **only when something looks wrong**, traffic is
+spiky and mostly zero. A server rented by the hour would sit idle almost all the
+time and still cost money every hour. That is the whole argument.
+
+## AWS Lambda: the code
+
+**What it is.** A service that runs a single function in response to an event.
+You hand it a zip file and the name of a function inside it. AWS handles
+machines, scaling, patching and restarts.
+
+**What it does here.** `api/handler.py` contains one function:
+
+```python
+def lambda_handler(event, context=None):
+```
+
+`event` is a dictionary describing the HTTP request: method, path, headers,
+query string, body. Everything in this project comes in through that one
+function, which reads the path and decides what to do:
+
+| path | what happens |
+|---|---|
+| `POST /scan` | scan a message, save the verdict, return it with an id |
+| `GET /v/{id}` | fetch a saved verdict, for whoever you sent the link to |
+| `POST /telegram` | a Telegram message, answered in the same chat |
+| `POST /twilio` | a WhatsApp message, answered in the HTTP response itself |
+| `GET /whatsapp` | Meta's one-time webhook verification handshake |
+| `GET /` | a health check that reports how many rules are loaded |
+
+**Settings that matter, and what they cost you if wrong:**
+
+- **Runtime Python 3.12**, memory **256 MB**, timeout **10 seconds**. The
+  defaults are 128 MB and **3 seconds**, and the 3 seconds is a trap: a hello
+  world fits inside it, but a first DynamoDB call on a cold start does not. It
+  surfaces as `Internal Server Error` with an empty body and no hint that time
+  was the problem.
+- **Handler string** must be `handler.lambda_handler` — the filename, then the
+  function name. The console creates functions expecting
+  `lambda_function.lambda_handler`, and uploading a zip does **not** update it,
+  which produces a 502 with a completely empty body.
+
+**Cold starts, and the one trick worth knowing.** The first request into a new
+slot pays for unzipping and importing. That phase is called **init**, and it has
+two useful properties: it gets more CPU than the request itself, and it is
+**not billed**. So anything expensive that can happen at import time should:
+
+```python
+# api/store.py — at module level, not inside the request
+_ddb = boto3.resource("dynamodb", config=Config(
+    connect_timeout=3, read_timeout=3, retries={"max_attempts": 2}))
+```
+
+Building the DynamoDB client inside the request handler instead of at import
+was a real bug here: the first scan after an idle period ran out of time and
+came back without a share link, while every scan after it worked. Moving one
+line up a scope fixed it.
+
+**What it costs.** One million requests a month are always free, plus 400,000
+GB-seconds of compute. At 256 MB and ~80 ms a scan, this project would need
+roughly twenty million scans a month to leave the free tier.
+
+## Lambda Function URLs: the front door
+
+**What it is.** A permanent HTTPS address attached directly to a Lambda
+function. You get something like
+`https://<id>.lambda-url.ap-south-1.on.aws/`, and anything posted to it invokes
+the function.
+
+**What it does here.** It is the entire API. The page calls it to mint a share
+link, and Telegram and Twilio call it with incoming messages.
+
+**Why not API Gateway**, which is what every tutorial reaches for. API Gateway
+is a full HTTP router with stages, deployments, request validation, throttling
+and usage plans. This project needs exactly one public endpoint with CORS.
+Function URLs carry **no additional charge**, while the API Gateway free tier
+expires after twelve months — so a project meant to stay free forever would
+start costing money in year two for a feature it never used.
+
+**Two things that will bite you:**
+
+- **The default auth is `AWS_IAM`.** You create a Function URL, whose entire
+  purpose is to make a function publicly reachable, and the default makes it
+  unreachable. Calling it returns `{"Message":"Forbidden"}` with no mention of
+  authentication, no mention of the setting and no link. It has to be set to
+  `NONE` for a public endpoint.
+- **CORS stacks.** If you configure CORS on the Function URL, AWS adds the
+  headers itself. If your code also adds them, every response goes out with
+  `Access-Control-Allow-Origin: *, *`, which every browser rejects. The evil
+  part is how it fails: `curl` is perfectly happy and only the actual web page
+  breaks. The code here only adds CORS headers when it detects it is *not*
+  inside Lambda:
+
+```python
+IN_LAMBDA = bool(os.environ.get("AWS_LAMBDA_FUNCTION_NAME"))
+CORS = {} if IN_LAMBDA else {"Access-Control-Allow-Origin": "*", ...}
+```
+
+## Amazon DynamoDB: the saved verdicts
+
+**What it is.** A managed key-value and document database. You do not run a
+server, you do not write SQL, and you do not manage indexes unless you want
+them. You give each item a **partition key**, and you fetch items by that key.
+
+**What it does here.** One table, `pakka-scans`, partition key `id`. A scan is
+written as a single item: the message, the score, the band, the findings, the
+advice, and an expiry timestamp. `GET /v/{id}` reads one item by key. There are
+no queries, no scans, no secondary indexes — the access pattern is literally
+"give me this one id", which is exactly what DynamoDB is best at.
+
+**Provisioned at 1 read unit and 1 write unit.** DynamoDB has two billing
+modes. On-demand charges per request and needs no thinking. Provisioned reserves
+capacity, and the always-free tier includes **25 read units and 25 write units
+forever**. Setting 1 and 1 means the cost is not just low, it is *certainly*
+zero, which matters more than optimal for a free tool. One write unit is one
+write per second of an item up to 1 KB — plenty for a tool nobody is using at
+scale yet, and if it were exceeded the write fails and the code already handles
+that by returning the verdict without a link.
+
+**Time to live, which is the best thing in this stack.** Under
+Settings → Time to live you name one attribute. Here it is `expires_at`. Write
+a Unix timestamp into it, and DynamoDB deletes the item after that time, for
+free, in the background.
+
+```python
+item["expires_at"] = int(time.time()) + 30 * 24 * 3600
+```
+
+Why this matters beyond convenience: this table holds **other people's private
+messages**. A saved scan is evidence for the person who nearly paid, not an
+archive anybody has business keeping. Data that expires by default is the right
+shape, and TTL turns that from a cleanup job you would write, schedule, monitor
+and eventually get wrong into one attribute name in a settings panel.
+
+**The gotcha.** boto3 returns DynamoDB numbers as `Decimal`, which
+`json.dumps` refuses to serialise. So the very first thing anyone does with a
+stored item — hand it back as JSON — throws a `TypeError` from inside the
+standard library, nowhere near the DynamoDB call. The fix:
+
+```python
+def _plain(value):
+    if isinstance(value, decimal.Decimal):
+        return int(value) if value == value.to_integral_value() else float(value)
+    raise TypeError(...)
+
+json.dumps(body, default=_plain)
+```
+
+## AWS Amplify Hosting: the website
+
+**What it is.** Static site hosting wired to a git repository, with a CDN in
+front and HTTPS included. Push to a branch and it redeploys.
+
+**What it does here.** It serves `web/` at
+`https://main.d1nvlrv96k8kj1.amplifyapp.com/`. The configuration is one file in
+the repo:
+
+```yaml
+# amplify.yml
+frontend:
+  phases:
+    build:
+      commands: []          # nothing to compile
+  artifacts:
+    baseDirectory: web
+```
+
+**Why the empty build step is deliberate.** There is no bundler, no framework,
+no transpiler. The front end is HTML, CSS and JavaScript that browsers already
+understand. That means build minutes stay at zero, there is nothing to keep
+up to date, and **nothing that can fail at deploy time**. The generated files
+(`rules.generated.js`, `model.generated.js`) are generated on a laptop and
+committed, so what is in git is exactly what ships.
+
+## Amazon CloudWatch Logs: how anything got fixed
+
+**What it is.** Wherever Lambda's output goes. Every `print()` and every
+uncaught traceback lands in a **log group** named `/aws/lambda/<function>`,
+split into **log streams**, one per execution environment.
+
+**What it does here.** It is the only reason this project works. Every problem
+described in this part — the 403, the empty 502, the timeout, the doubled CORS
+header — named itself in a traceback. The moment I stopped guessing and started
+reading the log group, each one took a couple of minutes instead of twenty.
+
+The handler is built to cooperate with it. An uncaught exception in Lambda
+becomes a bare 502 with an empty body, which tells the caller nothing and the
+developer less. So it is caught, logged, and answered in the same JSON shape as
+everything else:
+
+```python
+try:
+    return _route(event)
+except Exception as exc:
+    traceback.print_exc()                        # -> CloudWatch
+    return _reply(500, {"error": "Something broke handling that.",
+                        "detail": f"{type(exc).__name__}: {exc}"[:300]})
+```
+
+That `detail` field is the difference between "it's broken" and knowing which
+line broke, without opening the console at all.
+
+## AWS IAM: permissions
+
+**What it is.** Identity and Access Management — who is allowed to do what.
+
+**What it does here.** The Lambda has an **execution role**, which is the
+identity the function assumes while it runs. That role grants exactly two kinds
+of thing: write to its own CloudWatch log group, and read/write **one** DynamoDB
+table. It cannot touch any other table, cannot create resources, cannot read
+secrets. If the function were ever compromised, the blast radius is one table
+of expiring scans.
+
+This is the principle worth stating out loud: **a function should hold the
+smallest set of permissions that lets it do its job**, because permissions are
+the only thing standing between a bug and a breach.
+
+## AWS SAM: the whole stack as one file
+
+**What it is.** The Serverless Application Model — an extension of
+CloudFormation, AWS's infrastructure-as-code service. You describe what you
+want in YAML and AWS builds it.
+
+**What it does here.** `template.yaml` describes the function, the table, the
+TTL attribute, the Function URL and its CORS configuration, and the parameters
+for the chat integrations. That matters for two reasons. Anyone can deploy their
+own copy of this from that one file, and any change to the infrastructure is
+reviewable in a pull request instead of being a thing somebody once clicked in
+a console and cannot remember.
+
+## What a single request actually costs
+
+At a thousand scans a month, all of it is inside the free tier — and most of
+those thousand never touch AWS at all, because the check runs on the device and
+the cloud is only involved when somebody presses Share.
+
+At a hundred thousand, Lambda invocations are still free, Amplify is still
+serving static files from a CDN, CloudWatch is inside its 5 GB, and the only
+line that starts costing anything is the DynamoDB writes.
+
+## And the part that is not AWS at all
+
+The same handler runs with **no AWS account whatsoever**. `api/store.py` falls
+back to a local JSON file when `PAKKA_TABLE` is unset, and
+`python3 api/local_server.py` wraps the identical Lambda handler in a
+standard-library HTTP server:
+
+```python
+result = lambda_handler({
+    "httpMethod": method,
+    "path": parsed.path,
+    "queryStringParameters": {...},
+    "headers": {...},
+    "body": body,
+})
+```
+
+That file exists to guarantee that what runs on a laptop is the code that runs
+in production rather than a sibling of it — and it earned its keep: it was once
+passing the path with the query string still attached and never building
+`queryStringParameters`, so a route matched on Lambda and missed locally. That
+is precisely the drift it exists to prevent, and finding it was the point.
 
 # Part seven: the four front doors
 
