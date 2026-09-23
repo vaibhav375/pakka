@@ -10,7 +10,7 @@ Built at **First Commit (AWS × WeMakeDevs)**, 17–20 September 2026.
 
 ---
 
-**New here?** [GUIDE.md](GUIDE.md) explains the whole thing from scratch: what it does in plain language, then every technical piece down to why the model is linear and how two copies of the rules are kept honest, and what every AWS service in here actually does. There is a print version in [Pakka - Explained.pdf](Pakka%20-%20Explained.pdf), rebuildable with `sh tools/make_guide_pdf.sh`.
+**New here?** [GUIDE.md](GUIDE.md) walks the whole thing through in the order it happens: the problem, the architecture, then each stage of the pipeline with what it does, how to explain it, and what is going on underneath. It covers what every AWS service in here actually does, how the numbers were measured, and what is weak. Print version: [Pakka - Explained.pdf](Pakka%20-%20Explained.pdf).
 
 ## The problem
 

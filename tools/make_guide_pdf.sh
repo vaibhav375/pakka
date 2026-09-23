@@ -20,11 +20,24 @@ css = pathlib.Path("tools/guide-pdf.css").read_text()
 (out / "guide.html").write_text(body.replace("</head>", f"<style>\n{css}\n</style>\n</head>", 1))
 PY
 
-node -e '
+# playwright is a dev-only dependency and may live in an npx cache rather than
+# beside this repo, so find it rather than assuming
+PW=$(node -e 'try{console.log(require.resolve("playwright"))}catch(e){}' 2>/dev/null)
+if [ -z "$PW" ]; then
+  PW=$(find "$HOME/.npm/_npx" "$HOME/node_modules" -maxdepth 4 -type d -name playwright 2>/dev/null | head -1)
+  [ -n "$PW" ] && NODE_PATH=$(dirname "$PW") && export NODE_PATH
+fi
+if ! node -e 'require("playwright")' 2>/dev/null; then
+  echo "playwright not found. Install it with: npm i -g playwright" >&2
+  exit 1
+fi
+
+PAKKA_OUT="$OUT" node -e '
 const { chromium } = require("playwright");
-const out = process.argv[2];
+const out = process.env.PAKKA_OUT;
 (async () => {
-  const b = await chromium.launch();
+  const exe = process.env.PAKKA_CHROME || undefined;
+  const b = await chromium.launch(exe ? { executablePath: exe } : {});
   const p = await b.newPage();
   await p.goto("file://" + out + "/guide.html", { waitUntil: "networkidle" });
   await p.emulateMedia({ media: "print" });
@@ -34,5 +47,5 @@ const out = process.argv[2];
     footerTemplate: `<div style="width:100%;font-family:Times New Roman,serif;font-size:8pt;color:#888;padding:0 17mm;display:flex;justify-content:space-between"><span>Pakka, explained</span><span class="pageNumber"></span></div>` });
   await b.close();
 })();
-' -- "$OUT"
+'
 echo "wrote Pakka - Explained.pdf"
