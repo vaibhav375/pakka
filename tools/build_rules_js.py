@@ -37,8 +37,9 @@ advice = {
 }
 
 OUT.write_text(f"""/* Generated from api/rules.py by tools/build_rules_js.py — do not edit.
-   Running the check here means the message never leaves the device unless the
-   person presses Share. */
+   Running the check here means the message never leaves the device until the
+   person asks for something that needs the server: a link, the deeper check,
+   or reading a screenshot. Each of those is a button. */
 window.PAKKA_RULES = {json.dumps(rules, indent=2, ensure_ascii=False)};
 window.PAKKA_ADVICE = {json.dumps(advice, indent=2, ensure_ascii=False)};
 window.PAKKA_BANDS = {json.dumps(bands)};

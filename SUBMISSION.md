@@ -32,11 +32,14 @@ message @pakka_check_bot on Telegram, or forward it to the WhatsApp number. On
 Android the site also registers as a share target, so a message can be
 long-pressed and shared to Pakka from inside WhatsApp itself with no bot at all.
 
-There are three things doing the checking, and the order matters.
+There are four things doing the checking, and the order matters.
 
-Forty-seven rules written in ordinary Python decide the verdict. No model gets
-a vote there, which means the same message always produces the same answer and
-every answer can be explained line by line.
+Seventy-seven rules written in ordinary Python decide the verdict. Nothing
+overrules them, which means the same message always produces the same answer
+and every answer can be explained line by line. They match the shape of a scam
+rather than its vocabulary: a prize scam swaps its prize every week, so the
+rule looks for *something good offered, with a link to collect it* and never
+reads what the prize actually is.
 
 A linear model trained on 5,700 labelled messages sits underneath them. Rules
 have perfect precision on what they describe and no opinion at all about
@@ -52,9 +55,26 @@ xn--80ak6aa92e.com is displayed in the address bar as something else entirely.
 Those are properties of the characters, so a separate module answers them and
 reports the reason in words.
 
-All of it runs on the device. The rules are generated from Python into
-JavaScript, and the model is 789 numbers, twelve kilobytes. Nothing you paste
-ever leaves your phone unless you choose to create a shareable link.
+And when none of those has an opinion — a message with no reward framing, no
+link and nothing to quote — there is a fourth layer: a check on Amazon Bedrock,
+asked only when the rules scored under 2. It can raise a verdict to "be
+careful" and can never lower one or clear one, it stops short of the top band
+because "do not pay, this line here is why" is a sentence only a rule can
+carry, and its answer is thrown away unless it quotes the message word for
+word. A message telling it to say everything is fine therefore has nothing to
+win.
+
+The rules and the model run on the device. The rules are generated from Python
+into JavaScript, and the model is 789 numbers, twelve kilobytes. Nothing you
+paste leaves your phone until you ask for something that needs the server: a
+shareable link, the deeper check, or reading a screenshot. Each of those is a
+button, and the button says what it does before you press it.
+
+Screenshots matter because that is how these actually arrive — people
+screenshot the SMS and forward the picture. Send one and the words are read out
+of it, put back in front of you so you can see whether the reading was right,
+and then checked by the same rules as anything else. An instruction written
+inside the picture becomes text and gets scanned, not obeyed.
 
 ## 1b. What problem does it solve, and who is it for?
 
@@ -108,14 +128,37 @@ I have any business keeping.
 static with no build step, so build minutes stay at zero and every push
 redeploys it.
 
+**Amazon Bedrock** does the two jobs that cannot be done with a pattern: the
+check on messages no rule matched, and reading the text out of a screenshot.
+Both call Bedrock in ap-south-1 with a plain on-demand model id rather than a
+cross-region inference profile, deliberately — a profile would route the
+message out of the region, and keeping it in India is the whole reason the
+stack is in Mumbai. Both are off unless a model id is configured, and neither
+ever runs in the background: the check only fires on messages that scored under
+2 and only when somebody presses the button, and a picture is only read when
+somebody sends one.
+
+I looked at Textract first, since OCR is what it is for. It cannot read
+Devanagari, which rules out the half of this corpus that matters most, and the
+Bedrock model already wired up for the check above reads Hindi screenshots
+fine — so one service does both and nothing new joins the architecture.
+
 **Amazon CloudWatch Logs** carried every traceback, and it is the only reason I
 got the thing working at all.
 
-**AWS IAM** for an execution role scoped to that one table.
+**AWS IAM** for an execution role scoped to that one table, plus
+`bedrock:InvokeModel` on exactly one model ARN, added by a CloudFormation
+condition so the permission does not exist at all when no model is configured.
 
 On cost: at a thousand scans a month the whole stack stays inside the free
 tier. At a hundred thousand, the Lambda invocations are still free and the only
 line that starts costing anything is the DynamoDB writes.
+
+Bedrock is the exception and it is not free tier, which is why both paths are
+gated rather than automatic. The gating is a design decision before it is a
+cost one — the deeper check is worth nothing on a message the rules already
+explained, and sending every message to a model would have broken the promise
+the front page makes.
 
 ### Build it: AWS open source stack
 
@@ -139,17 +182,19 @@ boto3.
 
 Everything generated is checked. `tools/build_rules_js.py` emits the browser
 copy of the rules from the Python source and `tools/train_model.py` emits the
-model, and `tools/check_parity.py` runs 155 messages through both languages and
+model, and `tools/check_parity.py` runs 208 messages through both languages and
 compares the score, the band, the rule ids, the reason text, the normalised
 text, every highlighted phrase and every model probability. It is currently
-155 out of 155, which includes Hindi in Devanagari.
+208 out of 208, which includes Hindi in Devanagari.
 
 ## 3. Team leader's contributions
 
 Solo project, so all of it is mine.
 
-- The rules engine: forty-seven detection rules with weights, quoted spans and
-  stated reasons, plus the advice and the auto-generated reply.
+- The rules engine: seventy-seven detection rules with weights, quoted spans
+  and stated reasons, plus the advice and the auto-generated reply. The newest
+  thirty match the shape of a scam rather than its vocabulary, after testing
+  showed the old prize rules could be defeated by swapping one noun.
 - The text normaliser, which undoes the tricks scam messages use to get past
   filters: letters spaced out, an O typed as a zero, an accent on a vowel, with
   an index map so highlights still line up with what was pasted.
@@ -171,6 +216,16 @@ Solo project, so all of it is mine.
   WhatsApp Cloud API webhook. All three verify that a request really came from
   who it claims, and all three are tested end to end with the network stubbed
   out. The first two are live.
+- The Bedrock layer: the boundary that decides when it is asked at all, the cap
+  that stops it reaching the top band, the quote check that discards anything
+  it cannot point at in the message, and the screenshot reading that feeds the
+  same rules. Both are tested with the Bedrock call stubbed, so the suite runs
+  with no AWS account.
+- Finding and fixing a privacy bug of my own making: the page had been posting
+  every message to the API on every check, to mint a share link nobody had
+  asked for, while the front page said nothing left the device unless you chose
+  to share. Links are now minted on request, and everything that needs the
+  server asks first.
 - The test suites, the labelled corpus, the evaluation harness and the rule
   audit.
 - Documentation and the demo.
@@ -251,17 +306,24 @@ did the first time.
 
 ## 6. Anything else
 
-Two things I would want a judge to look at, because they are the parts I am
+Three things I would want a judge to look at, because they are the parts I am
 least able to fake.
 
 **The evaluation is in the repository and it reports its own weaknesses.**
-`python3 tools/eval.py` runs 155 labelled messages, 93 fraud across twenty-two
-families and 62 legitimate ones chosen to be hard: real bank OTP alerts, a real
+`python3 tools/eval.py` runs 208 labelled messages, 127 fraud across forty-two
+families and 81 legitimate ones chosen to be hard: real bank OTP alerts, a real
 RBI KYC reminder, delivery notifications with OTPs in them, recruiters,
 marketing full of urgency words, and friends talking about money. It currently
-catches 93 of 93 and raises zero false positives. It also says plainly in the
-README that I wrote the test set, which will always flatter the rules, and that
-real forwards would help more than anything else.
+catches 127 of 127, all of them clearly, and raises zero false positives. It
+also says plainly in the README that I wrote the test set, which will always
+flatter the rules, and that real forwards would help more than anything else.
+
+Eighteen of the legitimate messages are there specifically to catch me out:
+each is the near-twin of a rule I had just written. A real income-tax refund
+notice beside the fake one. A real credit-limit increase beside the card scam.
+A PhonePe referral offer beside the pyramid pitch. Four of my own new patterns
+fired on those while I was writing them, and each one got narrowed until it
+stopped. That is the half of the work nobody sees.
 
 **I audited the rulebook against somebody else's data.**
 `python3 tools/audit_rules.py` runs the rules over an external Indian SMS corpus
@@ -269,9 +331,19 @@ from Hugging Face. That dataset turns out to be templated rather than collected,
 5,951 spam rows sharing 41 distinct skeletons, which makes it useless for
 training and genuinely useful as an inventory of shapes. The first run covered
 29 of 41. The twelve misses became three new rules and several widened patterns,
-and coverage is now 41 of 41 with no new false positives. The audit also prints
-how often each rule fires, which is how two rules were found to be untested
-rather than useless.
+and coverage is now 41 of 41. Re-running it after adding thirty rules is also
+how I caught one of them flagging a genuine Income Tax refund notice: it fired
+on "has been processed", which is exactly what a real one says. It flags 12 of
+1,782 ordinary shapes, and all twelve are a template the dataset itself has
+mislabelled — a utility bill collecting on a personal UPI handle, which no real
+utility does.
+
+**The model never gets the last word, and I can show you where that is
+enforced.** `python3 api/test_llm.py` asserts that a verdict the rules reached
+cannot be lowered by anything, that a model answer which does not quote the
+message is discarded, and that a message telling the model to call itself safe
+changes nothing. That is the test I would open first if I were reviewing this,
+because an LLM bolted onto a safety tool is usually where the safety goes.
 
 The honest limitation: every number above is measured on messages I wrote or on
 templates somebody generated. Forty real forwards would change that, and it is
