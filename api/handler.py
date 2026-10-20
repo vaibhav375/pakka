@@ -24,6 +24,7 @@ import pathlib
 
 sys.path.insert(0, str(pathlib.Path(__file__).parent))
 
+import llm
 import model as linear_model
 import store
 import telegram
@@ -79,6 +80,14 @@ def scan(text: str) -> dict:
         record["model"] = linear_model.score(text)
     except Exception:
         traceback.print_exc()
+    # only where the rules found nothing or one small thing, and only when a
+    # model is configured. The band may move up to "Be careful", never past it
+    # and never down, so the stored record is what the reader was shown.
+    if llm.wanted(verdict):
+        try:
+            record.update(llm.raise_band(verdict, llm.check(text)))
+        except Exception:
+            traceback.print_exc()
     scan_id = store.new_id()
     try:
         store.put(scan_id, record)
@@ -100,6 +109,11 @@ def _verdict_for(text: str) -> tuple[dict, dict, str | None, dict | None]:
     except Exception:
         traceback.print_exc()
         hunch = None
+    if llm.wanted(verdict):
+        try:
+            verdict = llm.raise_band(verdict, llm.check(text))
+        except Exception:
+            traceback.print_exc()
     link = None
     try:
         scan_id = store.new_id()

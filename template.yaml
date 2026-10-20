@@ -5,7 +5,10 @@ Description: Pakka - scam check API. One function, one table, no servers.
 Globals:
   Function:
     Runtime: python3.12
-    Timeout: 10
+    # 20, not 10, so that a slow Bedrock call plus its one retry plus the
+    # DynamoDB write still fit. Lambda bills for the milliseconds actually
+    # used, so the headroom is free and the cut-off it prevents is not.
+    Timeout: 20
     MemorySize: 256
 
 Parameters:
@@ -40,6 +43,20 @@ Parameters:
     Type: String
     Default: ""
     Description: The exact URL Twilio calls, only needed if a proxy rewrites the host
+  BedrockModelId:
+    Type: String
+    Default: ""
+    Description: >
+      On-demand model id for the fallback check on messages no rule matched,
+      for example anthropic.claude-<model>-<version>. Verify it exists in this
+      region first: aws bedrock list-foundation-models --region <region>.
+      Leave blank and no message is ever sent to Bedrock. Use a plain model id
+      rather than a cross-region profile ("apac.", "us."): a profile routes the
+      text out of this region, and the point of deploying in Mumbai is that it
+      does not leave.
+
+Conditions:
+  HasBedrockModel: !Not [!Equals [!Ref BedrockModelId, ""]]
 
 Resources:
   PakkaApi:
@@ -62,9 +79,22 @@ Resources:
           # WhatsApp the easy way: Twilio's sandbox, no business account
           TWILIO_AUTH_TOKEN: !Ref TwilioAuthToken
           TWILIO_WEBHOOK_URL: !Ref TwilioWebhookUrl
+          # The fallback check, for messages the rules found nothing in. Unset
+          # by default, and unset means not a single call is made.
+          BEDROCK_MODEL_ID: !Ref BedrockModelId
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref ScansTable
+        # One action on one model, and only when one is configured. A
+        # cross-region inference profile would need an inference-profile ARN
+        # instead, which is deliberately not what this grants.
+        - !If
+          - HasBedrockModel
+          - Statement:
+              - Effect: Allow
+                Action: bedrock:InvokeModel
+                Resource: !Sub arn:${AWS::Partition}:bedrock:${AWS::Region}::foundation-model/${BedrockModelId}
+          - !Ref AWS::NoValue
       FunctionUrlConfig:
         AuthType: NONE
         Cors:
