@@ -48,8 +48,15 @@
     <textarea id="t" spellcheck="false" placeholder="Paste the message here…"></textarea>
     <footer>
       <span class="count mono" id="count">0 / 4000</span>
+      <!-- A screenshot cannot be read on the device, so the label says where
+           it goes before anything is chosen. -->
+      <input type="file" id="shotfile" accept="image/png,image/jpeg,image/gif,image/webp" hidden>
+      <button class="shot" id="shot" type="button" title="The picture is sent to the server to have its text read">Read a screenshot</button>
       <button class="go" id="go" disabled>Check it</button>
     </footer>
+    <p class="shotnote" id="shotnote">A screenshot is read on the server, so choosing one
+      sends the picture. The text comes back into the box above and the check itself still runs
+      on your device.</p>
   </div>
   <div class="chips fade" id="chips"></div>
   <div class="hist" id="hist"></div>
@@ -85,6 +92,20 @@
   <div class="hunch" id="hunch" hidden>
     <span class="mono" id="l-model">The model's reading</span>
     <p id="hunchtext"></p>
+  </div>
+  <!-- Offered only when nothing matched. Everything above this point was
+       decided on the device; this is the one check that cannot be, so it asks
+       first and says plainly what pressing it does. -->
+  <div class="deep" id="deep" hidden>
+    <span class="mono" id="l-deep">Still not sure?</span>
+    <p id="deepnote">Pakka found none of its patterns here. A deeper check can
+      read the message for a shape nobody wrote a rule for — but it runs on the
+      server, so <b>pressing this sends the message off your device</b>. It can
+      only add a warning, never clear one.</p>
+    <div class="deeprow">
+      <button class="copy" id="deepgo">Send for a deeper check</button>
+      <span class="mono" id="deepstate" style="color:var(--dim)"></span>
+    </div>
   </div>
   <div class="advice" id="advice" hidden>
     <span class="mono" id="l-todo">What to do now</span>
@@ -158,7 +179,7 @@
      shown beside them.</p>
   <div class="grid3">
     <div class="cell rise"><div class="num">01</div><h3>Rules decide</h3>
-      <p>Forty-seven checks, each able to point at the exact words that set it off. Same message, same answer, every time. Nothing overrules them.</p></div>
+      <p>Seventy-seven checks, each able to point at the exact words that set it off. Same message, same answer, every time. Nothing overrules them.</p></div>
     <div class="cell rise"><div class="num">02</div><h3>A model widens the net</h3>
       <p>Rules are blind to phrasings nobody wrote down. A linear model trained on 5,700 labelled messages catches those, and because it is linear it can show which characters it reacted to. It can raise a warning. It cannot clear a message the rules flagged.</p></div>
     <div class="cell rise"><div class="num">03</div><h3>It stays with you</h3>
@@ -168,7 +189,7 @@
 
 <section class="pad"><div class="shell">
   <div class="mono rise">The whole rulebook</div>
-  <h2 class="rise">Forty-seven checks,<br>all of them readable.</h2>
+  <h2 class="rise">Seventy-seven checks,<br>all of them readable.</h2>
   <p class="sub rise">Nothing here is a black box. Every check that can fire is listed, with the
      weight it carries and the reason it exists. Hover one to see what it looks for.</p>
   <div class="rulegrid rise" id="rulegrid"></div>
@@ -176,7 +197,7 @@
 
 <section class="pad"><div class="shell">
   <div class="mono rise">The pipeline, from above</div>
-  <h2 class="rise">Forty-seven patterns.<br>Yours lights the ones<br>it matched.</h2>
+  <h2 class="rise">Seventy-seven patterns.<br>Yours lights the ones<br>it matched.</h2>
   <p class="sub rise">Every rule is a node. Idle, they drift. Check a message and the ones that
      fired ignite and wire back to the core — the same rules, the same verdict, drawn.</p>
   <div class="sceneWrap rise">
@@ -191,7 +212,7 @@
 
 <section class="pad"><div class="shell">
   <div class="mono rise">Everything it looks for</div>
-  <h2 class="rise">Forty-seven ways a<br>message gives itself away.</h2>
+  <h2 class="rise">Seventy-seven ways a<br>message gives itself away.</h2>
   <p class="sub rise">Each one is a few lines of Python that can point at the words that set it off.
      No training data, no drift, no retraining — if it fires, you can read why.</p>
   <div class="gallery rise">

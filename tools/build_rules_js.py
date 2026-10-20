@@ -37,8 +37,9 @@ advice = {
 }
 
 OUT.write_text(f"""/* Generated from api/rules.py by tools/build_rules_js.py — do not edit.
-   Running the check here means the message never leaves the device unless the
-   person presses Share. */
+   Running the check here means the message never leaves the device until the
+   person asks for something that needs the server: a link, the deeper check,
+   or reading a screenshot. Each of those is a button. */
 window.PAKKA_RULES = {json.dumps(rules, indent=2, ensure_ascii=False)};
 window.PAKKA_ADVICE = {json.dumps(advice, indent=2, ensure_ascii=False)};
 window.PAKKA_BANDS = {json.dumps(bands)};
@@ -63,8 +64,18 @@ window.pakkaNormalise = function (text) {{
     }}
     at += ch.length;                              /* but index by code unit, for slice */
   }}
+  /* a run of three or more digits is a number, not letters in disguise */
+  const inNumber = new Array(chars.length).fill(false);
+  for (let j = 0; j < chars.length;) {{
+    if (chars[j] >= '0' && chars[j] <= '9') {{
+      let k = j;
+      while (k < chars.length && chars[k] >= '0' && chars[k] <= '9') k++;
+      if (k - j >= 3) for (let q = j; q < k; q++) inNumber[q] = true;
+      j = k;
+    }} else j++;
+  }}
   for (let j = 0; j < chars.length; j++) {{
-    if (PAKKA_LEET[chars[j]] !== undefined) {{
+    if (!inNumber[j] && PAKKA_LEET[chars[j]] !== undefined) {{
       const prev = j ? chars[j - 1] : '', next = chars[j + 1] || '';
       if (pakkaAlpha(prev) || pakkaAlpha(next)) chars[j] = PAKKA_LEET[chars[j]];
     }}

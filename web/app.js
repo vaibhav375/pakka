@@ -99,6 +99,25 @@ const API = (window.PAKKA_API && window.PAKKA_API.trim())
   || 'http://127.0.0.1:8787';
 
 const $ = (id) => document.getElementById(id);
+const L_LINK_PROMPT = 'Press Copy link to create one';
+const DEEP_ASK = 'Pakka found none of its patterns here. A deeper check can read the '
+  + 'message for a shape nobody wrote a rule for — but it runs on the server, so '
+  + '«pressing this sends the message off your device». It can only add a warning, '
+  + 'never clear one.';
+
+/* Writes a sentence into an element, with the part between « » in bold. The
+   emphasis is the consent line, so it cannot be lost to textContent, and the
+   sentence still never goes near innerHTML. */
+function sayWithEmphasis(el, sentence) {
+  el.textContent = '';
+  sentence.split(/«([^»]*)»/).forEach((part, i) => {
+    if (!part) return;
+    if (i % 2 === 0) { el.append(part); return; }
+    const b = document.createElement('b');
+    b.textContent = part;
+    el.append(b);
+  });
+}
 const t = $('t'), go = $('go'), out = $('out'), card = $('card');
 
 /* smooth scroll, the one piece of borrowed machinery */
@@ -187,6 +206,90 @@ t.addEventListener('keydown', (e) => {
 });
 sync();
 
+/* ---------- a screenshot, which is how half of these actually arrive ----------
+
+   People screenshot the SMS and forward the picture. Asking them to retype it
+   is asking for the one thing nobody does while being rushed.
+
+   The reading happens on the server; there is no on-device way to do it that
+   is worth the download, and the Hindi ones would come out worst. So the
+   picture goes, the text comes back into the box, and the check then runs
+   here on that text exactly as if it had been pasted. The text is put in
+   front of you rather than used invisibly, because when the reading is wrong
+   that is the only way you can see it was wrong and fix it before deciding
+   anything. */
+const SHOT_EDGE = 1600;              /* px on the long side before upload */
+const SHOT_MAX_BYTES = 3_500_000;    /* the server refuses more than this */
+
+const asBase64 = (blob) => new Promise((ok, no) => {
+  const fr = new FileReader();
+  fr.onload = () => ok(String(fr.result).split(',')[1]);
+  fr.onerror = no;
+  fr.readAsDataURL(blob);
+});
+
+/* Only re-encode when it has to: a JPEG pass costs small text the sharpness
+   the reading depends on, so an image already small enough is sent as it is. */
+async function fitForUpload(file) {
+  const ok = ['image/png', 'image/jpeg', 'image/gif', 'image/webp'];
+  let bitmap;
+  try { bitmap = await createImageBitmap(file); } catch { return file; }
+  const long = Math.max(bitmap.width, bitmap.height);
+  if (long <= SHOT_EDGE && file.size <= SHOT_MAX_BYTES && ok.includes(file.type)) {
+    bitmap.close?.();
+    return file;
+  }
+  const scale = Math.min(1, SHOT_EDGE / long);
+  const canvas = document.createElement('canvas');
+  canvas.width = Math.round(bitmap.width * scale);
+  canvas.height = Math.round(bitmap.height * scale);
+  canvas.getContext('2d').drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+  bitmap.close?.();
+  const blob = await new Promise((r) => canvas.toBlob(r, 'image/jpeg', 0.92));
+  return blob || file;
+}
+
+async function readScreenshot(file) {
+  const L = window.PakkaLang, btn = $('shot'), note = $('shotnote');
+  if (!file || !API) return;
+  btn.disabled = true;
+  note.textContent = L.t('shot_wait', 'Reading the picture…');
+  try {
+    const blob = await fitForUpload(file);
+    const res = await fetch(`${API.replace(/\/$/, '')}/read`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ image: await asBase64(blob), type: blob.type }),
+    });
+    const d = await res.json();
+    if (!res.ok || !d.text) throw new Error(d.error || 'Could not read that picture.');
+    t.value = d.text;
+    sync();
+    check();
+    note.textContent = L.t('shot_done',
+      'Read from the picture. Check the text above is right before you trust the verdict.');
+  } catch (e) {
+    note.textContent = String((e && e.message) || e).slice(0, 180);
+  } finally {
+    btn.disabled = false;
+    $('shotfile').value = '';
+  }
+}
+
+if ($('shot')) {
+  $('shot').onclick = () => $('shotfile').click();
+  $('shotfile').onchange = (e) => readScreenshot(e.target.files && e.target.files[0]);
+  /* pasting a screenshot straight into the box, which is what a desktop user
+     reaches for first */
+  t.addEventListener('paste', (e) => {
+    const items = (e.clipboardData && e.clipboardData.items) || [];
+    const shot = [...items].find((i) => i.type && i.type.startsWith('image/'));
+    if (!shot) return;
+    e.preventDefault();
+    readScreenshot(shot.getAsFile());
+  });
+}
+
 /* build the message with <mark> around every flagged span, merging overlaps so
    nested matches don't produce broken tags */
 function highlight(text, findings) {
@@ -273,20 +376,14 @@ function adviceFor(findings) {
   };
 }
 
-async function check() {
-  const text = t.value;
+const localOnly = () => !API || API.startsWith('http://127.0.0.1');
 
-  /* decided here, on the device — instant, and the message has not gone
-     anywhere yet */
-  const local = window.pakkaEvaluate(text);
-  render(local);
-  hunch(text, local);
-
-  /* the only reason to talk to the cloud is to mint a link worth forwarding */
-  if (!API || API.startsWith('http://127.0.0.1')) {
-    $('link').value = 'Sharing needs the deployed API';
-    return;
-  }
+/* Posting the message is what mints a link, and the API keeps it for thirty
+   days. Doing that on every press would mean the page quietly uploads every
+   message anybody pastes, which is the opposite of what it says it does, so
+   nothing is sent until something asks for it: Copy link, or the deeper
+   check. */
+async function mintLink(text) {
   $('link').value = 'Creating link…';
   try {
     const res = await fetch(`${API.replace(/\/$/, '')}/scan`, {
@@ -297,9 +394,83 @@ async function check() {
     const d = await res.json();
     if (!res.ok || !d.id) throw new Error(d.error || 'no id');
     $('link').value = `${location.origin}${location.pathname}#${d.id}`;
+    return d;
   } catch {
     $('link').value = 'Could not create a link — the verdict above still stands';
+    return null;
   }
+}
+
+/* ---------- the one check that cannot run on the device ----------
+
+   Offered only where no rule matched, which is the only place it can say
+   anything useful: above that the rules carry the verdict and can quote the
+   words for it. It sends the message, so it asks first and says so. */
+function offerDeep(text, verdict) {
+  const box = $('deep'), btn = $('deepgo'), state = $('deepstate'), note = $('deepnote');
+  if (!box || !btn) return;
+  const L = window.PakkaLang;
+  box.hidden = !(text.trim() && !(verdict.findings || []).length && API);
+  box.classList.remove('done');
+  state.textContent = '';
+  btn.disabled = false;
+  btn.hidden = false;
+  sayWithEmphasis(note, L.t('deep_ask', DEEP_ASK));
+
+  btn.onclick = async () => {
+    btn.disabled = true;
+    state.textContent = L.t('deep_wait', 'Checking…');
+    const d = await mintLink(text);
+    if (!d) {
+      state.textContent = L.t('deep_fail', 'Could not reach the server — the verdict above still stands');
+      btn.disabled = false;
+      return;
+    }
+    state.textContent = '';
+    btn.hidden = true;
+    if (!d.concern) {
+      state.textContent = d.deep_checked
+        ? L.t('deep_none', 'Nothing further found. That is still not proof it is safe.')
+        : L.t('deep_off', 'The deeper check is not switched on for this deployment.');
+      return;
+    }
+    /* Built as nodes, not markup: the reason and the quote are written by a
+       model and must never reach the page as HTML. */
+    box.classList.add('done');
+    note.textContent = '';
+    const lead = document.createElement('b');
+    lead.textContent = L.t('deep_found', 'No rule matched, but the deeper check is not happy with this.');
+    note.append(lead, ' ', d.concern.reason);
+    const quote = (d.concern.quotes || [])[0];
+    if (quote) {
+      const mark = document.createElement('mark');
+      mark.className = 'hunch-mark';
+      mark.textContent = quote;
+      note.append(' ', L.t('deep_quote', 'It pointed at'), ' ', mark, '.');
+    }
+    /* The card has to move with it. A green nothing beside an amber warning
+       reads as "safe", and the dial is relabelled so the 0 is understood as
+       the number of rules that matched rather than a clean bill of health. */
+    $('vlabel').textContent = L.t('deep_label', 'Nothing matched, but be careful');
+    $('vlabel').classList.add('warn');
+    if (card) card.className = 'verdict band-careful';
+    const dial = $('diallabel');
+    if (dial) dial.textContent = L.t('deep_dial', 'Rules matched');
+  };
+}
+
+function check() {
+  const text = t.value;
+
+  /* decided here, on the device — instant, and the message has not gone
+     anywhere yet */
+  const local = window.pakkaEvaluate(text);
+  render(local);
+  hunch(text, local);
+  $('link').value = localOnly()
+    ? 'Sharing needs the deployed API'
+    : L_LINK_PROMPT;
+  offerDeep(text, local);
 }
 go.onclick = check;
 
@@ -532,8 +703,13 @@ $('copyfwd').onclick = async () => {
 };
 
 $('copy').onclick = async () => {
-  const v = $('link').value;
-  if (v === '—') return;
+  let v = $('link').value;
+  if (!/^https?:/.test(v)) {        /* not minted yet: this press is the consent */
+    if (!t.value.trim() || localOnly()) return;
+    await mintLink(t.value);
+    v = $('link').value;
+    if (!/^https?:/.test(v)) return;
+  }
   try { await navigator.clipboard.writeText(v); } catch {}
   $('copy').textContent = 'Copied';
   setTimeout(() => ($('copy').textContent = 'Copy link'), 1600);
@@ -723,11 +899,14 @@ function hunch(text, verdict) {
     ['#l-of', 'of', 'text'],
     ['#l-fired', 'checks_fired', 'text'],
     ['#l-model', 'model_says', 'text'],
+    ['#l-deep', 'deep_title', 'text'],
     ['#l-todo', 'what_to_do', 'text'],
     ['#l-sendback', 'forward_back', 'text'],
     ['#l-forward', 'share', 'text'],
     ['#diallabel', 'risk', 'text'],
     ['#l-fwdnote', 'fwd_note', 'text'],
+    ['#shot', 'shot_go', 'text'],
+    ['#shotnote', 'shot_note', 'text'],
   ];
   const ENGLISH = new Map();
 

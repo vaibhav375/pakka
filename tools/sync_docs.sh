@@ -7,7 +7,9 @@ cd "$(dirname "$0")/.."
 # stamp the service worker cache with this commit, so a deploy actually
 # replaces what a returning visitor has cached
 STAMP=$(git rev-parse --short HEAD 2>/dev/null || date +%s)
-sed -i.bak "s/pakka-__BUILD__/pakka-$STAMP/" web/sw.js && rm -f web/sw.js.bak
+# matches the placeholder or a stamp left by an earlier run, so this stays
+# idempotent — a one-shot pattern silently stops updating the cache name
+sed -i.bak "s/pakka-[A-Za-z0-9_]*/pakka-$STAMP/" web/sw.js && rm -f web/sw.js.bak
 
 # everything, not a list that silently goes stale when a file is added
 cp web/* docs/

@@ -51,10 +51,27 @@ def normalise(text: str) -> tuple[str, list[int]]:
             chars.append("\ufffd" if ord(c) > 0xFFFF else c)
             idx.append(i)
 
+    # a run of three or more digits is a number, not letters dressed up as
+    # digits. "fr33" and "0TP" are obfuscation; "rs5000" is an amount, and
+    # rewriting it to "rssooo" blinded every rule that matches on the amount.
+    in_number = [False] * len(chars)
+    j = 0
+    while j < len(chars):
+        if "0" <= chars[j] <= "9":
+            k = j
+            while k < len(chars) and "0" <= chars[k] <= "9":
+                k += 1
+            if k - j >= 3:
+                for q in range(j, k):
+                    in_number[q] = True
+            j = k
+        else:
+            j += 1
+
     # a digit standing in for a letter, but only where a letter sits beside it,
     # so phone numbers and amounts are left alone
     for j, c in enumerate(chars):
-        if c in _LEET:
+        if c in _LEET and not in_number[j]:
             prev = chars[j - 1] if j else ""
             nxt = chars[j + 1] if j + 1 < len(chars) else ""
             if _alpha(prev) or _alpha(nxt):
@@ -149,8 +166,11 @@ RULES: tuple[Rule, ...] = (
         "A real employer never charges you to be hired. Registration, training "
         "and security fees are the oldest job scam there is.",
         3,
-        _p(r"registration fee", r"security (?:fee|deposit|amount)", r"processing fee",
-           r"training fee", r"refundable (?:fee|deposit|amount)", r"joining fee",
+        _p(r"(?<!no )(?<!nil )(?<!zero )registration fee",
+           r"security (?:fee|deposit|amount)",
+           r"(?<!no )(?<!nil )(?<!zero )processing fee",
+           r"training fee", r"refundable (?:fee|deposit|amount)",
+           r"(?<!no )(?<!nil )(?<!zero )joining fee",
            r"(?:have to|need to|must|kindly|please) pay (?:rs\.?|₹)?\s?[\d,]+",
            r"\bpay (?:rs\.?|₹)\s?[\d,]+ (?:to|for) (?:confirm|secure|book|get|join|start|activat)"),
     ),
@@ -308,7 +328,7 @@ RULES: tuple[Rule, ...] = (
         _p(r"electricity .{0,30}(?:disconnect|cut off|discontinue)",
            r"बिजली.{0,30}(?:काट|कट|बंद)",
            r"(?:power|electricity)(?: supply| connection)?.{0,30}(?:cut off|cut-off|switched off)",
-           r"power .{0,20}(?:will be )?disconnect", r"bill .{0,20}not updated.{0,30}disconnect"),
+           r"power .{0,20}(?:will be )?disconnect", r"(?:power|electricity)(?: supply| connection)?.{0,25}(?:will be |going to be )?cut\b", r"bill .{0,20}not updated.{0,30}disconnect"),
     ),
     Rule(
         "LOTTERY_WIN", "A prize you never entered for",
@@ -661,7 +681,308 @@ RULES: tuple[Rule, ...] = (
            r"\b(?:major|colonel|captain|subedar|havildar|brigadier) [a-z]\w+",
            r"(?:posted|deployed) (?:in|at) .{0,40}(?:cannot|can't|unable to) (?:meet|come|visit|see)",
            r"transfer(?:red)? .{0,25}urgent(?:ly)? .{0,25}sell"),
-    )
+    ),
+    Rule(
+        "PRIZE_FRAME", "A reward you are told to click for",
+        "The prize changes every week — an iPad, a scooter, a gift voucher — "
+        "because the object was never the point. What stays the same is being "
+        "told you have won something and that a link is how you collect it.",
+        3,
+        _p(r"(?:chance (?:to|of) )?\bwin(?:ning)?\b[^.!?]{0,60}?(?:click|press|tap|hit|open|visit)\b[^.!?]{0,25}(?:link|here|below|button|url|site)",
+           r"(?:click|press|tap|hit|open|visit)\b[^.!?]{0,25}(?:link|here|below|button|url|site)[^.!?]{0,45}(?:to |and )?(?:win|claim|collect|redeem)\b",
+           r"\b(?:you (?:have |hv )?won|you are (?:the )?winner|aap(?:ne)? jeet)\b.{0,70}(?:claim|collect|redeem|link|click|press|tap)\b",
+           r"\b(?:selected|chosen|shortlisted) (?:as|for) (?:a |the |our )?(?:lucky|winner|gift|prize|reward)",
+           r"\b(?:gift|prize|reward)\b[^.!?]{0,25}(?:waiting|reserved|unlocked|allotted|pending) for you",
+           r"(?:claim|collect|redeem)\b[^.!?]{0,20}(?:your|this|the)\b[^.!?]{0,20}(?:prize|reward|gift|bonus|voucher|coupon|hamper)\b[^.!?]{0,30}(?:now|today|link|here|before)"),
+    ),
+    Rule(
+        "SEXTORTION", "Threatens to send private photos or video to your contacts",
+        "This is blackmail, and paying has never once stopped it — it marks you "
+        "as someone who pays. The video is usually fake or AI-made. Report it "
+        "at cybercrime.gov.in and tell one person you trust.",
+        4,
+        _p(r"(?:nude|naked|obscene|intimate|private|explicit|compromising)\s*(?:photo|photos|pic|pics|picture|images?|video|videos|clip|clips|screenshot|mms)",
+           r"(?:video|photo|clip|mms|screenshot)s?\b[^.!?]{0,40}(?:send|post|upload|share|leak|viral|forward)\b[^.!?]{0,40}(?:contacts?|friends?|family|facebook|instagram|youtube|relatives|everyone)",
+           r"(?:send|post|upload|leak|viral|forward)\b[^.!?]{0,35}(?:your )?(?:video|photo|clip|mms)[^.!?]{0,40}(?:unless|if you (?:do not|don't|dont)|within \d+ (?:hour|minute))",
+           r"(?:delete|remove) (?:the |this |your )?(?:video|clip|photo|mms)[^.!?]{0,35}(?:pay|rs\.?|₹|fee|charge)",
+           r"(?:pay|rs\.?|₹)[^.!?]{0,35}(?:to |for )?(?:delete|remove|stop)\b[^.!?]{0,20}(?:the |this |your )?(?:video|clip|photo|mms)",
+           r"(?:send|post|upload|share|leak|forward|circulate)\b[^.!?]{0,30}(?:your |the )?(?:photos?|pics?|pictures?|videos?|clips?|mms|screenshots?)\b[^.!?]{0,45}(?:contacts?|phone ?book|friends?|family|everyone|relatives?|facebook|instagram|social)",
+           r"(?:अश्लील|न्यूड|निजी)\s*(?:वीडियो|फोटो|तस्वीर)"),
+    ),
+    Rule(
+        "MULE_ACCOUNT", "Wants to move money through your bank account",
+        "Letting someone route money through your account makes you the person "
+        "the police find, not them. The commission is small and the case is "
+        "yours. This is how mule accounts are recruited.",
+        4,
+        # "share your account number to receive a refund" is phishing, not mule
+        # recruitment. What marks a mule pitch is the cut you are offered for
+        # letting someone else's money pass through.
+        _p(r"(?:use|rent|lend|give|share) (?:your |ur |apna |apne )?(?:bank |savings )?account.{0,60}(?:commission|percent|\bcut\b|per transaction)",
+           r"(?:receive|accept) (?:money|funds|amount|payment).{0,45}(?:your|ur) account.{0,45}(?:commission|keep|percent|\bcut\b)",
+           r"(?:commission|cut) (?:for|on) (?:each |every |per )?transaction.{0,45}(?:account|transfer|withdraw|deposit)",
+           r"(?:bank )?account (?:rent|kiraya) (?:par|pe|on)\b"),
+    ),
+    Rule(
+        "WRONG_TRANSFER", "Says money reached you by mistake and wants it back",
+        "The money that arrived was usually taken from someone else's hacked "
+        "account, and the refund you send goes somewhere different. A genuine "
+        "mistaken transfer is reversed by the sender's bank, not by you.",
+        3,
+        _p(r"(?:sent|transferred|paid|credited)\b[^.!?]{0,35}(?:by mistake|mistakenly|accidentally|wrongly|by error|galti se)",
+           r"(?:wrong|mistaken|incorrect) (?:transfer|transaction|payment|upi)[^.!?]{0,40}(?:return|refund|send back|repay)",
+           r"(?:return|send back|refund)\b[^.!?]{0,30}(?:the |that |this )?(?:money|amount|rs\.?|₹)[^.!?]{0,40}(?:different|another|this) (?:upi|account|number|id)",
+           r"galti se[^.!?]{0,30}(?:paise|amount|transfer)"),
+    ),
+    Rule(
+        "TAX_REFUND", "A tax refund that arrives by link",
+        "The Income Tax Department pays refunds into the account on your return "
+        "and never sends a link to claim one. Refund links lead to a copy of "
+        "the portal that keeps whatever you type into it.",
+        3,
+        _p(r"(?:income ?tax|it department|itr|tds)[^.!?]{0,40}refund[^.!?]{0,40}(?:click here|click the|link|apply|verify|http)",
+           r"refund of (?:rs\.?|₹|inr)\s?[\d,]+[^.!?]{0,40}(?:approved|credited|pending|sanctioned)[^.!?]{0,40}(?:click|link|claim|verify|http)",
+           r"(?:tax )?refund[^.!?]{0,30}(?:pending|failed|on hold).{0,45}(?:update|verify|confirm)[^.!?]{0,25}(?:account|bank|detail)",
+           r"(?:आयकर|इनकम टैक्स)[^।.!?]{0,40}(?:रिफंड|वापस)"),
+    ),
+    Rule(
+        "PF_CLAIM", "A PF or pension payout that needs a link",
+        "EPFO settles claims inside the member portal you log into yourself. A "
+        "PF or pension message carrying a link is after your UAN and the bank "
+        "account attached to it.",
+        3,
+        _p(r"(?:epfo|\bpf\b|provident fund|\buan\b|pension)[^.!?]{0,45}(?:claim|withdraw|settle|release|transfer)[^.!?]{0,40}(?:click|link|here|http|verify|update)",
+           r"(?:pf|epf|pension) (?:amount|balance|fund)[^.!?]{0,35}(?:ready|approved|pending|credited)[^.!?]{0,35}(?:click|link|claim|verify|http)"),
+    ),
+    Rule(
+        "INSURANCE_LAPSE", "A policy about to lapse, with a link to pay",
+        "Insurers take premiums through their own app, their website or an "
+        "agent you already know. A lapse warning with a payment link attached "
+        "is how a premium gets paid into somebody else's account.",
+        3,
+        _p(r"(?:policy|insurance|premium)[^.!?]{0,40}(?:lapse|lapsed|discontinued|terminated)[^.!?]{0,45}(?:pay|renew|click|link|http|immediately|today)",
+           r"(?:renew|revive) (?:your )?policy[^.!?]{0,40}(?:click|link|http|pay now|immediately)",
+           r"(?:lic|insurance)[^.!?]{0,30}(?:bonus|maturity|claim)[^.!?]{0,40}(?:click|link|verify|update)[^.!?]{0,25}(?:detail|account|bank)"),
+    ),
+    Rule(
+        "CARD_UPGRADE", "A free card upgrade or limit increase",
+        "A bank raises your limit inside its own app and never collects card "
+        "number, CVV or OTP to do it. The upgrade offer exists to get all "
+        "three in one conversation.",
+        3,
+        _p(r"(?:credit|debit) card[^.!?]{0,35}(?:upgrade|limit)[^.!?]{0,45}(?:otp|cvv|card number|expiry date|verify your|call \d)",
+           r"(?:upgrade|enhance|increase)\b[^.!?]{0,25}(?:your )?(?:card )?limit[^.!?]{0,45}(?:otp|cvv|card number|verify your|call \d)"),
+    ),
+    Rule(
+        "UNLISTED_SHARES", "Pre-IPO or unlisted shares offered over chat",
+        "Unlisted shares cannot be allotted to you over WhatsApp, and the "
+        "allotment is a spreadsheet the seller controls. Every exit from it "
+        "needs one more payment first.",
+        3,
+        _p(r"(?:pre[- ]?ipo|unlisted|pre[- ]?listing) (?:share|shares|stock|equity|allotment)",
+           r"(?:ipo|share) allotment[^.!?]{0,40}(?:guarantee|confirm|book|reserve)[^.!?]{0,30}(?:now|today|amount|payment)",
+           r"(?:grey|gray) market premium"),
+    ),
+    Rule(
+        "GIFT_CARD_ASK", "Asks you to buy vouchers and send the codes",
+        "A gift card code is cash that cannot be traced or reversed, which is "
+        "the only reason anyone is ever asked for one. No employer, office or "
+        "government department is paid in vouchers.",
+        4,
+        _p(r"(?:buy|purchase|get)\b[^.!?]{0,30}(?:gift|amazon|google play|itunes|apple|steam)\s*(?:card|voucher|code)s?[^.!?]{0,60}(?:send|share|forward|whatsapp|photo|scratch|code)",
+           r"(?:gift|amazon|itunes|google play)\s*card[^.!?]{0,40}(?:code|number|pin)[^.!?]{0,30}(?:send|share|whatsapp|photo|scratch)",
+           r"(?:send|share|forward)\b[^.!?]{0,25}(?:the )?(?:voucher|gift card) code"),
+    ),
+    Rule(
+        "SCREEN_CODE", "Asks for the number showing on your screen",
+        "That code is a remote-access ID, and reading it out hands your phone "
+        "over. No bank or support desk needs to see your screen to fix "
+        "anything.",
+        4,
+        _p(r"(?:9|nine|6|six)[- ]digit (?:code|number|id)[^.!?]{0,35}(?:screen|app|display|showing)",
+           r"(?:tell|read|share|send|give)\b[^.!?]{0,30}(?:the |me the |us the )?(?:code|number|id)[^.!?]{0,30}(?:on|showing on|displayed on)[^.!?]{0,15}(?:your )?screen"),
+    ),
+    Rule(
+        "CRYPTO_DOUBLE", "Money that multiplies in hours",
+        "Nothing returns a multiple of itself in a day. The first small "
+        "payment is sometimes paid back to prove the system works, and that is "
+        "what buys the larger one that never comes back.",
+        4,
+        _p(r"(?:invest|send|deposit|pay)\b[^.!?]{0,25}(?:rs\.?|₹|inr|\$)\s?[\d,]+[^.!?]{0,30}(?:get|receive|earn|return)\b[^.!?]{0,20}(?:rs\.?|₹|inr|\$)\s?[\d,]+",
+           r"(?:bitcoin|btc|crypto|usdt|ethereum|forex)[^.!?]{0,40}(?:guaranteed|assured|fixed|daily) (?:return|profit|income)",
+           r"(?:2x|3x|5x|10x)\s*(?:your )?(?:money|amount|investment|deposit)"),
+    ),
+    Rule(
+        "SUBSCRIPTION_FAIL", "A failed subscription payment, with a link to fix it",
+        "Netflix, Prime and the rest simply stop the service and wait for you "
+        "to open the app yourself. A failed-payment message carrying a link is "
+        "collecting the card you are about to retype.",
+        3,
+        _p(r"(?:payment|billing|renewal|auto[- ]?debit) (?:failed|declined|unsuccessful)[^.!?]{0,50}(?:click|link|update|verify|http|retry)[^.!?]{0,25}(?:card|detail|payment|now|here)",
+           r"(?:subscription|membership)[^.!?]{0,30}(?:will be |is )?(?:cancelled|canceled|suspended|deactivated)[^.!?]{0,40}(?:update|verify|confirm)[^.!?]{0,25}(?:payment|card|billing)"),
+    ),
+    Rule(
+        "VISA_JOB_ABROAD", "An overseas job that needs a fee first",
+        "A real overseas employer pays for the visa or deducts it from salary, "
+        "and Indian recruiting agents are licensed and listed. Visa, permit "
+        "and medical fees collected up front are the whole business.",
+        3,
+        _p(r"(?:job|vacancy|salary|employment|placement)[^.!?]{0,50}(?:visa|work permit|iqama)[^.!?]{0,45}(?:fee|charge|deposit|processing|advance)",
+           r"(?:job|vacancy|opening|placement|employment)[^.!?]{0,40}(?:canada|dubai|uae|gulf|singapore|australia|germany|qatar|kuwait|saudi|new zealand)[^.!?]{0,45}(?:fee|charge|pay|deposit|registration)",
+           r"free visa[^.!?]{0,25}(?:ticket|air ?ticket|job)"),
+    ),
+    Rule(
+        "GIFT_FROM_ABROAD", "A gift from abroad that needs clearance money",
+        "The friend abroad is not real and neither is the parcel. Customs does "
+        "not telephone people about gifts, and every fee paid produces one "
+        "more fee.",
+        3,
+        _p(r"(?:gift|parcel|package|box|courier)[^.!?]{0,35}(?:from|sent by)[^.!?]{0,30}(?:\buk\b|\busa\b|london|dubai|canada|abroad|overseas|foreign)[^.!?]{0,45}(?:customs|clearance|duty|fee|charge|pay)",
+           r"(?:gift|parcel)[^.!?]{0,25}(?:stuck|held|detained)[^.!?]{0,30}(?:customs|airport)[^.!?]{0,35}(?:pay|fee|charge|release)"),
+    ),
+    Rule(
+        "LOAN_APPROVED_FEE", "A loan already approved, for a fee",
+        "No lender approves a loan before seeing who you are, and none takes a "
+        "processing fee over UPI before disbursing anything. The fee is the "
+        "product.",
+        3,
+        _p(r"(?:loan|credit|finance)[^.!?]{0,30}(?:approved|sanctioned|pre[- ]?approved|disbursed).{0,55}(?:processing|insurance|gst|file|advance) (?:fee|charge|amount)",
+           r"(?:instant|urgent|quick) (?:personal )?loan[^.!?]{0,40}(?:no document|without document|no cibil|any cibil|in \d+ minutes)",
+           r"loan[^.!?]{0,25}(?:approved|sanctioned)[^.!?]{0,35}(?:pay|transfer|deposit)[^.!?]{0,25}(?:rs\.?|₹|inr)\s?[\d,]+"),
+    ),
+    Rule(
+        "DORMANT_ACCOUNT", "A dormant account to be reactivated through a link",
+        "Reactivating a dormant account happens at a branch or in the bank's "
+        "own app, and the bank asks you for nothing by message. The link "
+        "exists to collect a login.",
+        3,
+        _p(r"account[^.!?]{0,20}(?:is |has been |will be )?(?:dormant|inactive|inoperative).{0,55}(?:click|link|re-?activate|http)",
+           r"(?:reactivate|unfreeze|unblock)\b[^.!?]{0,25}(?:your )?account[^.!?]{0,35}(?:click|link|http|now|immediately|kyc)",
+           r"(?:net ?banking|internet banking|account|login|debit card|credit card)[^.!?]{0,30}(?:will |has |is )?expir\w+.{0,50}(?:re-?activate|re-?verify|re-?validate|update your (?:account|kyc|detail))"),
+    ),
+    Rule(
+        "SIM_UPGRADE", "A SIM or network upgrade that needs a code from you",
+        "A 4G or 5G upgrade never needs an OTP read out to a caller. That code "
+        "moves your number onto their SIM, and every account you own is "
+        "secured by messages to that number.",
+        4,
+        _p(r"(?:sim|esim)[^.!?]{0,30}(?:upgrade|swap|replace|exchange)[^.!?]{0,40}(?:otp|code|verify|kyc|detail)",
+           r"(?:upgrade|update)\b[^.!?]{0,25}(?:to )?(?:4g|5g|e[- ]?sim)[^.!?]{0,40}(?:otp|code|sms|verify|free)"),
+    ),
+    Rule(
+        "GAS_SUBSIDY", "An LPG subsidy or gas connection link",
+        "Gas subsidies land in the account already linked to the connection, "
+        "and the distributor does KYC in person. The message is after the bank "
+        "details that receive the subsidy.",
+        3,
+        _p(r"(?:lpg|cylinder|indane|hp gas|bharat ?gas|gas connection)[^.!?]{0,40}(?:subsidy|kyc|ekyc)[^.!?]{0,40}(?:click|link|update|verify|http|block|suspend)",
+           r"(?:subsidy|सब्सिडी)[^.!?]{0,30}(?:bank|account|khata)[^.!?]{0,30}(?:update|link|verify|add)"),
+    ),
+    Rule(
+        "CHARITY_PLEA", "A donation appeal paid into a personal account",
+        "Registered charities collect through their own account and give you a "
+        "receipt with an 80G number on it. A UPI handle and a photograph are "
+        "not a charity.",
+        2,
+        _p(r"(?:donate|donation|contribute|relief fund)[^.!?]{0,45}(?:upi|gpay|phonepe|paytm|google ?pay|@ok|@ybl|\bqr\b)",
+           r"(?:donate|contribute)[^.!?]{0,30}(?:rs\.?|₹|inr)\s?[\d,]+[^.!?]{0,35}(?:urgent|immediately|today|save)",
+           r"(?:cancer|surgery|operation|treatment|orphan)[^.!?]{0,40}(?:donate|donation|fund)[^.!?]{0,30}(?:upi|account|gpay|paytm|phonepe)"),
+    ),
+    Rule(
+        "BETTING_PROMO", "A betting or prediction app promising daily income",
+        "Colour prediction and aviator apps are controlled by the people "
+        "running them, and the early wins exist to make the later deposits "
+        "feel safe. The withdrawal is where it stops.",
+        3,
+        _p(r"(?:colour|color) (?:prediction|trading) (?:app|game|group)",
+           r"\b(?:aviator|teen ?patti|1xbet|parimatch|mahadev)\b[^.!?]{0,40}(?:earn|income|bonus|deposit|withdraw|join|daily)",
+           r"(?:betting|satta|gambling)[^.!?]{0,35}(?:id|app|group|tips)[^.!?]{0,35}(?:join|earn|daily|profit|guarantee)"),
+    ),
+    Rule(
+        "MLM_RECRUIT", "Income that depends on recruiting more people",
+        "When the money comes from the people you bring in rather than from "
+        "anything sold, the people at the bottom are the product, and most "
+        "people arrive at the bottom.",
+        2,
+        _p(r"(?:join|add|refer|bring)\b[^.!?]{0,20}(?:\d+|two|three|five|ten)\s*(?:people|members|friends|person)[^.!?]{0,45}(?:daily|monthly|per day|lifetime|unlimited) (?:income|earning|profit|payout)",
+           r"\b(?:downline|upline|binary income|level income|matrix plan)\b",
+           r"(?:network|multi[- ]?level) marketing[^.!?]{0,30}(?:join|earn|income|opportunity)"),
+    ),
+    Rule(
+        "EXAM_RESULT_LINK", "A result or admit card behind a sent link",
+        "Boards and universities publish results on their own site, which you "
+        "reach yourself. A result link arriving by message is either an app to "
+        "install or a login to steal.",
+        2,
+        _p(r"(?:result|admit card|hall ticket|scorecard|marksheet|answer key)[^.!?]{0,30}(?:declared|released|out|available|ready)[^.!?]{0,40}(?:click|link|download|http|apk|whatsapp)",
+           r"(?:download|check)\b[^.!?]{0,25}(?:your )?(?:result|admit card|marksheet|hall ticket)[^.!?]{0,30}(?:apk|link|http)"),
+    ),
+    Rule(
+        "SCHOLARSHIP_BAIT", "A scholarship that wants your details by message",
+        "Scholarships are applied for on the national portal and paid into the "
+        "account on that application. One arriving unasked, wanting documents "
+        "over chat, is collecting an identity.",
+        2,
+        _p(r"(?:scholarship|fee (?:refund|reimbursement)|stipend)[^.!?]{0,45}(?:bank|account|aadhaar|aadhar|document|detail|form)[^.!?]{0,30}(?:send|share|submit|whatsapp|link|click)",
+           r"(?:scholarship|stipend)[^.!?]{0,30}(?:approved|sanctioned|selected)[^.!?]{0,40}(?:click|link|claim|register|http)"),
+    ),
+    Rule(
+        "CELEB_ENDORSE", "A famous name attached to an investment",
+        "These are made with cloned voices and faces, and no public figure "
+        "recommends a trading platform by name. The endorsement is the "
+        "cheapest part of the operation to manufacture.",
+        3,
+        _p(r"(?:modi|ambani|adani|ratan tata|sachin|dhoni|kohli|amitabh|shark tank|elon musk)[^.!?]{0,45}(?:invest|trading|platform|scheme|profit|earn|crypto)",
+           r"(?:recommended|endorsed|approved|backed) by[^.!?]{0,30}(?:rbi|sebi|government|prime minister)[^.!?]{0,35}(?:invest|trading|profit|scheme|return)"),
+    ),
+    Rule(
+        "PROFIT_PROOF", "Screenshots of profit as the reason to trust it",
+        "Profit screenshots cost nothing to fabricate and are the standard "
+        "opening of a trading group. A real adviser is registered with SEBI "
+        "and gives you the registration number instead.",
+        2,
+        _p(r"(?:profit|earning|income|payout) (?:proof|screenshot|screen ?shot|slip)",
+           r"(?:members|students|clients)[^.!?]{0,25}(?:earning|earned|making)[^.!?]{0,20}(?:rs\.?|₹|inr)\s?[\d,]+[^.!?]{0,30}(?:daily|per day|monthly|every day)"),
+    ),
+    Rule(
+        "WHATSAPP_CODE", "Wants the code that signs in to your chat account",
+        "That six-digit code is what moves your WhatsApp onto someone else's "
+        "phone. Once it does, the same requests go out to everyone you know, "
+        "in your name.",
+        4,
+        _p(r"(?:whatsapp|telegram|instagram|facebook)[^.!?]{0,30}(?:code|otp|verification)[^.!?]{0,35}(?:send|share|forward|tell|bhej)",
+           r"(?:send|share|forward|tell)\b[^.!?]{0,25}(?:me )?(?:the )?(?:6|six)[- ]digit (?:code|otp)"),
+    ),
+    Rule(
+        "FAKE_INVOICE_ACCOUNT", "An invoice whose bank account has changed",
+        "A changed account number on a familiar invoice is the whole fraud, "
+        "and the address it arrives from is usually one character different. "
+        "Confirm it on a number you already had, never one in the message.",
+        3,
+        _p(r"(?:bank|account) (?:detail|details|number)[^.!?]{0,25}(?:has|have|were|are)?\s*(?:been )?(?:changed|updated|revised|new)[^.!?]{0,40}(?:payment|invoice|transfer|remit|pay)",
+           r"(?:kindly |please )?(?:remit|pay|transfer)\b[^.!?]{0,35}(?:to (?:our |the )?)?new (?:bank )?account",
+           r"(?:invoice|payment)[^.!?]{0,30}(?:to|into) (?:our )?(?:new|updated|revised) account"),
+    ),
+    Rule(
+        "MEDICAL_PLEA", "A medical emergency from someone you cannot reach",
+        "The hospital story exists to make a stranger's payment request feel "
+        "like a decision with no time to check it. Hospitals bill the patient, "
+        "not a contact over chat.",
+        2,
+        _p(r"(?:hospital|\bicu\b|operation|surgery|accident|admitted)[^.!?]{0,45}(?:urgent|urgently|immediately|right now|turant)[^.!?]{0,35}(?:money|amount|rs\.?|₹|transfer|pay|upi)",
+           r"(?:accident|emergency|\bicu\b|admitted).{0,45}(?:send|transfer|need)\b[^.!?]{0,25}(?:rs\.?|₹|inr)\s?[\d,]+",
+           r"(?:अस्पताल|एक्सीडेंट)[^।.!?]{0,40}(?:पैसे|रुपये|तुरंत)"),
+    ),
+    Rule(
+        "GOVT_JOB_FIXING", "A government job promised through a contact",
+        "Government recruitment runs on published exams and merit lists, and "
+        "nobody can place you outside one. Money paid for a seat buys a forged "
+        "appointment letter at best.",
+        3,
+        _p(r"(?:government|govt|sarkari|railway|ssc)[^.!?]{0,30}(?:job|post|vacancy|bharti)[^.!?]{0,45}(?:guaranteed|guarantee|without exam|no exam|setting)",
+           r"(?:job|naukri)[^.!?]{0,25}(?:guarantee|pakki|confirm)[^.!?]{0,35}(?:pay|fee|rs\.?|₹|inr|amount|lakh)",
+           r"(?:direct|without) (?:exam|interview|test)[^.!?]{0,30}(?:joining|appointment|selection)"),
+    ),
 )
 
 

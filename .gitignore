@@ -9,3 +9,6 @@ data/
 dist/
 node_modules/
 pakka-lambda.zip
+
+# local editor/tool run configs
+.claude/

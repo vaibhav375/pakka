@@ -88,6 +88,56 @@ def main() -> int:
                  handler.twilio_webhook(ev2)["statusCode"], 200)
     del os.environ["TWILIO_AUTH_TOKEN"]
 
+    # --- a screenshot forwarded to the sandbox
+    import vision
+
+    # The media URL arrives inside the request body, and with no auth token
+    # configured the signature check passes everything, so the host it points
+    # at is the only thing standing between this and a request made on a
+    # stranger's behalf with the account token attached.
+    for url, want in [
+            ("https://api.twilio.com/2010-04-01/Accounts/AC1/Media/ME1", True),
+            ("https://evil-twilio.com/steal", False),
+            ("https://api.twilio.com.evil.net/steal", False),
+            ("http://api.twilio.com/plaintext", False),
+            ("https://attacker.example/steal", False)]:
+        bad += check(f"media host {'allowed' if want else 'refused'}: {url[:46]}",
+                     twilio._is_twilio(url), want)
+
+    media = {"From": "whatsapp:+919812345670", "Body": "dekho ye aaya hai",
+             "NumMedia": "1", "MediaUrl0": "https://api.twilio.com/m/1",
+             "MediaContentType0": "image/jpeg"}
+    msg = twilio.incoming(media)[0]
+    bad += check("a picture with a caption is treated as a picture",
+                 (msg["type"], msg["text"], msg["caption"]),
+                 ("photo", "", "dekho ye aaya hai"))
+
+    def post(form):
+        body = urllib.parse.urlencode(form)
+        return handler.twilio_webhook(
+            {"rawPath": "/twilio", "headers": {}, "body": body})["body"]
+
+    twilio.fetch = lambda url, mt="", sid="", token="": (b"\x89PNG" + b"0" * 32, "image/png")
+    vision.MODEL_ID = "stub-model"
+    vision.read = lambda raw, mt: "Your KYC has expired. Share the OTP to continue."
+    out = post(media)
+    bad += check("a forwarded screenshot is read and then scanned",
+                 "checks fired" in out, True)
+    bad += check("and the reply quotes the words it read",
+                 "I read in the picture" in out and "Share the OTP" in out, True)
+
+    vision.read = lambda raw, mt: None
+    bad += check("an unreadable picture says that, not 'I can only read text'",
+                 "could not read any text in that picture" in post(media), True)
+
+    vision.MODEL_ID = None
+    bad += check("with no model configured a picture is never downloaded",
+                 "could not read any text in that picture" in post(media), True)
+
+    bad += check("a voice note is still answered as a voice note",
+                 "I can only read text" in post(
+                     {**media, "MediaContentType0": "audio/ogg"}), True)
+
     print(f"\n  {'all tests passed' if not bad else f'{bad} FAILED'}")
     return 1 if bad else 0
 

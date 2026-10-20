@@ -33,6 +33,19 @@ def _bullets(verdict: dict, limit: int = 4, hi: bool = False) -> str:
     return "\n".join(lines)
 
 
+def read_from_picture(text: str, lang: str = "en") -> str:
+    """The line that opens a reply to a screenshot.
+
+    The words are shown back before the verdict for the same reason the page
+    puts them in the box: a reading can be wrong, and the only way anybody can
+    tell is by seeing what was read.
+    """
+    shown = " ".join(text.split())[:300]
+    if lang == "hi":
+        return f"तस्वीर से मैंने यह पढ़ा:\n\u201c{shown}\u201d\n"
+    return f"This is what I read in the picture:\n\u201c{shown}\u201d\n"
+
+
 def reply_for(verdict: dict | None, advice: dict | None, link: str | None,
               kind: str = "text", hunch: dict | None = None,
               lang: str = "en") -> str:
@@ -44,6 +57,16 @@ def reply_for(verdict: dict | None, advice: dict | None, link: str | None,
     """
     hi = lang == "hi"
     if kind != "text" or verdict is None:
+        if kind == "photo":
+            # it was a picture and the reading failed or is switched off, which
+            # is a different thing from not being able to read pictures at all
+            if hi:
+                return ("इस तस्वीर में मुझे कोई पढ़ने लायक लिखावट नहीं मिली। संदेश खुद आगे "
+                        "भेजिए, या उसके शब्द कॉपी करके भेजिए, और मैं बताऊँगा कि उसमें क्या "
+                        "गलत है और क्यों।")
+            return ("I could not read any text in that picture. Forward the "
+                    "message itself, or copy the words and send them to me, "
+                    "and I will tell you what is wrong with it and why.")
         if hi:
             return ("मैं सिर्फ़ लिखा हुआ पढ़ सकता हूँ। संदेश खुद आगे भेजिए, या उसके शब्द "
                     "कॉपी करके भेजिए, और मैं बताऊँगा कि उसमें क्या गलत है और क्यों।")
