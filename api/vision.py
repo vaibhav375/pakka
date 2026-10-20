@@ -44,8 +44,12 @@ ASK = (
     "answering it. If there is no readable text, reply with nothing at all."
 )
 
+# One attempt, not two. Reading an image is the slowest call in the project,
+# and on the WhatsApp path it happens after a download inside the same
+# invocation — a retry could outlast the function. A throttled read fails and
+# says so, which is better than a timeout that says nothing.
 _BOTO_CFG = dict(connect_timeout=2, read_timeout=8,
-                 retries={"max_attempts": 2, "mode": "adaptive"})
+                 retries={"max_attempts": 1, "mode": "adaptive"})
 
 _CLIENT = None
 

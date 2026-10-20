@@ -614,12 +614,22 @@ and scores as the scam it is.
 |---|---|
 | the page | a button beside **Check it**, or paste a screenshot into the box |
 | Telegram | forward the picture to the bot |
+| WhatsApp | forward the picture to the sandbox number |
 
 Anything over 1600px or 3.5 MB is scaled down before it is sent, and anything
 already small enough is sent untouched — a JPEG pass costs small text the
 sharpness the reading depends on. On Telegram the largest size under the limit
 is the one fetched, because a thumbnail loses exactly the small print the rules
 are looking for.
+
+The two chat doors differ in where the picture lives. Telegram hands over a
+file id you exchange for a download. Twilio keeps media behind its own
+authenticated API, so that one needs `TWILIO_ACCOUNT_SID` as well as the auth
+token, and the URL it gives arrives **inside the request body** — which matters,
+because with no auth token configured the signature check passes everything. So
+the host is checked before anything is sent to it, and the credentials are
+dropped at Twilio's redirect rather than forwarded to whichever CDN it points
+at.
 
 ```
 python3 api/test_vision.py     # the gates and the reading, Bedrock stubbed out

@@ -134,14 +134,24 @@ def main() -> int:
     sent.clear()
     handler.telegram_webhook({"headers": {}, "body": json.dumps(photo(sizes))},
                              send=lambda cid, t: sent.append((cid, t)))
-    bad += check("an unreadable picture is answered honestly",
-                 "I can only read text" in sent[0][1], True)
+    bad += check("an unreadable picture says so, rather than 'only text'",
+                 "could not read any text in that picture" in sent[0][1], True)
 
     vision.MODEL_ID = None
     sent.clear()
     handler.telegram_webhook({"headers": {}, "body": json.dumps(photo(sizes))},
                              send=lambda cid, t: sent.append((cid, t)))
     bad += check("with no model configured a picture is never downloaded",
+                 "could not read any text in that picture" in sent[0][1], True)
+
+    # a voice note is not a picture and must not be answered as one
+    voice = {"update_id": 3, "message": {
+        "message_id": 12, "from": {"id": 4242, "first_name": "V"},
+        "chat": {"id": 4242, "type": "private"}, "voice": {"file_id": "v1"}}}
+    sent.clear()
+    handler.telegram_webhook({"headers": {}, "body": json.dumps(voice)},
+                             send=lambda cid, t: sent.append((cid, t)))
+    bad += check("a voice note is still answered as a voice note",
                  "I can only read text" in sent[0][1], True)
 
     print(f"\n  {'all tests passed' if not bad else f'{bad} FAILED'}")

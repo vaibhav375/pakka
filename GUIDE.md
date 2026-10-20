@@ -851,9 +851,10 @@ The ones above all assume the scam arrives as *text*. A great many arrive as a
 recently the honest answer to those was "I can only read text", which is the
 answer least useful to the person who most needs one.
 
-So a picture can now be sent three ways: the button beside **Check it**,
+So a picture can now be sent four ways: the button beside **Check it**,
 pasting a screenshot straight into the box, or forwarding it to the Telegram
-bot. What happens next is the part worth explaining:
+bot or the WhatsApp sandbox number. What happens next is the part worth
+explaining:
 
 > The picture is read into words. Those words then go through exactly the same
 > seventy-seven rules as anything typed. Reading is not deciding.
@@ -880,6 +881,17 @@ Two small decisions that are worth having ready: anything over 1600px or
 JPEG pass costs small text the sharpness the reading depends on; and on
 Telegram the **largest** size under the limit is fetched, because a thumbnail
 loses exactly the small print the rules are looking for.
+
+And one security decision worth volunteering, because it is the kind of thing
+an interviewer digs for. Twilio does not put the picture in the webhook; it
+sends a **URL**, inside the request body, which this function then fetches with
+the account credentials attached. With no auth token configured the signature
+check passes everything, so an unchecked URL there would be a request the
+Lambda makes on a stranger's behalf, carrying the token. Two guards: the host
+must be Twilio's own — `evil-twilio.com` does not end in `.twilio.com` — and
+the redirect Twilio answers with is followed **without** the Authorization
+header, because the URL it points at is already signed and the CDN behind it
+has no business seeing the token. Both are asserted in `api/test_twilio.py`.
 
 ## Hindi
 

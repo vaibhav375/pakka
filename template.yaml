@@ -43,6 +43,14 @@ Parameters:
     Type: String
     Default: ""
     Description: The exact URL Twilio calls, only needed if a proxy rewrites the host
+  TwilioAccountSid:
+    Type: String
+    Default: ""
+    Description: >
+      Account SID, needed only to download a picture someone sends to the
+      WhatsApp sandbox — Twilio keeps media behind its own authenticated API
+      rather than putting it in the webhook. Leave it blank and a forwarded
+      screenshot is answered with "I could not read any text in that picture".
   BedrockModelId:
     Type: String
     Default: ""
@@ -79,6 +87,7 @@ Resources:
           # WhatsApp the easy way: Twilio's sandbox, no business account
           TWILIO_AUTH_TOKEN: !Ref TwilioAuthToken
           TWILIO_WEBHOOK_URL: !Ref TwilioWebhookUrl
+          TWILIO_ACCOUNT_SID: !Ref TwilioAccountSid
           # The fallback check, for messages the rules found nothing in. Unset
           # by default, and unset means not a single call is made.
           BEDROCK_MODEL_ID: !Ref BedrockModelId

@@ -101,6 +101,20 @@ def scan(text: str) -> dict:
     return _reply(200, {**record, "id": scan_id})
 
 
+def _words_in_twilio_picture(msg: dict) -> str:
+    """The text in a screenshot sent to the WhatsApp sandbox, or "" when there
+    is none to be had. Twilio puts the picture behind its own API rather than
+    in the webhook, so it has to be fetched before it can be read."""
+    if not msg.get("media_url") or not vision.MODEL_ID:
+        return ""
+    if not (msg.get("media_type") or "").startswith("image/"):
+        return ""                      # a voice note is not a screenshot
+    got = twilio.fetch(msg["media_url"], msg.get("media_type", ""))
+    if not got:
+        return ""
+    return vision.read(*got) or ""
+
+
 def _words_in_picture(msg: dict) -> str:
     """The text in a screenshot somebody forwarded to the bot, or "" when
     there is none to be had. A picture that cannot be fetched or read is not
@@ -248,11 +262,17 @@ def twilio_webhook(event) -> dict:
     for msg in twilio.incoming(form):
         try:
             text = (msg["text"] or "").strip()[:MAX_CHARS]
-            if not text or msg["type"] != "text":
+            shot = ""
+            if msg.get("media_url"):
+                shot = _words_in_twilio_picture(msg)
+                text = shot[:MAX_CHARS]
+            if not text:
                 reply = reply_for(None, None, None, kind=msg["type"])
                 continue
             verdict, advice, link, hunch, lang = _verdict_for(text)
             reply = reply_for(verdict, advice, link, hunch=hunch, lang=lang)
+            if shot:
+                reply = read_from_picture(text, lang) + "\n" + reply
         except Exception:
             traceback.print_exc()
             reply = ("Something broke checking that. Try again, or paste it at "

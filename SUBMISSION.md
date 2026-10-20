@@ -71,10 +71,11 @@ shareable link, the deeper check, or reading a screenshot. Each of those is a
 button, and the button says what it does before you press it.
 
 Screenshots matter because that is how these actually arrive — people
-screenshot the SMS and forward the picture. Send one and the words are read out
-of it, put back in front of you so you can see whether the reading was right,
-and then checked by the same rules as anything else. An instruction written
-inside the picture becomes text and gets scanned, not obeyed.
+screenshot the SMS and forward the picture. Send one to the page, the Telegram
+bot or the WhatsApp number and the words are read out of it, put back in front
+of you so you can see whether the reading was right, and then checked by the
+same rules as anything else. An instruction written inside the picture becomes
+text and gets scanned, not obeyed.
 
 ## 1b. What problem does it solve, and who is it for?
 
@@ -221,6 +222,12 @@ Solo project, so all of it is mine.
   it cannot point at in the message, and the screenshot reading that feeds the
   same rules. Both are tested with the Bedrock call stubbed, so the suite runs
   with no AWS account.
+- Screenshot support on all three doors, including the awkward one: Twilio
+  sends a media **URL** in the request body rather than the picture, and the
+  webhook fetches it with the account credentials. Since an unchecked URL there
+  would be a request made on a stranger's behalf with the token attached, the
+  host is validated against Twilio's own and the credentials are dropped at the
+  redirect instead of being forwarded to the CDN behind it.
 - Finding and fixing a privacy bug of my own making: the page had been posting
   every message to the API on every check, to mint a share link nobody had
   asked for, while the front page said nothing left the device unless you chose
