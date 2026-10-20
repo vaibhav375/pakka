@@ -83,7 +83,8 @@ def scan(text: str) -> dict:
     # only where the rules found nothing or one small thing, and only when a
     # model is configured. The band may move up to "Be careful", never past it
     # and never down, so the stored record is what the reader was shown.
-    if llm.wanted(verdict):
+    record["deep_checked"] = llm.wanted(verdict)
+    if record["deep_checked"]:
         try:
             record.update(llm.raise_band(verdict, llm.check(text)))
         except Exception:

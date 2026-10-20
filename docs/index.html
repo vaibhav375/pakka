@@ -86,6 +86,20 @@
     <span class="mono" id="l-model">The model's reading</span>
     <p id="hunchtext"></p>
   </div>
+  <!-- Offered only when nothing matched. Everything above this point was
+       decided on the device; this is the one check that cannot be, so it asks
+       first and says plainly what pressing it does. -->
+  <div class="deep" id="deep" hidden>
+    <span class="mono" id="l-deep">Still not sure?</span>
+    <p id="deepnote">Pakka found none of its patterns here. A deeper check can
+      read the message for a shape nobody wrote a rule for — but it runs on the
+      server, so <b>pressing this sends the message off your device</b>. It can
+      only add a warning, never clear one.</p>
+    <div class="deeprow">
+      <button class="copy" id="deepgo">Send for a deeper check</button>
+      <span class="mono" id="deepstate" style="color:var(--dim)"></span>
+    </div>
+  </div>
   <div class="advice" id="advice" hidden>
     <span class="mono" id="l-todo">What to do now</span>
     <ol id="actions"></ol>
