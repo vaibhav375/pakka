@@ -63,8 +63,18 @@ window.pakkaNormalise = function (text) {{
     }}
     at += ch.length;                              /* but index by code unit, for slice */
   }}
+  /* a run of three or more digits is a number, not letters in disguise */
+  const inNumber = new Array(chars.length).fill(false);
+  for (let j = 0; j < chars.length;) {{
+    if (chars[j] >= '0' && chars[j] <= '9') {{
+      let k = j;
+      while (k < chars.length && chars[k] >= '0' && chars[k] <= '9') k++;
+      if (k - j >= 3) for (let q = j; q < k; q++) inNumber[q] = true;
+      j = k;
+    }} else j++;
+  }}
   for (let j = 0; j < chars.length; j++) {{
-    if (PAKKA_LEET[chars[j]] !== undefined) {{
+    if (!inNumber[j] && PAKKA_LEET[chars[j]] !== undefined) {{
       const prev = j ? chars[j - 1] : '', next = chars[j + 1] || '';
       if (pakkaAlpha(prev) || pakkaAlpha(next)) chars[j] = PAKKA_LEET[chars[j]];
     }}

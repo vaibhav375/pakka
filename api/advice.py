@@ -45,13 +45,49 @@ CLAUSE = {
     "INVESTMENT_TIP": "it promises guaranteed returns",
     "TASK_COMMISSION": "it is a prepaid-task scheme",
     "ARMY_OFFICER": "it uses the posted-far-away story to avoid meeting",
+    "PRIZE_FRAME": "it offers a reward and a link to collect it",
+    "SEXTORTION": "it threatens to send private images to the people you know",
+    "MULE_ACCOUNT": "it wants to move somebody else's money through your account",
+    "WRONG_TRANSFER": "it says money arrived by mistake and wants it sent back",
+    "TAX_REFUND": "it offers a tax refund through a link",
+    "PF_CLAIM": "it offers a PF or pension payout through a link",
+    "INSURANCE_LAPSE": "it says a policy is lapsing and attaches a way to pay",
+    "CARD_UPGRADE": "it offers a card upgrade and wants the OTP or CVV for it",
+    "UNLISTED_SHARES": "it offers pre-IPO or unlisted shares over chat",
+    "GIFT_CARD_ASK": "it wants vouchers bought and the codes sent back",
+    "SCREEN_CODE": "it asks for the code showing on your screen",
+    "CRYPTO_DOUBLE": "it promises to multiply money in hours",
+    "SUBSCRIPTION_FAIL": "it says a subscription payment failed and links somewhere to fix it",
+    "VISA_JOB_ABROAD": "it wants a visa or permit fee for a job abroad",
+    "GIFT_FROM_ABROAD": "it wants clearance money for a parcel from abroad",
+    "LOAN_APPROVED_FEE": "it says a loan is approved and asks for a fee",
+    "DORMANT_ACCOUNT": "it says the account is dormant and links somewhere to reactivate it",
+    "SIM_UPGRADE": "it wants an OTP to complete a SIM upgrade",
+    "GAS_SUBSIDY": "it wants gas subsidy details through a link",
+    "CHARITY_PLEA": "the donation goes to a personal UPI handle",
+    "BETTING_PROMO": "it promises daily income from a betting app",
+    "MLM_RECRUIT": "the income depends on recruiting more people",
+    "EXAM_RESULT_LINK": "it puts a result or admit card behind a sent link",
+    "SCHOLARSHIP_BAIT": "it wants documents for a scholarship over chat",
+    "CELEB_ENDORSE": "it attaches a famous name to an investment",
+    "PROFIT_PROOF": "it offers profit screenshots as the reason to trust it",
+    "WHATSAPP_CODE": "it wants the code that signs in to your chat account",
+    "FAKE_INVOICE_ACCOUNT": "it says the bank account on the invoice has changed",
+    "MEDICAL_PLEA": "it uses a medical emergency to rush a payment",
+    "GOVT_JOB_FIXING": "it promises a government job outside the exam",
 }
 
 MONEY = {"PAY_TO_GET_JOB", "PAY_TO_RECEIVE", "PERSONAL_PAYMENT", "COURIER_CUSTOMS",
-         "TASK_COMMISSION", "LOTTERY_WIN", "INVESTMENT_TIP", "QR_SCAN", "COLLECT_REQUEST", "ADVANCE_FEE", "BANK_DETAILS"}
-JOB = {"PAY_TO_GET_JOB", "NO_INTERVIEW", "TOO_GOOD", "TASK_COMMISSION"}
+         "TASK_COMMISSION", "LOTTERY_WIN", "INVESTMENT_TIP", "QR_SCAN", "COLLECT_REQUEST", "ADVANCE_FEE", "BANK_DETAILS",
+         "PRIZE_FRAME", "MULE_ACCOUNT", "WRONG_TRANSFER", "GIFT_CARD_ASK", "CRYPTO_DOUBLE", "UNLISTED_SHARES",
+         "LOAN_APPROVED_FEE", "GIFT_FROM_ABROAD", "CHARITY_PLEA", "BETTING_PROMO", "MLM_RECRUIT", "PROFIT_PROOF",
+         "CELEB_ENDORSE", "MEDICAL_PLEA", "FAKE_INVOICE_ACCOUNT"}
+JOB = {"PAY_TO_GET_JOB", "NO_INTERVIEW", "TOO_GOOD", "TASK_COMMISSION",
+       "VISA_JOB_ABROAD", "GOVT_JOB_FIXING", "SCHOLARSHIP_BAIT"}
 IMPERSONATION = {"KYC_PANIC", "ELECTRICITY_CUT", "LOAN_HARASSMENT", "THREAT", "COURIER_CUSTOMS", "SIM_BLOCK", "LOOKALIKE_DOMAIN",
-                 "VERIFY_DETAILS", "CALLBACK_NUMBER", "REMOTE_ACCESS", "APK_INSTALL"}
+                 "VERIFY_DETAILS", "CALLBACK_NUMBER", "REMOTE_ACCESS", "APK_INSTALL",
+                 "TAX_REFUND", "PF_CLAIM", "INSURANCE_LAPSE", "CARD_UPGRADE", "SUBSCRIPTION_FAIL", "DORMANT_ACCOUNT",
+                 "SIM_UPGRADE", "GAS_SUBSIDY", "EXAM_RESULT_LINK", "SCREEN_CODE", "WHATSAPP_CODE", "SEXTORTION"}
 PROPERTY = {"SIGHT_UNSEEN", "ARMY_OFFICER"}
 
 

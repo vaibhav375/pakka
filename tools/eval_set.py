@@ -123,6 +123,50 @@ FRAUD = [
  ("lookalike", "Your account needs verification. Update it at http://\u0430mazon.in/verify now"),
  ("lookalike", "Apple ID locked. Sign in at https://xn--80ak6aa92e.com/login to restore access"),
  ("lookalike", "Confirm your KYC details here http://192.168.4.11:8080/kyc immediately"),
+ # --- a reward whose object is not in anybody's word list
+ ("prize", "get a chance to win a free hoverboard just press the link"),
+ ("prize", "Congratulations! You have won a free Dyson vacuum. Claim now at http://gift-claim.cc"),
+ ("prize", "Press the link below to collect your reward before it expires tonight."),
+ # --- blackmail over images
+ ("sextortion", "I have your private video. Pay Rs 20,000 within 2 hours or I will send it to your Instagram contacts."),
+ ("sextortion", "Pay Rs 8,000 to delete the clip, otherwise it goes to your family and office."),
+ # --- being recruited as a mule
+ ("mule", "Let us use your bank account to receive payments. You keep 10 percent commission on each transaction."),
+ ("mule", "Account rent par chahiye. Sirf paisa aayega aur jayega, aapko commission milega."),
+ # --- the money that arrived by mistake
+ ("wrongtransfer", "Sir I transferred Rs 5000 to your account by mistake. Please return it to this UPI id 9812345670@okaxis."),
+ # --- payouts that arrive as a link
+ ("taxrefund", "Income Tax Department: your refund of Rs 18,230 is pending. Verify your bank account at http://itr-refund.in"),
+ ("pf", "EPFO: your PF claim of Rs 1,24,000 is approved. Click http://epfo-claim.xyz to release the amount."),
+ ("insurance", "Your LIC policy will lapse today. Pay the premium immediately at http://lic-renew.co to avoid termination."),
+ ("gas", "Your LPG subsidy KYC is pending. Update at http://lpg-kyc.in or the subsidy will be blocked."),
+ ("scholarship", "Your scholarship is approved. Share your Aadhaar and bank account details on WhatsApp to claim it."),
+ # --- cards, SIMs and the codes that move them
+ ("card", "Your HDFC credit card is eligible for a limit upgrade. Confirm your CVV and the OTP to activate it."),
+ ("sim", "Airtel: upgrade to 5G free of cost. Share the OTP sent to your number to complete the SIM upgrade."),
+ ("whatsappcode", "Bhai mera WhatsApp code tumhare number pe aaya hai, please forward the 6 digit code."),
+ ("remote", "Please tell me the 9 digit code showing on your screen so I can process your refund."),
+ # --- investments that cannot exist
+ ("investment", "Pre-IPO shares of a leading company available at a discount. Allotment guaranteed, book now with payment."),
+ ("investment", "Invest Rs 10,000 and receive Rs 30,000 in 24 hours. Guaranteed bitcoin daily profit."),
+ ("investment", "Ratan Tata recommends this trading platform. Earn guaranteed profit, join the group now."),
+ ("investment", "See my profit screenshot from today. My members are earning Rs 20,000 daily."),
+ ("betting", "Join our colour prediction app and earn Rs 5,000 daily. Deposit bonus on your first recharge."),
+ ("mlm", "Join now and refer 5 people to build your downline. Unlimited monthly income guaranteed."),
+ # --- jobs, loans and vouchers
+ ("job", "Job in Canada with free visa and air ticket. Salary 3 lakh monthly. Pay Rs 25,000 visa processing fee."),
+ ("job", "Railway group D job guaranteed without exam. Pay Rs 80,000 for a confirm joining letter."),
+ ("loan", "Your personal loan of Rs 5 lakh is sanctioned. Pay Rs 3,500 file charge to disburse it today."),
+ ("giftcard", "I am in a meeting. Please buy 5 Amazon gift cards of Rs 10,000 each and send me the codes."),
+ # --- accounts, subscriptions and invoices
+ ("kyc", "Your account is dormant. Reactivate now at http://bank-reactivate.in to avoid permanent closure."),
+ ("subscription", "Netflix: your payment failed. Update your card details here http://netflix-billing.cc to avoid cancellation."),
+ ("invoice", "Please note our bank account details have changed. Kindly remit the invoice payment to our new account."),
+ # --- parcels, emergencies and appeals
+ ("courier", "Your friend sent a gift parcel from London. It is held at customs, pay a clearance duty of Rs 12,500."),
+ ("medical", "Your brother had an accident and is admitted in ICU. Send Rs 50,000 urgently for the operation."),
+ ("charity", "Please donate Rs 2,000 urgently for this child's cancer surgery. GPay to 9812345670@ybl"),
+ ("exam", "CBSE result declared. Download your marksheet from this link http://cbse-result.in/result.apk"),
 ]
 
 LEGIT = [
@@ -195,4 +239,24 @@ LEGIT = [
  ("hindi", "नमस्ते, कल मीटिंग सुबह 10 बजे है। कृपया समय पर आएं।"),
  ("hindi", "आपका ऑर्डर भेज दिया गया है। ऐप में ट्रैक करें।"),
  ("hindi", "बिजली बिल 1,240 रुपये का भुगतान सफल रहा। रसीद ऐप में है।"),
+ # --- the legitimate twins of the rules added for the new scam shapes
+ ("service", "Congratulations on winning the inter-college quiz! Collect your certificate from the department office."),
+ ("service", "Free delivery on all orders above Rs 499 this weekend. Shop now on our app."),
+ ("bank", "Your income tax refund of Rs 18,230 has been credited to a/c XXXX1234 on 12 Oct."),
+ ("service", "Your EPF passbook is updated. View your balance by logging in to the EPFO member portal."),
+ ("service", "Your LIC premium of Rs 12,400 is due on 15 November. Pay through the LIC app or at any branch."),
+ ("bank", "Your HDFC credit card statement is ready. Total due Rs 8,430. Pay by 18 Oct in the app."),
+ ("bank", "Your credit card limit has been increased to Rs 2 lakh. View the details in the app."),
+ ("service", "Get a lifetime free credit card with no joining fee. Apply on our app."),
+ ("service", "Netflix: your plan renews on 3 November. Manage your membership in the app."),
+ ("service", "Refer 3 friends on PhonePe and earn Rs 500 cashback each."),
+ ("service", "Buy one gift card and get 10 percent off at any Croma store."),
+ ("service", "Your SIM will be upgraded to 5G automatically. No action is needed from you."),
+ ("service", "Your CBSE result is declared. Check it on the official website cbseresults.nic.in"),
+ ("friend", "I transferred the Rs 2,000 I owed you to your account this morning."),
+ ("friend", "Please use my account for the group trip money, I will keep track of who paid what."),
+ ("friend", "Mom is admitted in Apollo for her knee surgery tomorrow, I will send you the room number."),
+ ("service", "Thanks for donating to the school library fund. Your receipt with 80G details is attached."),
+ ("service", "Your Amazon order has been delivered. Rate your experience in the app."),
+ ("bank", "Income Tax Dept: Your refund of INR 14882 has been processed and credited to your account."),
 ]

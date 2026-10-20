@@ -7,7 +7,7 @@ window.PAKKA_RULES = [
     "name": "Asks for money before a job",
     "why": "A real employer never charges you to be hired. Registration, training and security fees are the oldest job scam there is.",
     "weight": 3,
-    "re": "registration fee|security (?:fee|deposit|amount)|processing fee|training fee|refundable (?:fee|deposit|amount)|joining fee|(?:have to|need to|must|kindly|please) pay (?:rs\\.?|₹)?\\s?[\\d,]+|\\bpay (?:rs\\.?|₹)\\s?[\\d,]+ (?:to|for) (?:confirm|secure|book|get|join|start|activat)"
+    "re": "(?<!no )(?<!nil )(?<!zero )registration fee|security (?:fee|deposit|amount)|(?<!no )(?<!nil )(?<!zero )processing fee|training fee|refundable (?:fee|deposit|amount)|(?<!no )(?<!nil )(?<!zero )joining fee|(?:have to|need to|must|kindly|please) pay (?:rs\\.?|₹)?\\s?[\\d,]+|\\bpay (?:rs\\.?|₹)\\s?[\\d,]+ (?:to|for) (?:confirm|secure|book|get|join|start|activat)"
   },
   {
     "id": "ASKS_FOR_SECRET",
@@ -112,7 +112,7 @@ window.PAKKA_RULES = [
     "name": "Electricity disconnection threat",
     "why": "Power utilities do not warn you by SMS from a personal number, and they never ask you to call one to avoid disconnection tonight.",
     "weight": 3,
-    "re": "electricity .{0,30}(?:disconnect|cut off|discontinue)|बिजली.{0,30}(?:काट|कट|बंद)|(?:power|electricity)(?: supply| connection)?.{0,30}(?:cut off|cut-off|switched off)|power .{0,20}(?:will be )?disconnect|bill .{0,20}not updated.{0,30}disconnect"
+    "re": "electricity .{0,30}(?:disconnect|cut off|discontinue)|बिजली.{0,30}(?:काट|कट|बंद)|(?:power|electricity)(?: supply| connection)?.{0,30}(?:cut off|cut-off|switched off)|power .{0,20}(?:will be )?disconnect|(?:power|electricity)(?: supply| connection)?.{0,25}(?:will be |going to be )?cut\\b|bill .{0,20}not updated.{0,30}disconnect"
   },
   {
     "id": "LOTTERY_WIN",
@@ -330,6 +330,216 @@ window.PAKKA_RULES = [
     "why": "The soldier-being-transferred story is the oldest marketplace scam in India. It exists to explain why you must pay before meeting.",
     "weight": 3,
     "re": "(?:army|military|cisf|crpf|bsf|navy) (?:officer|jawan|personnel)|\\b(?:major|colonel|captain|subedar|havildar|brigadier) [a-z]\\w+|(?:posted|deployed) (?:in|at) .{0,40}(?:cannot|can't|unable to) (?:meet|come|visit|see)|transfer(?:red)? .{0,25}urgent(?:ly)? .{0,25}sell"
+  },
+  {
+    "id": "PRIZE_FRAME",
+    "name": "A reward you are told to click for",
+    "why": "The prize changes every week — an iPad, a scooter, a gift voucher — because the object was never the point. What stays the same is being told you have won something and that a link is how you collect it.",
+    "weight": 3,
+    "re": "(?:chance (?:to|of) )?\\bwin(?:ning)?\\b[^.!?]{0,60}?(?:click|press|tap|hit|open|visit)\\b[^.!?]{0,25}(?:link|here|below|button|url|site)|(?:click|press|tap|hit|open|visit)\\b[^.!?]{0,25}(?:link|here|below|button|url|site)[^.!?]{0,45}(?:to |and )?(?:win|claim|collect|redeem)\\b|\\b(?:you (?:have |hv )?won|you are (?:the )?winner|aap(?:ne)? jeet)\\b.{0,70}(?:claim|collect|redeem|link|click|press|tap)\\b|\\b(?:selected|chosen|shortlisted) (?:as|for) (?:a |the |our )?(?:lucky|winner|gift|prize|reward)|\\b(?:gift|prize|reward)\\b[^.!?]{0,25}(?:waiting|reserved|unlocked|allotted|pending) for you|(?:claim|collect|redeem)\\b[^.!?]{0,20}(?:your|this|the)\\b[^.!?]{0,20}(?:prize|reward|gift|bonus|voucher|coupon|hamper)\\b[^.!?]{0,30}(?:now|today|link|here|before)"
+  },
+  {
+    "id": "SEXTORTION",
+    "name": "Threatens to send private photos or video to your contacts",
+    "why": "This is blackmail, and paying has never once stopped it — it marks you as someone who pays. The video is usually fake or AI-made. Report it at cybercrime.gov.in and tell one person you trust.",
+    "weight": 4,
+    "re": "(?:nude|naked|obscene|intimate|private|explicit|compromising)\\s*(?:photo|photos|pic|pics|picture|images?|video|videos|clip|clips|screenshot|mms)|(?:video|photo|clip|mms|screenshot)s?\\b[^.!?]{0,40}(?:send|post|upload|share|leak|viral|forward)\\b[^.!?]{0,40}(?:contacts?|friends?|family|facebook|instagram|youtube|relatives|everyone)|(?:send|post|upload|leak|viral|forward)\\b[^.!?]{0,35}(?:your )?(?:video|photo|clip|mms)[^.!?]{0,40}(?:unless|if you (?:do not|don't|dont)|within \\d+ (?:hour|minute))|(?:delete|remove) (?:the |this |your )?(?:video|clip|photo|mms)[^.!?]{0,35}(?:pay|rs\\.?|₹|fee|charge)|(?:pay|rs\\.?|₹)[^.!?]{0,35}(?:to |for )?(?:delete|remove|stop)\\b[^.!?]{0,20}(?:the |this |your )?(?:video|clip|photo|mms)|(?:send|post|upload|share|leak|forward|circulate)\\b[^.!?]{0,30}(?:your |the )?(?:photos?|pics?|pictures?|videos?|clips?|mms|screenshots?)\\b[^.!?]{0,45}(?:contacts?|phone ?book|friends?|family|everyone|relatives?|facebook|instagram|social)|(?:अश्लील|न्यूड|निजी)\\s*(?:वीडियो|फोटो|तस्वीर)"
+  },
+  {
+    "id": "MULE_ACCOUNT",
+    "name": "Wants to move money through your bank account",
+    "why": "Letting someone route money through your account makes you the person the police find, not them. The commission is small and the case is yours. This is how mule accounts are recruited.",
+    "weight": 4,
+    "re": "(?:use|rent|lend|give|share) (?:your |ur |apna |apne )?(?:bank |savings )?account.{0,60}(?:commission|percent|\\bcut\\b|per transaction)|(?:receive|accept) (?:money|funds|amount|payment).{0,45}(?:your|ur) account.{0,45}(?:commission|keep|percent|\\bcut\\b)|(?:commission|cut) (?:for|on) (?:each |every |per )?transaction.{0,45}(?:account|transfer|withdraw|deposit)|(?:bank )?account (?:rent|kiraya) (?:par|pe|on)\\b"
+  },
+  {
+    "id": "WRONG_TRANSFER",
+    "name": "Says money reached you by mistake and wants it back",
+    "why": "The money that arrived was usually taken from someone else's hacked account, and the refund you send goes somewhere different. A genuine mistaken transfer is reversed by the sender's bank, not by you.",
+    "weight": 3,
+    "re": "(?:sent|transferred|paid|credited)\\b[^.!?]{0,35}(?:by mistake|mistakenly|accidentally|wrongly|by error|galti se)|(?:wrong|mistaken|incorrect) (?:transfer|transaction|payment|upi)[^.!?]{0,40}(?:return|refund|send back|repay)|(?:return|send back|refund)\\b[^.!?]{0,30}(?:the |that |this )?(?:money|amount|rs\\.?|₹)[^.!?]{0,40}(?:different|another|this) (?:upi|account|number|id)|galti se[^.!?]{0,30}(?:paise|amount|transfer)"
+  },
+  {
+    "id": "TAX_REFUND",
+    "name": "A tax refund that arrives by link",
+    "why": "The Income Tax Department pays refunds into the account on your return and never sends a link to claim one. Refund links lead to a copy of the portal that keeps whatever you type into it.",
+    "weight": 3,
+    "re": "(?:income ?tax|it department|itr|tds)[^.!?]{0,40}refund[^.!?]{0,40}(?:click here|click the|link|apply|verify|http)|refund of (?:rs\\.?|₹|inr)\\s?[\\d,]+[^.!?]{0,40}(?:approved|credited|pending|sanctioned)[^.!?]{0,40}(?:click|link|claim|verify|http)|(?:tax )?refund[^.!?]{0,30}(?:pending|failed|on hold).{0,45}(?:update|verify|confirm)[^.!?]{0,25}(?:account|bank|detail)|(?:आयकर|इनकम टैक्स)[^।.!?]{0,40}(?:रिफंड|वापस)"
+  },
+  {
+    "id": "PF_CLAIM",
+    "name": "A PF or pension payout that needs a link",
+    "why": "EPFO settles claims inside the member portal you log into yourself. A PF or pension message carrying a link is after your UAN and the bank account attached to it.",
+    "weight": 3,
+    "re": "(?:epfo|\\bpf\\b|provident fund|\\buan\\b|pension)[^.!?]{0,45}(?:claim|withdraw|settle|release|transfer)[^.!?]{0,40}(?:click|link|here|http|verify|update)|(?:pf|epf|pension) (?:amount|balance|fund)[^.!?]{0,35}(?:ready|approved|pending|credited)[^.!?]{0,35}(?:click|link|claim|verify|http)"
+  },
+  {
+    "id": "INSURANCE_LAPSE",
+    "name": "A policy about to lapse, with a link to pay",
+    "why": "Insurers take premiums through their own app, their website or an agent you already know. A lapse warning with a payment link attached is how a premium gets paid into somebody else's account.",
+    "weight": 3,
+    "re": "(?:policy|insurance|premium)[^.!?]{0,40}(?:lapse|lapsed|discontinued|terminated)[^.!?]{0,45}(?:pay|renew|click|link|http|immediately|today)|(?:renew|revive) (?:your )?policy[^.!?]{0,40}(?:click|link|http|pay now|immediately)|(?:lic|insurance)[^.!?]{0,30}(?:bonus|maturity|claim)[^.!?]{0,40}(?:click|link|verify|update)[^.!?]{0,25}(?:detail|account|bank)"
+  },
+  {
+    "id": "CARD_UPGRADE",
+    "name": "A free card upgrade or limit increase",
+    "why": "A bank raises your limit inside its own app and never collects card number, CVV or OTP to do it. The upgrade offer exists to get all three in one conversation.",
+    "weight": 3,
+    "re": "(?:credit|debit) card[^.!?]{0,35}(?:upgrade|limit)[^.!?]{0,45}(?:otp|cvv|card number|expiry date|verify your|call \\d)|(?:upgrade|enhance|increase)\\b[^.!?]{0,25}(?:your )?(?:card )?limit[^.!?]{0,45}(?:otp|cvv|card number|verify your|call \\d)"
+  },
+  {
+    "id": "UNLISTED_SHARES",
+    "name": "Pre-IPO or unlisted shares offered over chat",
+    "why": "Unlisted shares cannot be allotted to you over WhatsApp, and the allotment is a spreadsheet the seller controls. Every exit from it needs one more payment first.",
+    "weight": 3,
+    "re": "(?:pre[- ]?ipo|unlisted|pre[- ]?listing) (?:share|shares|stock|equity|allotment)|(?:ipo|share) allotment[^.!?]{0,40}(?:guarantee|confirm|book|reserve)[^.!?]{0,30}(?:now|today|amount|payment)|(?:grey|gray) market premium"
+  },
+  {
+    "id": "GIFT_CARD_ASK",
+    "name": "Asks you to buy vouchers and send the codes",
+    "why": "A gift card code is cash that cannot be traced or reversed, which is the only reason anyone is ever asked for one. No employer, office or government department is paid in vouchers.",
+    "weight": 4,
+    "re": "(?:buy|purchase|get)\\b[^.!?]{0,30}(?:gift|amazon|google play|itunes|apple|steam)\\s*(?:card|voucher|code)s?[^.!?]{0,60}(?:send|share|forward|whatsapp|photo|scratch|code)|(?:gift|amazon|itunes|google play)\\s*card[^.!?]{0,40}(?:code|number|pin)[^.!?]{0,30}(?:send|share|whatsapp|photo|scratch)|(?:send|share|forward)\\b[^.!?]{0,25}(?:the )?(?:voucher|gift card) code"
+  },
+  {
+    "id": "SCREEN_CODE",
+    "name": "Asks for the number showing on your screen",
+    "why": "That code is a remote-access ID, and reading it out hands your phone over. No bank or support desk needs to see your screen to fix anything.",
+    "weight": 4,
+    "re": "(?:9|nine|6|six)[- ]digit (?:code|number|id)[^.!?]{0,35}(?:screen|app|display|showing)|(?:tell|read|share|send|give)\\b[^.!?]{0,30}(?:the |me the |us the )?(?:code|number|id)[^.!?]{0,30}(?:on|showing on|displayed on)[^.!?]{0,15}(?:your )?screen"
+  },
+  {
+    "id": "CRYPTO_DOUBLE",
+    "name": "Money that multiplies in hours",
+    "why": "Nothing returns a multiple of itself in a day. The first small payment is sometimes paid back to prove the system works, and that is what buys the larger one that never comes back.",
+    "weight": 4,
+    "re": "(?:invest|send|deposit|pay)\\b[^.!?]{0,25}(?:rs\\.?|₹|inr|\\$)\\s?[\\d,]+[^.!?]{0,30}(?:get|receive|earn|return)\\b[^.!?]{0,20}(?:rs\\.?|₹|inr|\\$)\\s?[\\d,]+|(?:bitcoin|btc|crypto|usdt|ethereum|forex)[^.!?]{0,40}(?:guaranteed|assured|fixed|daily) (?:return|profit|income)|(?:2x|3x|5x|10x)\\s*(?:your )?(?:money|amount|investment|deposit)"
+  },
+  {
+    "id": "SUBSCRIPTION_FAIL",
+    "name": "A failed subscription payment, with a link to fix it",
+    "why": "Netflix, Prime and the rest simply stop the service and wait for you to open the app yourself. A failed-payment message carrying a link is collecting the card you are about to retype.",
+    "weight": 3,
+    "re": "(?:payment|billing|renewal|auto[- ]?debit) (?:failed|declined|unsuccessful)[^.!?]{0,50}(?:click|link|update|verify|http|retry)[^.!?]{0,25}(?:card|detail|payment|now|here)|(?:subscription|membership)[^.!?]{0,30}(?:will be |is )?(?:cancelled|canceled|suspended|deactivated)[^.!?]{0,40}(?:update|verify|confirm)[^.!?]{0,25}(?:payment|card|billing)"
+  },
+  {
+    "id": "VISA_JOB_ABROAD",
+    "name": "An overseas job that needs a fee first",
+    "why": "A real overseas employer pays for the visa or deducts it from salary, and Indian recruiting agents are licensed and listed. Visa, permit and medical fees collected up front are the whole business.",
+    "weight": 3,
+    "re": "(?:job|vacancy|salary|employment|placement)[^.!?]{0,50}(?:visa|work permit|iqama)[^.!?]{0,45}(?:fee|charge|deposit|processing|advance)|(?:job|vacancy|opening|placement|employment)[^.!?]{0,40}(?:canada|dubai|uae|gulf|singapore|australia|germany|qatar|kuwait|saudi|new zealand)[^.!?]{0,45}(?:fee|charge|pay|deposit|registration)|free visa[^.!?]{0,25}(?:ticket|air ?ticket|job)"
+  },
+  {
+    "id": "GIFT_FROM_ABROAD",
+    "name": "A gift from abroad that needs clearance money",
+    "why": "The friend abroad is not real and neither is the parcel. Customs does not telephone people about gifts, and every fee paid produces one more fee.",
+    "weight": 3,
+    "re": "(?:gift|parcel|package|box|courier)[^.!?]{0,35}(?:from|sent by)[^.!?]{0,30}(?:\\buk\\b|\\busa\\b|london|dubai|canada|abroad|overseas|foreign)[^.!?]{0,45}(?:customs|clearance|duty|fee|charge|pay)|(?:gift|parcel)[^.!?]{0,25}(?:stuck|held|detained)[^.!?]{0,30}(?:customs|airport)[^.!?]{0,35}(?:pay|fee|charge|release)"
+  },
+  {
+    "id": "LOAN_APPROVED_FEE",
+    "name": "A loan already approved, for a fee",
+    "why": "No lender approves a loan before seeing who you are, and none takes a processing fee over UPI before disbursing anything. The fee is the product.",
+    "weight": 3,
+    "re": "(?:loan|credit|finance)[^.!?]{0,30}(?:approved|sanctioned|pre[- ]?approved|disbursed).{0,55}(?:processing|insurance|gst|file|advance) (?:fee|charge|amount)|(?:instant|urgent|quick) (?:personal )?loan[^.!?]{0,40}(?:no document|without document|no cibil|any cibil|in \\d+ minutes)|loan[^.!?]{0,25}(?:approved|sanctioned)[^.!?]{0,35}(?:pay|transfer|deposit)[^.!?]{0,25}(?:rs\\.?|₹|inr)\\s?[\\d,]+"
+  },
+  {
+    "id": "DORMANT_ACCOUNT",
+    "name": "A dormant account to be reactivated through a link",
+    "why": "Reactivating a dormant account happens at a branch or in the bank's own app, and the bank asks you for nothing by message. The link exists to collect a login.",
+    "weight": 3,
+    "re": "account[^.!?]{0,20}(?:is |has been |will be )?(?:dormant|inactive|inoperative).{0,55}(?:click|link|re-?activate|http)|(?:reactivate|unfreeze|unblock)\\b[^.!?]{0,25}(?:your )?account[^.!?]{0,35}(?:click|link|http|now|immediately|kyc)|(?:net ?banking|internet banking|account|login|debit card|credit card)[^.!?]{0,30}(?:will |has |is )?expir\\w+.{0,50}(?:re-?activate|re-?verify|re-?validate|update your (?:account|kyc|detail))"
+  },
+  {
+    "id": "SIM_UPGRADE",
+    "name": "A SIM or network upgrade that needs a code from you",
+    "why": "A 4G or 5G upgrade never needs an OTP read out to a caller. That code moves your number onto their SIM, and every account you own is secured by messages to that number.",
+    "weight": 4,
+    "re": "(?:sim|esim)[^.!?]{0,30}(?:upgrade|swap|replace|exchange)[^.!?]{0,40}(?:otp|code|verify|kyc|detail)|(?:upgrade|update)\\b[^.!?]{0,25}(?:to )?(?:4g|5g|e[- ]?sim)[^.!?]{0,40}(?:otp|code|sms|verify|free)"
+  },
+  {
+    "id": "GAS_SUBSIDY",
+    "name": "An LPG subsidy or gas connection link",
+    "why": "Gas subsidies land in the account already linked to the connection, and the distributor does KYC in person. The message is after the bank details that receive the subsidy.",
+    "weight": 3,
+    "re": "(?:lpg|cylinder|indane|hp gas|bharat ?gas|gas connection)[^.!?]{0,40}(?:subsidy|kyc|ekyc)[^.!?]{0,40}(?:click|link|update|verify|http|block|suspend)|(?:subsidy|सब्सिडी)[^.!?]{0,30}(?:bank|account|khata)[^.!?]{0,30}(?:update|link|verify|add)"
+  },
+  {
+    "id": "CHARITY_PLEA",
+    "name": "A donation appeal paid into a personal account",
+    "why": "Registered charities collect through their own account and give you a receipt with an 80G number on it. A UPI handle and a photograph are not a charity.",
+    "weight": 2,
+    "re": "(?:donate|donation|contribute|relief fund)[^.!?]{0,45}(?:upi|gpay|phonepe|paytm|google ?pay|@ok|@ybl|\\bqr\\b)|(?:donate|contribute)[^.!?]{0,30}(?:rs\\.?|₹|inr)\\s?[\\d,]+[^.!?]{0,35}(?:urgent|immediately|today|save)|(?:cancer|surgery|operation|treatment|orphan)[^.!?]{0,40}(?:donate|donation|fund)[^.!?]{0,30}(?:upi|account|gpay|paytm|phonepe)"
+  },
+  {
+    "id": "BETTING_PROMO",
+    "name": "A betting or prediction app promising daily income",
+    "why": "Colour prediction and aviator apps are controlled by the people running them, and the early wins exist to make the later deposits feel safe. The withdrawal is where it stops.",
+    "weight": 3,
+    "re": "(?:colour|color) (?:prediction|trading) (?:app|game|group)|\\b(?:aviator|teen ?patti|1xbet|parimatch|mahadev)\\b[^.!?]{0,40}(?:earn|income|bonus|deposit|withdraw|join|daily)|(?:betting|satta|gambling)[^.!?]{0,35}(?:id|app|group|tips)[^.!?]{0,35}(?:join|earn|daily|profit|guarantee)"
+  },
+  {
+    "id": "MLM_RECRUIT",
+    "name": "Income that depends on recruiting more people",
+    "why": "When the money comes from the people you bring in rather than from anything sold, the people at the bottom are the product, and most people arrive at the bottom.",
+    "weight": 2,
+    "re": "(?:join|add|refer|bring)\\b[^.!?]{0,20}(?:\\d+|two|three|five|ten)\\s*(?:people|members|friends|person)[^.!?]{0,45}(?:daily|monthly|per day|lifetime|unlimited) (?:income|earning|profit|payout)|\\b(?:downline|upline|binary income|level income|matrix plan)\\b|(?:network|multi[- ]?level) marketing[^.!?]{0,30}(?:join|earn|income|opportunity)"
+  },
+  {
+    "id": "EXAM_RESULT_LINK",
+    "name": "A result or admit card behind a sent link",
+    "why": "Boards and universities publish results on their own site, which you reach yourself. A result link arriving by message is either an app to install or a login to steal.",
+    "weight": 2,
+    "re": "(?:result|admit card|hall ticket|scorecard|marksheet|answer key)[^.!?]{0,30}(?:declared|released|out|available|ready)[^.!?]{0,40}(?:click|link|download|http|apk|whatsapp)|(?:download|check)\\b[^.!?]{0,25}(?:your )?(?:result|admit card|marksheet|hall ticket)[^.!?]{0,30}(?:apk|link|http)"
+  },
+  {
+    "id": "SCHOLARSHIP_BAIT",
+    "name": "A scholarship that wants your details by message",
+    "why": "Scholarships are applied for on the national portal and paid into the account on that application. One arriving unasked, wanting documents over chat, is collecting an identity.",
+    "weight": 2,
+    "re": "(?:scholarship|fee (?:refund|reimbursement)|stipend)[^.!?]{0,45}(?:bank|account|aadhaar|aadhar|document|detail|form)[^.!?]{0,30}(?:send|share|submit|whatsapp|link|click)|(?:scholarship|stipend)[^.!?]{0,30}(?:approved|sanctioned|selected)[^.!?]{0,40}(?:click|link|claim|register|http)"
+  },
+  {
+    "id": "CELEB_ENDORSE",
+    "name": "A famous name attached to an investment",
+    "why": "These are made with cloned voices and faces, and no public figure recommends a trading platform by name. The endorsement is the cheapest part of the operation to manufacture.",
+    "weight": 3,
+    "re": "(?:modi|ambani|adani|ratan tata|sachin|dhoni|kohli|amitabh|shark tank|elon musk)[^.!?]{0,45}(?:invest|trading|platform|scheme|profit|earn|crypto)|(?:recommended|endorsed|approved|backed) by[^.!?]{0,30}(?:rbi|sebi|government|prime minister)[^.!?]{0,35}(?:invest|trading|profit|scheme|return)"
+  },
+  {
+    "id": "PROFIT_PROOF",
+    "name": "Screenshots of profit as the reason to trust it",
+    "why": "Profit screenshots cost nothing to fabricate and are the standard opening of a trading group. A real adviser is registered with SEBI and gives you the registration number instead.",
+    "weight": 2,
+    "re": "(?:profit|earning|income|payout) (?:proof|screenshot|screen ?shot|slip)|(?:members|students|clients)[^.!?]{0,25}(?:earning|earned|making)[^.!?]{0,20}(?:rs\\.?|₹|inr)\\s?[\\d,]+[^.!?]{0,30}(?:daily|per day|monthly|every day)"
+  },
+  {
+    "id": "WHATSAPP_CODE",
+    "name": "Wants the code that signs in to your chat account",
+    "why": "That six-digit code is what moves your WhatsApp onto someone else's phone. Once it does, the same requests go out to everyone you know, in your name.",
+    "weight": 4,
+    "re": "(?:whatsapp|telegram|instagram|facebook)[^.!?]{0,30}(?:code|otp|verification)[^.!?]{0,35}(?:send|share|forward|tell|bhej)|(?:send|share|forward|tell)\\b[^.!?]{0,25}(?:me )?(?:the )?(?:6|six)[- ]digit (?:code|otp)"
+  },
+  {
+    "id": "FAKE_INVOICE_ACCOUNT",
+    "name": "An invoice whose bank account has changed",
+    "why": "A changed account number on a familiar invoice is the whole fraud, and the address it arrives from is usually one character different. Confirm it on a number you already had, never one in the message.",
+    "weight": 3,
+    "re": "(?:bank|account) (?:detail|details|number)[^.!?]{0,25}(?:has|have|were|are)?\\s*(?:been )?(?:changed|updated|revised|new)[^.!?]{0,40}(?:payment|invoice|transfer|remit|pay)|(?:kindly |please )?(?:remit|pay|transfer)\\b[^.!?]{0,35}(?:to (?:our |the )?)?new (?:bank )?account|(?:invoice|payment)[^.!?]{0,30}(?:to|into) (?:our )?(?:new|updated|revised) account"
+  },
+  {
+    "id": "MEDICAL_PLEA",
+    "name": "A medical emergency from someone you cannot reach",
+    "why": "The hospital story exists to make a stranger's payment request feel like a decision with no time to check it. Hospitals bill the patient, not a contact over chat.",
+    "weight": 2,
+    "re": "(?:hospital|\\bicu\\b|operation|surgery|accident|admitted)[^.!?]{0,45}(?:urgent|urgently|immediately|right now|turant)[^.!?]{0,35}(?:money|amount|rs\\.?|₹|transfer|pay|upi)|(?:accident|emergency|\\bicu\\b|admitted).{0,45}(?:send|transfer|need)\\b[^.!?]{0,25}(?:rs\\.?|₹|inr)\\s?[\\d,]+|(?:अस्पताल|एक्सीडेंट)[^।.!?]{0,40}(?:पैसे|रुपये|तुरंत)"
+  },
+  {
+    "id": "GOVT_JOB_FIXING",
+    "name": "A government job promised through a contact",
+    "why": "Government recruitment runs on published exams and merit lists, and nobody can place you outside one. Money paid for a seat buys a forged appointment letter at best.",
+    "weight": 3,
+    "re": "(?:government|govt|sarkari|railway|ssc)[^.!?]{0,30}(?:job|post|vacancy|bharti)[^.!?]{0,45}(?:guaranteed|guarantee|without exam|no exam|setting)|(?:job|naukri)[^.!?]{0,25}(?:guarantee|pakki|confirm)[^.!?]{0,35}(?:pay|fee|rs\\.?|₹|inr|amount|lakh)|(?:direct|without) (?:exam|interview|test)[^.!?]{0,30}(?:joining|appointment|selection)"
   }
 ];
 window.PAKKA_ADVICE = {
@@ -367,39 +577,99 @@ window.PAKKA_ADVICE = {
     "LOAN_HARASSMENT": "it threatens to contact the people in your phone",
     "INVESTMENT_TIP": "it promises guaranteed returns",
     "TASK_COMMISSION": "it is a prepaid-task scheme",
-    "ARMY_OFFICER": "it uses the posted-far-away story to avoid meeting"
+    "ARMY_OFFICER": "it uses the posted-far-away story to avoid meeting",
+    "PRIZE_FRAME": "it offers a reward and a link to collect it",
+    "SEXTORTION": "it threatens to send private images to the people you know",
+    "MULE_ACCOUNT": "it wants to move somebody else's money through your account",
+    "WRONG_TRANSFER": "it says money arrived by mistake and wants it sent back",
+    "TAX_REFUND": "it offers a tax refund through a link",
+    "PF_CLAIM": "it offers a PF or pension payout through a link",
+    "INSURANCE_LAPSE": "it says a policy is lapsing and attaches a way to pay",
+    "CARD_UPGRADE": "it offers a card upgrade and wants the OTP or CVV for it",
+    "UNLISTED_SHARES": "it offers pre-IPO or unlisted shares over chat",
+    "GIFT_CARD_ASK": "it wants vouchers bought and the codes sent back",
+    "SCREEN_CODE": "it asks for the code showing on your screen",
+    "CRYPTO_DOUBLE": "it promises to multiply money in hours",
+    "SUBSCRIPTION_FAIL": "it says a subscription payment failed and links somewhere to fix it",
+    "VISA_JOB_ABROAD": "it wants a visa or permit fee for a job abroad",
+    "GIFT_FROM_ABROAD": "it wants clearance money for a parcel from abroad",
+    "LOAN_APPROVED_FEE": "it says a loan is approved and asks for a fee",
+    "DORMANT_ACCOUNT": "it says the account is dormant and links somewhere to reactivate it",
+    "SIM_UPGRADE": "it wants an OTP to complete a SIM upgrade",
+    "GAS_SUBSIDY": "it wants gas subsidy details through a link",
+    "CHARITY_PLEA": "the donation goes to a personal UPI handle",
+    "BETTING_PROMO": "it promises daily income from a betting app",
+    "MLM_RECRUIT": "the income depends on recruiting more people",
+    "EXAM_RESULT_LINK": "it puts a result or admit card behind a sent link",
+    "SCHOLARSHIP_BAIT": "it wants documents for a scholarship over chat",
+    "CELEB_ENDORSE": "it attaches a famous name to an investment",
+    "PROFIT_PROOF": "it offers profit screenshots as the reason to trust it",
+    "WHATSAPP_CODE": "it wants the code that signs in to your chat account",
+    "FAKE_INVOICE_ACCOUNT": "it says the bank account on the invoice has changed",
+    "MEDICAL_PLEA": "it uses a medical emergency to rush a payment",
+    "GOVT_JOB_FIXING": "it promises a government job outside the exam"
   },
   "money": [
     "ADVANCE_FEE",
     "BANK_DETAILS",
+    "BETTING_PROMO",
+    "CELEB_ENDORSE",
+    "CHARITY_PLEA",
     "COLLECT_REQUEST",
     "COURIER_CUSTOMS",
+    "CRYPTO_DOUBLE",
+    "FAKE_INVOICE_ACCOUNT",
+    "GIFT_CARD_ASK",
+    "GIFT_FROM_ABROAD",
     "INVESTMENT_TIP",
+    "LOAN_APPROVED_FEE",
     "LOTTERY_WIN",
+    "MEDICAL_PLEA",
+    "MLM_RECRUIT",
+    "MULE_ACCOUNT",
     "PAY_TO_GET_JOB",
     "PAY_TO_RECEIVE",
     "PERSONAL_PAYMENT",
+    "PRIZE_FRAME",
+    "PROFIT_PROOF",
     "QR_SCAN",
-    "TASK_COMMISSION"
+    "TASK_COMMISSION",
+    "UNLISTED_SHARES",
+    "WRONG_TRANSFER"
   ],
   "job": [
+    "GOVT_JOB_FIXING",
     "NO_INTERVIEW",
     "PAY_TO_GET_JOB",
+    "SCHOLARSHIP_BAIT",
     "TASK_COMMISSION",
-    "TOO_GOOD"
+    "TOO_GOOD",
+    "VISA_JOB_ABROAD"
   ],
   "impersonation": [
     "APK_INSTALL",
     "CALLBACK_NUMBER",
+    "CARD_UPGRADE",
     "COURIER_CUSTOMS",
+    "DORMANT_ACCOUNT",
     "ELECTRICITY_CUT",
+    "EXAM_RESULT_LINK",
+    "GAS_SUBSIDY",
+    "INSURANCE_LAPSE",
     "KYC_PANIC",
     "LOAN_HARASSMENT",
     "LOOKALIKE_DOMAIN",
+    "PF_CLAIM",
     "REMOTE_ACCESS",
+    "SCREEN_CODE",
+    "SEXTORTION",
     "SIM_BLOCK",
+    "SIM_UPGRADE",
+    "SUBSCRIPTION_FAIL",
+    "TAX_REFUND",
     "THREAT",
-    "VERIFY_DETAILS"
+    "VERIFY_DETAILS",
+    "WHATSAPP_CODE"
   ],
   "property": [
     "ARMY_OFFICER",
@@ -603,6 +873,126 @@ window.PAKKA_HI = {
   "ARMY_OFFICER": [
    "दूर तैनात होने का दावा, मिल नहीं सकते",
    "वर्दी और मिल न पाने का बहाना, ताकि आप देखे बिना पैसे भेज दें।"
+  ],
+  "PRIZE_FRAME": [
+   "इनाम, जिसके लिए लिंक दबाने को कहा जा रहा है",
+   "इनाम हर हफ्ते बदलता है — आईपैड, स्कूटर, वाउचर — क्योंकि चीज़ कभी मुद्दा नहीं थी। जो नहीं बदलता: आपने कुछ जीत लिया है, और लिंक ही उसे लेने का रास्ता है।"
+  ],
+  "SEXTORTION": [
+   "निजी फोटो या वीडियो आपके संपर्कों को भेजने की धमकी",
+   "यह ब्लैकमेल है, और पैसे देने से यह कभी नहीं रुका। वीडियो आमतौर पर नकली या एआई से बना होता है। cybercrime.gov.in पर शिकायत करें और किसी एक भरोसेमंद व्यक्ति को बताएं।"
+  ],
+  "MULE_ACCOUNT": [
+   "आपके बैंक खाते से पैसा घुमाना चाहता है",
+   "किसी और का पैसा अपने खाते से गुजरने देने पर पुलिस आपको ढूँढती है, उसे नहीं। कमीशन छोटा है और केस आपका।"
+  ],
+  "WRONG_TRANSFER": [
+   "कहता है पैसा गलती से आ गया और वापस मांगता है",
+   "जो पैसा आया वह आमतौर पर किसी और के हैक हुए खाते से निकला है, और आप जो वापस भेजते हैं वह कहीं और जाता है। असली गलत ट्रांसफर भेजने वाले का बैंक पलटता है, आप नहीं।"
+  ],
+  "TAX_REFUND": [
+   "टैक्स रिफंड जो लिंक से आता है",
+   "आयकर विभाग रिफंड सीधे रिटर्न में दिए खाते में डालता है और उसे लेने के लिए कोई लिंक नहीं भेजता। रिफंड लिंक पोर्टल की नकल पर ले जाता है।"
+  ],
+  "PF_CLAIM": [
+   "पीएफ या पेंशन का पैसा, लिंक के साथ",
+   "ईपीएफओ दावे उसी मेंबर पोर्टल में निपटाता है जिसमें आप खुद लॉगिन करते हैं। लिंक वाला पीएफ संदेश आपके यूएएन और उससे जुड़े बैंक खाते के पीछे है।"
+  ],
+  "INSURANCE_LAPSE": [
+   "पॉलिसी लैप्स होने वाली है, भुगतान लिंक के साथ",
+   "बीमा कंपनियाँ प्रीमियम अपने ऐप, अपनी वेबसाइट या आपके पहचाने एजेंट से लेती हैं। भुगतान लिंक लगी चेतावनी से प्रीमियम किसी और के खाते में जाता है।"
+  ],
+  "CARD_UPGRADE": [
+   "मुफ्त कार्ड अपग्रेड या लिमिट बढ़ाने की पेशकश",
+   "बैंक लिमिट अपने ऐप में बढ़ाता है और इसके लिए कार्ड नंबर, सीवीवी या ओटीपी कभी नहीं लेता। अपग्रेड की पेशकश एक ही बातचीत में तीनों पाने के लिए है।"
+  ],
+  "UNLISTED_SHARES": [
+   "प्री-आईपीओ या अनलिस्टेड शेयर चैट पर",
+   "अनलिस्टेड शेयर व्हाट्सएप पर आवंटित नहीं हो सकते, और आवंटन बेचने वाले की अपनी शीट है। उससे निकलने के लिए हर बार एक और भुगतान चाहिए।"
+  ],
+  "GIFT_CARD_ASK": [
+   "वाउचर खरीदकर कोड भेजने को कहता है",
+   "गिफ्ट कार्ड कोड वह नकदी है जिसे ट्रैक या वापस नहीं किया जा सकता, और यही एक वजह है कि कोई उसे मांगता है। कोई दफ्तर या सरकारी विभाग वाउचर में भुगतान नहीं लेता।"
+  ],
+  "SCREEN_CODE": [
+   "आपकी स्क्रीन पर दिख रहा नंबर मांगता है",
+   "वह कोड रिमोट एक्सेस आईडी है, और बता देने पर आपका फोन उनके हाथ चला जाता है। कोई बैंक कुछ ठीक करने के लिए आपकी स्क्रीन नहीं देखता।"
+  ],
+  "CRYPTO_DOUBLE": [
+   "पैसा जो घंटों में कई गुना हो जाता है",
+   "कुछ भी एक दिन में अपना गुणा नहीं देता। पहला छोटा भुगतान कभी-कभी वापस कर दिया जाता है ताकि सिस्टम सच लगे, और उसी से वह बड़ा भुगतान होता है जो कभी नहीं लौटता।"
+  ],
+  "SUBSCRIPTION_FAIL": [
+   "सब्सक्रिप्शन भुगतान फेल, ठीक करने का लिंक साथ",
+   "नेटफ्लिक्स और बाकी सेवा बस रोक देते हैं और इंतज़ार करते हैं कि आप खुद ऐप खोलें। लिंक वाला फेल-पेमेंट संदेश वही कार्ड जमा कर रहा है जो आप दोबारा टाइप करने वाले हैं।"
+  ],
+  "VISA_JOB_ABROAD": [
+   "विदेश की नौकरी जिसके लिए पहले फीस चाहिए",
+   "असली विदेशी नियोक्ता वीज़ा का खर्च देता है या वेतन से काटता है। पहले वसूली गई वीज़ा, परमिट और मेडिकल फीस ही पूरा धंधा है।"
+  ],
+  "GIFT_FROM_ABROAD": [
+   "विदेश से आया तोहफा जिसके लिए क्लीयरेंस पैसा चाहिए",
+   "विदेश वाला दोस्त असली नहीं है और पार्सल भी नहीं। कस्टम तोहफों के लिए फोन नहीं करता, और हर दी गई फीस एक और फीस पैदा करती है।"
+  ],
+  "LOAN_APPROVED_FEE": [
+   "लोन पहले से मंजूर, बदले में फीस",
+   "कोई ऋणदाता आपको देखे बिना लोन मंजूर नहीं करता, और कोई पैसा देने से पहले यूपीआई पर प्रोसेसिंग फीस नहीं लेता। फीस ही उत्पाद है।"
+  ],
+  "DORMANT_ACCOUNT": [
+   "निष्क्रिय खाता, लिंक से चालू करने को कहा जा रहा है",
+   "निष्क्रिय खाता शाखा में या बैंक के अपने ऐप में चालू होता है, और बैंक संदेश पर आपसे कुछ नहीं मांगता। लिंक लॉगिन जमा करने के लिए है।"
+  ],
+  "SIM_UPGRADE": [
+   "सिम या नेटवर्क अपग्रेड जिसके लिए आपसे कोड चाहिए",
+   "4जी या 5जी अपग्रेड के लिए किसी को ओटीपी बताने की ज़रूरत कभी नहीं होती। वह कोड आपका नंबर उनके सिम पर ले जाता है, और आपका हर खाता उसी नंबर से सुरक्षित है।"
+  ],
+  "GAS_SUBSIDY": [
+   "एलपीजी सब्सिडी या गैस कनेक्शन का लिंक",
+   "गैस सब्सिडी उसी खाते में आती है जो कनेक्शन से पहले से जुड़ा है, और वितरक केवाईसी सामने करता है। संदेश उन बैंक विवरणों के पीछे है।"
+  ],
+  "CHARITY_PLEA": [
+   "चंदे की अपील जो निजी खाते में जाती है",
+   "पंजीकृत संस्थाएँ अपने खाते से चंदा लेती हैं और 80जी नंबर वाली रसीद देती हैं। एक यूपीआई हैंडल और एक फोटो कोई संस्था नहीं है।"
+  ],
+  "BETTING_PROMO": [
+   "सट्टे या प्रेडिक्शन ऐप का रोज़ की कमाई का वादा",
+   "कलर प्रेडिक्शन और एविएटर ऐप उन्हीं के हाथ में हैं जो उन्हें चलाते हैं, और शुरुआती जीत इसलिए है कि बाद की जमा राशि सुरक्षित लगे। निकासी पर सब रुक जाता है।"
+  ],
+  "MLM_RECRUIT": [
+   "कमाई जो और लोग जोड़ने पर टिकी है",
+   "जब पैसा बेची गई चीज़ से नहीं, आपके लाए लोगों से आता है, तो सबसे नीचे वाले लोग ही उत्पाद हैं, और ज़्यादातर लोग नीचे ही पहुँचते हैं।"
+  ],
+  "EXAM_RESULT_LINK": [
+   "रिजल्ट या एडमिट कार्ड भेजे गए लिंक के पीछे",
+   "बोर्ड और विश्वविद्यालय रिजल्ट अपनी साइट पर डालते हैं, जहाँ आप खुद पहुँचते हैं। संदेश से आया रिजल्ट लिंक या तो ऐप इंस्टॉल कराता है या लॉगिन चुराता है।"
+  ],
+  "SCHOLARSHIP_BAIT": [
+   "छात्रवृत्ति जो संदेश पर आपके विवरण मांगती है",
+   "छात्रवृत्ति राष्ट्रीय पोर्टल पर आवेदन से मिलती है और उसी आवेदन के खाते में आती है। बिन मांगे आई, चैट पर दस्तावेज़ मांगने वाली छात्रवृत्ति पहचान जमा कर रही है।"
+  ],
+  "CELEB_ENDORSE": [
+   "किसी मशहूर नाम को निवेश से जोड़ा गया है",
+   "ये क्लोन की गई आवाज़ और चेहरों से बनते हैं, और कोई सार्वजनिक हस्ती किसी ट्रेडिंग प्लेटफॉर्म का नाम लेकर सिफारिश नहीं करती।"
+  ],
+  "PROFIT_PROOF": [
+   "मुनाफे के स्क्रीनशॉट को भरोसे की वजह बताया गया है",
+   "मुनाफे के स्क्रीनशॉट बनाने में कुछ नहीं लगता और यह ट्रेडिंग ग्रुप की आम शुरुआत है। असली सलाहकार सेबी में पंजीकृत होता है और पंजीकरण नंबर देता है।"
+  ],
+  "WHATSAPP_CODE": [
+   "वह कोड चाहता है जो आपके चैट खाते में लॉगिन करता है",
+   "वह छह अंकों का कोड आपका व्हाट्सएप किसी और के फोन पर ले जाता है। फिर वही मांगें आपके नाम से आपके सब जानने वालों तक जाती हैं।"
+  ],
+  "FAKE_INVOICE_ACCOUNT": [
+   "इनवॉइस जिसका बैंक खाता बदल गया है",
+   "जाने-पहचाने इनवॉइस पर बदला हुआ खाता नंबर ही पूरी धोखाधड़ी है। इसे उसी नंबर पर पक्का करें जो आपके पास पहले से था, संदेश में दिए नंबर पर कभी नहीं।"
+  ],
+  "MEDICAL_PLEA": [
+   "किसी ऐसे से मेडिकल इमरजेंसी जिससे आप संपर्क नहीं कर सकते",
+   "अस्पताल की कहानी इसलिए है कि अजनबी की पैसे की मांग ऐसा फैसला लगे जिसे जाँचने का वक्त नहीं है। अस्पताल मरीज़ से बिल लेते हैं, चैट पर किसी से नहीं।"
+  ],
+  "GOVT_JOB_FIXING": [
+   "सरकारी नौकरी किसी जान-पहचान से दिलाने का वादा",
+   "सरकारी भर्ती प्रकाशित परीक्षाओं और मेरिट लिस्ट से होती है, और कोई आपको उसके बाहर नहीं बैठा सकता। सीट के लिए दिया पैसा जाली नियुक्ति पत्र खरीदता है।"
   ]
  },
  "clause": {
@@ -677,8 +1067,18 @@ window.pakkaNormalise = function (text) {
     }
     at += ch.length;                              /* but index by code unit, for slice */
   }
+  /* a run of three or more digits is a number, not letters in disguise */
+  const inNumber = new Array(chars.length).fill(false);
+  for (let j = 0; j < chars.length;) {
+    if (chars[j] >= '0' && chars[j] <= '9') {
+      let k = j;
+      while (k < chars.length && chars[k] >= '0' && chars[k] <= '9') k++;
+      if (k - j >= 3) for (let q = j; q < k; q++) inNumber[q] = true;
+      j = k;
+    } else j++;
+  }
   for (let j = 0; j < chars.length; j++) {
-    if (PAKKA_LEET[chars[j]] !== undefined) {
+    if (!inNumber[j] && PAKKA_LEET[chars[j]] !== undefined) {
       const prev = j ? chars[j - 1] : '', next = chars[j + 1] || '';
       if (pakkaAlpha(prev) || pakkaAlpha(next)) chars[j] = PAKKA_LEET[chars[j]];
     }
