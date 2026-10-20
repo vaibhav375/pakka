@@ -17,6 +17,7 @@ import hmac
 import json
 import os
 import urllib.error
+import urllib.parse
 import urllib.request
 
 API = "https://api.telegram.org"
@@ -26,7 +27,7 @@ WELCOME = (
     "Forward me any message you are unsure about and I will tell you what is "
     "wrong with it and why.\n\n"
     "A PG listing, an internship offer, a bank SMS, a KYC warning, anything. I "
-    "check it against 47 rules, quote the exact words that are a problem, tell "
+    "check it against 77 rules, quote the exact words that are a problem, tell "
     "you what to do next, and write a reply you can send back to whoever "
     "forwarded it to you.\n\n"
     "I am not a model guessing. The same message always gets the same answer."
@@ -35,6 +36,10 @@ WELCOME = (
 
 def is_start(text: str) -> bool:
     return (text or "").strip().split("@")[0] in ("/start", "/help")
+
+
+# Bigger than this and it is not getting read anyway, so it is not downloaded.
+MAX_PICTURE = 3_500_000
 
 
 def secret_ok(headers: dict, secret: str) -> bool:
@@ -69,8 +74,56 @@ def incoming(payload: dict) -> list[dict]:
             "chat_id": (m.get("chat") or {}).get("id"),
             "type": kind,
             "text": m.get("text", "") if kind == "text" else "",
+            # a photo arrives as every size Telegram made of it, smallest
+            # first. The largest one still under the reading limit is the one
+            # worth fetching: a thumbnail loses exactly the small print the
+            # rules are looking for.
+            "file_id": _picture(m),
+            "caption": (m.get("caption") or "")
+            if kind in ("photo", "document") else "",
         })
     return out
+
+
+def _picture(m: dict) -> str:
+    """The file id of a picture in this message, if there is one."""
+    sizes = m.get("photo") or []
+    if sizes:
+        usable = [p for p in sizes if (p.get("file_size") or 0) <= MAX_PICTURE] or sizes[:1]
+        return (max(usable, key=lambda p: p.get("file_size") or 0) or {}).get("file_id", "")
+    # a screenshot sent as a file rather than as a photo, which is what
+    # "send without compression" does and what keeps the text sharpest
+    doc = m.get("document") or {}
+    if str(doc.get("mime_type") or "").startswith("image/") \
+            and (doc.get("file_size") or 0) <= MAX_PICTURE:
+        return doc.get("file_id", "")
+    return ""
+
+
+def fetch(file_id: str, token: str = "") -> tuple[bytes, str] | None:
+    """Download a picture somebody forwarded. None on anything at all, which
+    leaves the caller saying it could not read it."""
+    token = token or os.environ.get("TELEGRAM_TOKEN", "")
+    if not token or not file_id:
+        return None
+    try:
+        req = urllib.request.Request(
+            f"{API}/bot{token}/getFile?file_id={urllib.parse.quote(file_id)}")
+        with urllib.request.urlopen(req, timeout=TIMEOUT) as r:
+            path = (json.loads(r.read()).get("result") or {}).get("file_path")
+        if not path:
+            return None
+        with urllib.request.urlopen(
+                f"{API}/file/bot{token}/{path}", timeout=TIMEOUT) as r:
+            raw = r.read(MAX_PICTURE + 1)
+        if not raw or len(raw) > MAX_PICTURE:
+            return None
+        ext = path.rsplit(".", 1)[-1].lower()
+        return raw, {"jpg": "image/jpeg", "jpeg": "image/jpeg", "png": "image/png",
+                     "gif": "image/gif", "webp": "image/webp"}.get(ext, "image/jpeg")
+    except Exception as e:  # noqa: BLE001 - a failed download is not a crash
+        print(f"telegram: could not fetch the picture: {type(e).__name__}: {e}")
+        return None
 
 
 def send(chat_id, text: str, token: str = "") -> bool:

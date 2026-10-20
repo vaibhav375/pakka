@@ -8,7 +8,7 @@
    install() ran once and never again, so anyone who had installed the app
    could stay pinned to the files from whatever day they installed it. Changing
    the name on every deploy is what makes a new version take. */
-const SHELL = 'pakka-c65b6b7';
+const SHELL = 'pakka-71275e1';
 const FILES = ['./', './index.html', './styles.css', './app.js',
                './rules.generated.js', './config.js', './scene.js',
                './manifest.webmanifest', './icon-192.png'];

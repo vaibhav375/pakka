@@ -15,6 +15,8 @@ a laptop is the code that runs in production rather than a sibling of it.
 """
 from __future__ import annotations
 
+import base64
+import binascii
 import decimal
 import json
 import os
@@ -29,8 +31,9 @@ import model as linear_model
 import store
 import telegram
 import twilio
+import vision
 import whatsapp
-from chat import devanagari, reply_for
+from chat import devanagari, read_from_picture, reply_for
 from advice import build as build_advice
 from rules import evaluate
 
@@ -96,6 +99,38 @@ def scan(text: str) -> dict:
         # a storage failure must not cost the user their answer
         scan_id = None
     return _reply(200, {**record, "id": scan_id})
+
+
+def _words_in_picture(msg: dict) -> str:
+    """The text in a screenshot somebody forwarded to the bot, or "" when
+    there is none to be had. A picture that cannot be fetched or read is not
+    an error worth a traceback: it is answered as a message with no words."""
+    if not msg.get("file_id") or not vision.MODEL_ID:
+        return ""
+    got = telegram.fetch(msg["file_id"])
+    if not got:
+        return ""
+    return vision.read(*got) or ""
+
+
+def read_image(data: str, media_type: str) -> dict:
+    """Text out of a screenshot, and nothing else.
+
+    No verdict is reached here. The page puts the text it gets back into the
+    box and runs the ordinary check on it, so the answer still comes from the
+    rules and the reader can see, and correct, what was read.
+    """
+    try:
+        raw = base64.b64decode(data or "", validate=True)
+    except (ValueError, binascii.Error):
+        return _reply(400, {"error": "That image did not arrive intact."})
+    why = vision.problem(raw, (media_type or "").lower())
+    if why:
+        return _reply(400, {"error": why})
+    text = vision.read(raw, media_type.lower())
+    if not text:
+        return _reply(502, {"error": "Could not read any text in that image."})
+    return _reply(200, {"text": text[:MAX_CHARS]})
 
 
 def _verdict_for(text: str) -> tuple[dict, dict, str | None, dict | None]:
@@ -181,11 +216,18 @@ def telegram_webhook(event, send=telegram.send) -> dict:
             if telegram.is_start(text):
                 send(msg["chat_id"], telegram.WELCOME)
                 continue
+            shot = ""
             if msg["type"] != "text" or not text:
-                send(msg["chat_id"], reply_for(None, None, None, kind=msg["type"]))
-                continue
+                shot = _words_in_picture(msg)
+                if not shot:
+                    send(msg["chat_id"], reply_for(None, None, None, kind=msg["type"]))
+                    continue
+                text = shot[:MAX_CHARS]
             verdict, advice, link, hunch, lang = _verdict_for(text)
-            send(msg["chat_id"], reply_for(verdict, advice, link, hunch=hunch, lang=lang))
+            answer = reply_for(verdict, advice, link, hunch=hunch, lang=lang)
+            if shot:
+                answer = read_from_picture(text, lang) + "\n" + answer
+            send(msg["chat_id"], answer)
         except Exception:               # one bad update must not drop the rest
             traceback.print_exc()
     return {"statusCode": 200, "body": "ok"}
@@ -261,6 +303,13 @@ def _route(event):
         except json.JSONDecodeError:
             return _reply(400, {"error": "Body must be JSON."})
         return scan(body.get("text", ""))
+
+    if method == "POST" and path.rstrip("/").endswith("/read"):
+        try:
+            body = json.loads(event.get("body") or "{}")
+        except json.JSONDecodeError:
+            return _reply(400, {"error": "Body must be JSON."})
+        return read_image(body.get("image", ""), body.get("type", ""))
 
     if method == "GET" and "/v/" in path:
         try:

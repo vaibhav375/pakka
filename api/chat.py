@@ -33,6 +33,19 @@ def _bullets(verdict: dict, limit: int = 4, hi: bool = False) -> str:
     return "\n".join(lines)
 
 
+def read_from_picture(text: str, lang: str = "en") -> str:
+    """The line that opens a reply to a screenshot.
+
+    The words are shown back before the verdict for the same reason the page
+    puts them in the box: a reading can be wrong, and the only way anybody can
+    tell is by seeing what was read.
+    """
+    shown = " ".join(text.split())[:300]
+    if lang == "hi":
+        return f"तस्वीर से मैंने यह पढ़ा:\n\u201c{shown}\u201d\n"
+    return f"This is what I read in the picture:\n\u201c{shown}\u201d\n"
+
+
 def reply_for(verdict: dict | None, advice: dict | None, link: str | None,
               kind: str = "text", hunch: dict | None = None,
               lang: str = "en") -> str:

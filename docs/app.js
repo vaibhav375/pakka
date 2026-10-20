@@ -206,6 +206,90 @@ t.addEventListener('keydown', (e) => {
 });
 sync();
 
+/* ---------- a screenshot, which is how half of these actually arrive ----------
+
+   People screenshot the SMS and forward the picture. Asking them to retype it
+   is asking for the one thing nobody does while being rushed.
+
+   The reading happens on the server; there is no on-device way to do it that
+   is worth the download, and the Hindi ones would come out worst. So the
+   picture goes, the text comes back into the box, and the check then runs
+   here on that text exactly as if it had been pasted. The text is put in
+   front of you rather than used invisibly, because when the reading is wrong
+   that is the only way you can see it was wrong and fix it before deciding
+   anything. */
+const SHOT_EDGE = 1600;              /* px on the long side before upload */
+const SHOT_MAX_BYTES = 3_500_000;    /* the server refuses more than this */
+
+const asBase64 = (blob) => new Promise((ok, no) => {
+  const fr = new FileReader();
+  fr.onload = () => ok(String(fr.result).split(',')[1]);
+  fr.onerror = no;
+  fr.readAsDataURL(blob);
+});
+
+/* Only re-encode when it has to: a JPEG pass costs small text the sharpness
+   the reading depends on, so an image already small enough is sent as it is. */
+async function fitForUpload(file) {
+  const ok = ['image/png', 'image/jpeg', 'image/gif', 'image/webp'];
+  let bitmap;
+  try { bitmap = await createImageBitmap(file); } catch { return file; }
+  const long = Math.max(bitmap.width, bitmap.height);
+  if (long <= SHOT_EDGE && file.size <= SHOT_MAX_BYTES && ok.includes(file.type)) {
+    bitmap.close?.();
+    return file;
+  }
+  const scale = Math.min(1, SHOT_EDGE / long);
+  const canvas = document.createElement('canvas');
+  canvas.width = Math.round(bitmap.width * scale);
+  canvas.height = Math.round(bitmap.height * scale);
+  canvas.getContext('2d').drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+  bitmap.close?.();
+  const blob = await new Promise((r) => canvas.toBlob(r, 'image/jpeg', 0.92));
+  return blob || file;
+}
+
+async function readScreenshot(file) {
+  const L = window.PakkaLang, btn = $('shot'), note = $('shotnote');
+  if (!file || !API) return;
+  btn.disabled = true;
+  note.textContent = L.t('shot_wait', 'Reading the picture…');
+  try {
+    const blob = await fitForUpload(file);
+    const res = await fetch(`${API.replace(/\/$/, '')}/read`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ image: await asBase64(blob), type: blob.type }),
+    });
+    const d = await res.json();
+    if (!res.ok || !d.text) throw new Error(d.error || 'Could not read that picture.');
+    t.value = d.text;
+    sync();
+    check();
+    note.textContent = L.t('shot_done',
+      'Read from the picture. Check the text above is right before you trust the verdict.');
+  } catch (e) {
+    note.textContent = String((e && e.message) || e).slice(0, 180);
+  } finally {
+    btn.disabled = false;
+    $('shotfile').value = '';
+  }
+}
+
+if ($('shot')) {
+  $('shot').onclick = () => $('shotfile').click();
+  $('shotfile').onchange = (e) => readScreenshot(e.target.files && e.target.files[0]);
+  /* pasting a screenshot straight into the box, which is what a desktop user
+     reaches for first */
+  t.addEventListener('paste', (e) => {
+    const items = (e.clipboardData && e.clipboardData.items) || [];
+    const shot = [...items].find((i) => i.type && i.type.startsWith('image/'));
+    if (!shot) return;
+    e.preventDefault();
+    readScreenshot(shot.getAsFile());
+  });
+}
+
 /* build the message with <mark> around every flagged span, merging overlaps so
    nested matches don't produce broken tags */
 function highlight(text, findings) {
@@ -821,6 +905,8 @@ function hunch(text, verdict) {
     ['#l-forward', 'share', 'text'],
     ['#diallabel', 'risk', 'text'],
     ['#l-fwdnote', 'fwd_note', 'text'],
+    ['#shot', 'shot_go', 'text'],
+    ['#shotnote', 'shot_note', 'text'],
   ];
   const ENGLISH = new Map();
 

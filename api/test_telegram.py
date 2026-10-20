@@ -102,6 +102,48 @@ def main() -> int:
     bad += check("an english one is still answered in english",
                  "checks fired" in sent[0][1], True)
 
+    # --- a screenshot forwarded to the bot, with the fetch and the reading
+    # both stubbed, so this needs no token, no network and no AWS
+    import vision
+    def photo(sizes, chat_id=4242):
+        return {"update_id": 2, "message": {
+            "message_id": 11, "from": {"id": chat_id, "first_name": "V"},
+            "chat": {"id": chat_id, "type": "private"}, "photo": sizes}}
+
+    sizes = [{"file_id": "small", "file_size": 800},
+             {"file_id": "big", "file_size": 40000},
+             {"file_id": "huge", "file_size": 9_000_000}]
+    bad += check("the largest picture under the limit is the one fetched",
+                 telegram.incoming(photo(sizes))[0]["file_id"], "big")
+
+    telegram.fetch = lambda fid, token="": (b"\x89PNG" + b"0" * 32, "image/png")
+    vision.MODEL_ID = "stub-model"
+    vision.read = lambda raw, mt: "Your KYC has expired. Share the OTP to continue."
+    sent.clear()
+    handler.telegram_webhook({"headers": {}, "body": json.dumps(photo(sizes))},
+                             send=lambda cid, t: sent.append((cid, t)))
+    bad += check("a forwarded screenshot is read and then scanned",
+                 "checks fired" in sent[0][1], True)
+    bad += check("and the reply shows the words it read, so a bad reading is visible",
+                 "This is what I read in the picture" in sent[0][1]
+                 and "Share the OTP" in sent[0][1], True)
+
+    # a picture it cannot read falls back to the old answer rather than
+    # pretending it scanned something
+    vision.read = lambda raw, mt: None
+    sent.clear()
+    handler.telegram_webhook({"headers": {}, "body": json.dumps(photo(sizes))},
+                             send=lambda cid, t: sent.append((cid, t)))
+    bad += check("an unreadable picture is answered honestly",
+                 "I can only read text" in sent[0][1], True)
+
+    vision.MODEL_ID = None
+    sent.clear()
+    handler.telegram_webhook({"headers": {}, "body": json.dumps(photo(sizes))},
+                             send=lambda cid, t: sent.append((cid, t)))
+    bad += check("with no model configured a picture is never downloaded",
+                 "I can only read text" in sent[0][1], True)
+
     print(f"\n  {'all tests passed' if not bad else f'{bad} FAILED'}")
     return 1 if bad else 0
 
